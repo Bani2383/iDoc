@@ -1,0 +1,102 @@
+{
+  "common": {
+    "appName": "iDoc",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "download": "Download",
+    "upload": "Upload",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "documents": "Documents",
+    "signature": "Signature",
+    "faq": "FAQ & Demo",
+    "login": "Login",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Create Professional Documents in Seconds",
+    "subtitle": "Free PDF document generator with AI assistance. Contracts, letters, forms - generate and sign instantly.",
+    "cta": "Start Creating",
+    "ctaDemo": "View Demo"
+  },
+  "features": {
+    "title": "Powerful Features",
+    "aiGeneration": "AI Generation",
+    "aiGenerationDesc": "Generate documents with artificial intelligence",
+    "eSignature": "E-Signature",
+    "eSignatureDesc": "Electronically sign your documents",
+    "instantDownload": "Instant Download",
+    "instantDownloadDesc": "Download your PDFs immediately",
+    "secure": "Secure",
+    "secureDesc": "Your data is encrypted and protected"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createAccount": "Create Account",
+    "loginSuccess": "Login successful!",
+    "loginError": "Login error. Please try again.",
+    "signupSuccess": "Account created successfully!",
+    "signupError": "Error creating account."
+  },
+  "documents": {
+    "title": "My Documents",
+    "createNew": "Create New Document",
+    "selectTemplate": "Select a Template",
+    "noDocuments": "No documents yet",
+    "createdAt": "Created on",
+    "viewDocument": "View Document",
+    "deleteDocument": "Delete Document",
+    "confirmDelete": "Are you sure you want to delete this document?"
+  },
+  "templates": {
+    "workContract": "Employment Contract",
+    "motivationLetter": "Cover Letter",
+    "convention": "Agreement",
+    "adminForm": "Administrative Form",
+    "certificate": "Certificate",
+    "invoice": "Invoice",
+    "quote": "Quote",
+    "resignation": "Resignation Letter"
+  },
+  "signature": {
+    "title": "Electronic Signature",
+    "draw": "Draw",
+    "type": "Type",
+    "upload": "Upload",
+    "clear": "Clear",
+    "signHere": "Sign Here",
+    "saveSignature": "Save Signature",
+    "signatureSuccess": "Signature saved successfully!"
+  },
+  "footer": {
+    "about": "About",
+    "features": "Features",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "rights": "All rights reserved"
+  }
+}

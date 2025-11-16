@@ -1,0 +1,177 @@
+/**
+ * App Component
+ *
+ * @description Main application component with routing and state management
+ * @component
+ */
+
+import { useState, lazy, Suspense, startTransition } from 'react';
+import { useAuth } from './contexts/AuthContext';
+import { LandingPage } from './components/LandingPage';
+import { ConversionLandingPage } from './components/ConversionLandingPage';
+import { LanguageSEO } from './components/LanguageSEO';
+import { LoadingSpinner } from './components/LoadingSpinner';
+import { AppHeader } from './components/AppHeader';
+import { ClassicView } from './components/ClassicView';
+
+// Lazy loaded components for better performance
+const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
+const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
+const GuestDocumentGenerator = lazy(() => import('./components/GuestDocumentGenerator').then(m => ({ default: m.GuestDocumentGenerator })));
+const ClientDashboard = lazy(() => import('./components/ClientDashboard').then(m => ({ default: m.ClientDashboard })));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const GuestFlowDemo = lazy(() => import('./components/GuestFlowDemo'));
+const InitialSetup = lazy(() => import('./components/InitialSetup').then(m => ({ default: m.InitialSetup })));
+const FAQPage = lazy(() => import('./components/FAQPage').then(m => ({ default: m.FAQPage })));
+const SignatureFeaturePage = lazy(() => import('./components/SignatureFeaturePage').then(m => ({ default: m.SignatureFeaturePage })));
+const ImprovedHomepage = lazy(() => import('./components/ImprovedHomepage'));
+
+/**
+ * Main application component
+ *
+ * @returns {JSX.Element} Application UI
+ */
+function App() {
+  const { user, profile, loading } = useAuth();
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showGuestGenerator, setShowGuestGenerator] = useState(false);
+  const [showFlowDemo, setShowFlowDemo] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved'>('improved');
+
+  /**
+   * Handles template selection for guest users
+   * @param {string} templateId - Selected template ID
+   */
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    setShowGuestGenerator(true);
+  };
+
+  /**
+   * Handles guest login transition
+   */
+  const handleGuestLogin = () => {
+    setShowGuestGenerator(false);
+    setShowAuthModal(true);
+  };
+
+  /**
+   * Handles navigation to documents section
+   */
+  const handleGetStarted = () => {
+    startTransition(() => setCurrentView('classic'));
+    setTimeout(() => {
+      document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  // Loading state
+  if (loading) {
+    return <LoadingSpinner text="Chargement de l'application..." />;
+  }
+
+  // Authenticated user view
+  if (user && profile) {
+    if (profile.role === 'admin') {
+      return (
+        <Suspense fallback={<LoadingSpinner text="Chargement du panneau admin..." />}>
+          <AdminDashboard />
+        </Suspense>
+      );
+    }
+    return (
+      <Suspense fallback={<LoadingSpinner text="Chargement de votre espace..." />}>
+        <ClientDashboard />
+      </Suspense>
+    );
+  }
+
+  // Guest user flow - Show guest document generator
+  if (showGuestGenerator && selectedTemplateId) {
+    return (
+      <Suspense fallback={<LoadingSpinner text="Chargement du générateur..." />}>
+        <GuestDocumentGenerator
+          templateId={selectedTemplateId}
+          onClose={() => {
+            setShowGuestGenerator(false);
+            setSelectedTemplateId(null);
+          }}
+          onLogin={handleGuestLogin}
+        />
+      </Suspense>
+    );
+  }
+
+  // Guest user flow - Show flow demo
+  if (showFlowDemo) {
+    return (
+      <Suspense fallback={<LoadingSpinner text="Chargement de la démo..." />}>
+        <GuestFlowDemo
+          onBack={() => setShowFlowDemo(false)}
+          onLogin={() => setShowAuthModal(true)}
+        />
+      </Suspense>
+    );
+  }
+
+  // Guest user flow - Show AI generator
+  if (showAIGenerator) {
+    return (
+      <Suspense fallback={<LoadingSpinner text="Chargement du générateur IA..." />}>
+        <AIDocumentGenerator onClose={() => setShowAIGenerator(false)} />
+      </Suspense>
+    );
+  }
+
+  // Main application layout for guest users
+  return (
+    <div className="min-h-screen bg-white">
+      <LanguageSEO />
+
+      <Suspense fallback={<LoadingSpinner text="Initialisation..." />}>
+        <InitialSetup />
+      </Suspense>
+
+      <AppHeader
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        onShowAuth={() => setShowAuthModal(true)}
+      />
+
+      <main role="main">
+        {currentView === 'improved' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement de la nouvelle interface..." />}>
+            <ImprovedHomepage onLogin={() => setShowAuthModal(true)} />
+          </Suspense>
+        ) : currentView === 'conversion' ? (
+          <ConversionLandingPage onTemplateSelect={handleTemplateSelect} />
+        ) : currentView === 'landing' ? (
+          <LandingPage onGetStarted={handleGetStarted} />
+        ) : currentView === 'signature' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <SignatureFeaturePage onGetStarted={handleGetStarted} />
+          </Suspense>
+        ) : currentView === 'faq' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <FAQPage onGetStarted={handleGetStarted} />
+          </Suspense>
+        ) : (
+          <ClassicView
+            onShowAIGenerator={() => setShowAIGenerator(true)}
+            onTemplateSelect={handleTemplateSelect}
+          />
+        )}
+      </main>
+
+      {showAuthModal && (
+        <Suspense fallback={null}>
+          <AuthModal onClose={() => setShowAuthModal(false)} />
+        </Suspense>
+      )}
+    </div>
+  );
+}
+
+export default App;

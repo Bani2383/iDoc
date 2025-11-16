@@ -1,0 +1,102 @@
+{
+  "common": {
+    "appName": "iDoc",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Inicio",
+    "documents": "Documentos",
+    "signature": "Firma",
+    "faq": "FAQ y Demo",
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "dashboard": "Panel",
+    "profile": "Perfil"
+  },
+  "hero": {
+    "title": "Crea Documentos Profesionales en Segundos",
+    "subtitle": "Generador gratuito de documentos PDF con asistencia IA. Contratos, cartas, formularios - genera y firma instantáneamente.",
+    "cta": "Empezar",
+    "ctaDemo": "Ver Demo"
+  },
+  "features": {
+    "title": "Características Potentes",
+    "aiGeneration": "Generación IA",
+    "aiGenerationDesc": "Genera documentos con inteligencia artificial",
+    "eSignature": "Firma Electrónica",
+    "eSignatureDesc": "Firma tus documentos electrónicamente",
+    "instantDownload": "Descarga Instantánea",
+    "instantDownloadDesc": "Descarga tus PDF inmediatamente",
+    "secure": "Seguro",
+    "secureDesc": "Tus datos están encriptados y protegidos"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "createAccount": "Crear Cuenta",
+    "loginSuccess": "¡Inicio de sesión exitoso!",
+    "loginError": "Error al iniciar sesión. Inténtalo de nuevo.",
+    "signupSuccess": "¡Cuenta creada con éxito!",
+    "signupError": "Error al crear la cuenta."
+  },
+  "documents": {
+    "title": "Mis Documentos",
+    "createNew": "Crear Nuevo Documento",
+    "selectTemplate": "Seleccionar Plantilla",
+    "noDocuments": "Aún no hay documentos",
+    "createdAt": "Creado el",
+    "viewDocument": "Ver Documento",
+    "deleteDocument": "Eliminar Documento",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar este documento?"
+  },
+  "templates": {
+    "workContract": "Contrato de Trabajo",
+    "motivationLetter": "Carta de Motivación",
+    "convention": "Convenio",
+    "adminForm": "Formulario Administrativo",
+    "certificate": "Certificado",
+    "invoice": "Factura",
+    "quote": "Cotización",
+    "resignation": "Carta de Renuncia"
+  },
+  "signature": {
+    "title": "Firma Electrónica",
+    "draw": "Dibujar",
+    "type": "Escribir",
+    "upload": "Subir",
+    "clear": "Borrar",
+    "signHere": "Firme Aquí",
+    "saveSignature": "Guardar Firma",
+    "signatureSuccess": "¡Firma guardada con éxito!"
+  },
+  "footer": {
+    "about": "Acerca de",
+    "features": "Características",
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "legal": "Legal",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Uso",
+    "rights": "Todos los derechos reservados"
+  }
+}

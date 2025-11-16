@@ -1,0 +1,410 @@
+import { FileText, CheckCircle, Menu, X, Sparkles, LogIn, Palette } from 'lucide-react';
+import { useState, lazy, Suspense, startTransition } from 'react';
+import { useAuth } from './contexts/AuthContext';
+import { useTheme } from './contexts/ThemeContext';
+import { LandingPage } from './components/LandingPage';
+import { LanguageSelector } from './components/LanguageSelector';
+import { LanguageSEO } from './components/LanguageSEO';
+
+const DocumentList = lazy(() => import('./components/DocumentList').then(m => ({ default: m.DocumentList })));
+const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
+const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
+const GuestDocumentGenerator = lazy(() => import('./components/GuestDocumentGenerator').then(m => ({ default: m.GuestDocumentGenerator })));
+const ClientDashboard = lazy(() => import('./components/ClientDashboard').then(m => ({ default: m.ClientDashboard })));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const GuestFlowDemo = lazy(() => import('./components/GuestFlowDemo'));
+const InitialSetup = lazy(() => import('./components/InitialSetup').then(m => ({ default: m.InitialSetup })));
+const FAQPage = lazy(() => import('./components/FAQPage').then(m => ({ default: m.FAQPage })));
+const SignatureFeaturePage = lazy(() => import('./components/SignatureFeaturePage').then(m => ({ default: m.SignatureFeaturePage })));
+
+function App() {
+  const { user, profile, loading } = useAuth();
+  const { toggleTheme, theme } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showGuestGenerator, setShowGuestGenerator] = useState(false);
+  const [showFlowDemo, setShowFlowDemo] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState<'landing' | 'classic' | 'signature' | 'faq'>('landing');
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    setShowGuestGenerator(true);
+  };
+
+  const handleGuestLogin = () => {
+    setShowGuestGenerator(false);
+    setShowAuthModal(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const LoadingSpinner = () => (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+  );
+
+  if (user && profile) {
+    if (profile.role === 'admin') {
+      return (
+        <Suspense fallback={<LoadingSpinner />}>
+          <AdminDashboard />
+        </Suspense>
+      );
+    }
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <ClientDashboard />
+      </Suspense>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <LanguageSEO />
+      <Suspense fallback={<LoadingSpinner />}>
+        <InitialSetup />
+      </Suspense>
+
+      {/* Header */}
+      <header className={theme === 'minimal' ? 'border-b border-black bg-white sticky top-0 z-50' : 'border-b border-gray-200 bg-white sticky top-0 z-50'}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <button onClick={() => startTransition(() => setCurrentView('landing'))} className="flex items-center cursor-pointer">
+              <span className={theme === 'minimal' ? 'text-2xl font-light text-black tracking-tight' : 'text-2xl font-bold text-gray-900'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>i<span className={theme === 'minimal' ? 'text-black' : 'text-blue-600'}>Doc</span></span>
+            </button>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <button onClick={() => startTransition(() => setCurrentView('landing'))} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors' : 'text-gray-700 hover:text-blue-600 transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Accueil</button>
+              <button onClick={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors' : 'text-gray-700 hover:text-blue-600 transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Documents</button>
+              <button onClick={() => startTransition(() => setCurrentView('signature'))} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors' : 'text-gray-700 hover:text-blue-600 transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Signer un PDF</button>
+              <button onClick={() => startTransition(() => setCurrentView('faq'))} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors' : 'text-gray-700 hover:text-blue-600 transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>FAQ & Démo</button>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors flex items-center space-x-2' : 'text-gray-700 hover:text-blue-600 transition-colors flex items-center space-x-2'}
+                style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Connexion</span>
+              </button>
+              <button
+                onClick={toggleTheme}
+                className={theme === 'minimal' ? 'text-gray-800 hover:text-black transition-colors flex items-center space-x-2' : 'text-gray-700 hover:text-blue-600 transition-colors flex items-center space-x-2'}
+                title={theme === 'minimal' ? 'Version Bleue' : 'Version Minimaliste'}
+              >
+                <Palette className="w-5 h-5" />
+              </button>
+              <LanguageSelector />
+            </nav>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className={theme === 'minimal' ? 'md:hidden py-4 border-t border-black' : 'md:hidden py-4 border-t border-gray-200'}>
+              <nav className="flex flex-col space-y-3">
+                <button onClick={() => { startTransition(() => setCurrentView('landing')); setMobileMenuOpen(false); }} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors py-2 text-left' : 'text-gray-700 hover:text-blue-600 transition-colors py-2 text-left'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Accueil</button>
+                <button onClick={() => { startTransition(() => setCurrentView('classic')); setMobileMenuOpen(false); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors py-2 text-left' : 'text-gray-700 hover:text-blue-600 transition-colors py-2 text-left'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Documents</button>
+                <button onClick={() => { startTransition(() => setCurrentView('signature')); setMobileMenuOpen(false); }} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors py-2 text-left' : 'text-gray-700 hover:text-blue-600 transition-colors py-2 text-left'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Signer un PDF</button>
+                <button onClick={() => { startTransition(() => setCurrentView('faq')); setMobileMenuOpen(false); }} className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors py-2 text-left' : 'text-gray-700 hover:text-blue-600 transition-colors py-2 text-left'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>FAQ & Démo</button>
+                <button
+                  onClick={() => { setShowAuthModal(true); setMobileMenuOpen(false); }}
+                  className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors py-2 flex items-center space-x-2' : 'text-gray-700 hover:text-blue-600 transition-colors py-2 flex items-center space-x-2'}
+                  style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Connexion</span>
+                </button>
+                <button
+                  onClick={() => { toggleTheme(); setMobileMenuOpen(false); }}
+                  className={theme === 'minimal' ? 'text-xs tracking-wide text-gray-800 hover:text-black transition-colors py-2 flex items-center space-x-2' : 'text-gray-700 hover:text-blue-600 transition-colors py-2 flex items-center space-x-2'}
+                  style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}
+                >
+                  <Palette className="w-4 h-4" />
+                  <span>{theme === 'minimal' ? 'Version Bleue' : 'Version Minimaliste'}</span>
+                </button>
+              </nav>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {currentView === 'landing' ? (
+        <LandingPage onGetStarted={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} />
+      ) : currentView === 'signature' ? (
+        <SignatureFeaturePage onGetStarted={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} />
+      ) : currentView === 'faq' ? (
+        <FAQPage onGetStarted={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} />
+      ) : (
+        <>
+      {/* Hero Section */}
+      <section id="hero" className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Créez facilement tous vos documents !
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-8">
+              Des modèles de documents personnalisables pour tous vos besoins, avec l'assistance de l'IA
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setTimeout(() => {
+                    document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}
+                className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl text-center"
+              >
+                Parcourir les modèles
+              </button>
+              <button
+                onClick={() => setShowAIGenerator(true)}
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl border-2 border-blue-600 flex items-center justify-center space-x-2"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span>Générer avec l'IA</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-4xl mx-auto">
+            <div className="text-center">
+              <FileText className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+              <div className="text-3xl font-bold text-gray-900">40+</div>
+              <div className="text-gray-600">Modèles de documents</div>
+            </div>
+            <div className="text-center">
+              <Sparkles className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+              <div className="text-3xl font-bold text-gray-900">IA</div>
+              <div className="text-gray-600">Génération intelligente</div>
+            </div>
+            <div className="text-center">
+              <FileText className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+              <div className="text-3xl font-bold text-gray-900">Simple</div>
+              <div className="text-gray-600">Et rapide</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="py-16 md:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
+            Comment ça marche ?
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl font-bold text-blue-600">1</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Choisissez votre document</h3>
+              <p className="text-gray-600">
+                Parcourez notre bibliothèque de modèles ou demandez à l'IA de créer un nouveau document
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl font-bold text-blue-600">2</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Répondez aux questions</h3>
+              <p className="text-gray-600">
+                Notre assistant vous guide étape par étape pour personnaliser votre document
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-2xl font-bold text-blue-600">3</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Téléchargez et utilisez</h3>
+              <p className="text-gray-600">
+                Obtenez votre document finalisé en format PDF ou Word, prêt à être utilisé
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Document Categories */}
+      <section id="documents" className="py-16 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-16">
+            Catégories de documents
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <DocumentList
+              category="professional"
+              title="Documents professionnels"
+              onTemplateSelect={handleTemplateSelect}
+            />
+            <DocumentList
+              category="personal"
+              title="Documents personnels"
+              onTemplateSelect={handleTemplateSelect}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Section */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Pourquoi choisir iDoc ?
+          </h2>
+          <p className="text-lg text-gray-600 mb-12 max-w-3xl mx-auto">
+            Une plateforme intelligente qui combine modèles prêts à l'emploi et génération par IA
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">IA avancée</h3>
+              <p className="text-gray-600">Génération automatique de documents personnalisés</p>
+            </div>
+
+            <div className="p-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Simplicité garantie</h3>
+              <p className="text-gray-600">Interface intuitive et processus guidé</p>
+            </div>
+
+            <div className="p-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Qualité professionnelle</h3>
+              <p className="text-gray-600">Documents prêts à l'emploi immédiatement</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+        </>
+      )}
+
+      {/* Footer */}
+      <footer className={theme === 'minimal' ? 'bg-white border-t border-black text-gray-900 py-12' : 'bg-gray-900 text-gray-300 py-12'}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <button onClick={() => startTransition(() => setCurrentView('landing'))} className="flex items-center space-x-2 mb-4 cursor-pointer">
+                <span className={theme === 'minimal' ? 'text-xl font-light text-black tracking-tight' : 'text-xl font-bold text-white'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>iDoc</span>
+              </button>
+              <p className={theme === 'minimal' ? 'text-xs text-gray-600 tracking-wide' : 'text-sm text-gray-400'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>
+                Créez vos documents en toute simplicité
+              </p>
+            </div>
+
+            <div>
+              <h4 className={theme === 'minimal' ? 'text-black font-light mb-4 tracking-tight' : 'text-white font-semibold mb-4'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Documents</h4>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Professionnels</button></li>
+                <li><button onClick={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Personnels</button></li>
+                <li><button onClick={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Immobilier</button></li>
+                <li><button onClick={() => { startTransition(() => setCurrentView('classic')); setTimeout(() => { document.getElementById('documents')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Entreprise</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className={theme === 'minimal' ? 'text-black font-light mb-4 tracking-tight' : 'text-white font-semibold mb-4'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Entreprise</h4>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => startTransition(() => setCurrentView('landing'))} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>À propos</button></li>
+                <li><button onClick={() => setShowAuthModal(true)} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Contact</button></li>
+                <li><button onClick={() => startTransition(() => setCurrentView('landing'))} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Mentions légales</button></li>
+                <li><button onClick={() => startTransition(() => setCurrentView('landing'))} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Confidentialité</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className={theme === 'minimal' ? 'text-black font-light mb-4 tracking-tight' : 'text-white font-semibold mb-4'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Support</h4>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => startTransition(() => setCurrentView('faq'))} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>FAQ</button></li>
+                <li><button onClick={() => startTransition(() => setCurrentView('faq'))} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Guide d'utilisation</button></li>
+                <li><button onClick={() => startTransition(() => setCurrentView('landing'))} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Blog</button></li>
+                <li><button onClick={() => setShowAuthModal(true)} className={theme === 'minimal' ? 'text-xs text-gray-700 hover:text-black transition-colors tracking-wide' : 'hover:text-white transition-colors'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>Assistance</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className={theme === 'minimal' ? 'border-t border-black mt-8 pt-8 text-xs text-center text-gray-700 tracking-wide' : 'border-t border-gray-800 mt-8 pt-8 text-sm text-center text-gray-400'} style={theme === 'minimal' ? { fontFamily: 'serif' } : {}}>
+            <p>© 2024 iDoc. Tous droits réservés.</p>
+          </div>
+        </div>
+      </footer>
+
+      {showAIGenerator && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <AIDocumentGenerator onClose={() => setShowAIGenerator(false)} />
+        </Suspense>
+      )}
+      {showAuthModal && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <AuthModal onClose={() => setShowAuthModal(false)} />
+        </Suspense>
+      )}
+      {showGuestGenerator && selectedTemplateId && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <GuestDocumentGenerator
+            templateId={selectedTemplateId}
+            onClose={() => {
+              setShowGuestGenerator(false);
+              setSelectedTemplateId(null);
+            }}
+            onLogin={handleGuestLogin}
+          />
+        </Suspense>
+      )}
+      {showFlowDemo && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <div className="fixed inset-0 z-50">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowFlowDemo(false)} />
+            <div className="relative h-full overflow-auto">
+              <button
+                onClick={() => setShowFlowDemo(false)}
+                className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <GuestFlowDemo />
+            </div>
+          </div>
+        </Suspense>
+      )}
+    </div>
+  );
+}
+
+export default App;

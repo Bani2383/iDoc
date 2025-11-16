@@ -1,0 +1,102 @@
+{
+  "common": {
+    "appName": "iDoc",
+    "loading": "Laden...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "download": "Herunterladen",
+    "upload": "Hochladen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "create": "Erstellen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "nav": {
+    "home": "Startseite",
+    "documents": "Dokumente",
+    "signature": "Unterschrift",
+    "faq": "FAQ & Demo",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "dashboard": "Dashboard",
+    "profile": "Profil"
+  },
+  "hero": {
+    "title": "Erstellen Sie professionelle Dokumente in Sekunden",
+    "subtitle": "Kostenloser PDF-Dokumentengenerator mit KI-Unterstützung. Verträge, Briefe, Formulare - erstellen und unterschreiben Sie sofort.",
+    "cta": "Jetzt starten",
+    "ctaDemo": "Demo ansehen"
+  },
+  "features": {
+    "title": "Leistungsstarke Funktionen",
+    "aiGeneration": "KI-Generierung",
+    "aiGenerationDesc": "Erstellen Sie Dokumente mit künstlicher Intelligenz",
+    "eSignature": "E-Signatur",
+    "eSignatureDesc": "Unterschreiben Sie Ihre Dokumente elektronisch",
+    "instantDownload": "Sofortiger Download",
+    "instantDownloadDesc": "Laden Sie Ihre PDFs sofort herunter",
+    "secure": "Sicher",
+    "secureDesc": "Ihre Daten sind verschlüsselt und geschützt"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "createAccount": "Konto erstellen",
+    "loginSuccess": "Anmeldung erfolgreich!",
+    "loginError": "Anmeldefehler. Bitte versuchen Sie es erneut.",
+    "signupSuccess": "Konto erfolgreich erstellt!",
+    "signupError": "Fehler beim Erstellen des Kontos."
+  },
+  "documents": {
+    "title": "Meine Dokumente",
+    "createNew": "Neues Dokument erstellen",
+    "selectTemplate": "Vorlage auswählen",
+    "noDocuments": "Noch keine Dokumente",
+    "createdAt": "Erstellt am",
+    "viewDocument": "Dokument ansehen",
+    "deleteDocument": "Dokument löschen",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses Dokument löschen möchten?"
+  },
+  "templates": {
+    "workContract": "Arbeitsvertrag",
+    "motivationLetter": "Bewerbungsschreiben",
+    "convention": "Vereinbarung",
+    "adminForm": "Verwaltungsformular",
+    "certificate": "Zertifikat",
+    "invoice": "Rechnung",
+    "quote": "Angebot",
+    "resignation": "Kündigungsschreiben"
+  },
+  "signature": {
+    "title": "Elektronische Unterschrift",
+    "draw": "Zeichnen",
+    "type": "Tippen",
+    "upload": "Hochladen",
+    "clear": "Löschen",
+    "signHere": "Hier unterschreiben",
+    "saveSignature": "Unterschrift speichern",
+    "signatureSuccess": "Unterschrift erfolgreich gespeichert!"
+  },
+  "footer": {
+    "about": "Über uns",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "contact": "Kontakt",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutzerklärung",
+    "terms": "Nutzungsbedingungen",
+    "rights": "Alle Rechte vorbehalten"
+  }
+}

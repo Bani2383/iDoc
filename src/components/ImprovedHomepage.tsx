@@ -1,0 +1,326 @@
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import EnhancedSearchBar from './EnhancedSearchBar';
+import SmartFillStudio from './SmartFillStudio';
+import { Zap, Shield, Download, TrendingUp } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+const FomoWidget = lazy(() => import('./FomoWidget'));
+const DocVaultPromo = lazy(() => import('./DocVaultPromo'));
+
+interface Template {
+  id: string;
+  name: string;
+  category: string;
+  popularity: number;
+}
+
+interface ImprovedHomepageProps {
+  onLogin?: () => void;
+}
+
+const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [showSmartFill, setShowSmartFill] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  const fetchTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('document_templates')
+        .select('id, name, category')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const templatesWithPopularity = (data || []).map((template, index) => ({
+        ...template,
+        category: template.category || 'Général',
+        popularity: Math.max(100 - index * 5, 20),
+      }));
+
+      setTemplates(templatesWithPopularity);
+    } catch (err) {
+      console.error('Error fetching templates:', err);
+      setTemplates([
+        { id: '1', name: 'Contrat de Location', category: 'Immobilier', popularity: 95 },
+        { id: '2', name: 'Lettre de Résiliation', category: 'Administratif', popularity: 87 },
+        { id: '3', name: 'Bail Commercial', category: 'Immobilier', popularity: 73 },
+        { id: '4', name: 'Contrat de Travail', category: 'RH', popularity: 68 },
+        { id: '5', name: 'Procuration', category: 'Juridique', popularity: 62 },
+      ]);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const handleTemplateSelect = (template: Template) => {
+    setSelectedTemplate(template);
+    setShowSmartFill(true);
+  };
+
+  const handleSmartFillComplete = (data: Record<string, string>) => {
+    console.log('Form completed:', data);
+    setShowSmartFill(false);
+  };
+
+  const handleSmartFillCancel = () => {
+    setShowSmartFill(false);
+    setSelectedTemplate(null);
+  };
+
+  if (showSmartFill && selectedTemplate) {
+    return (
+      <SmartFillStudio
+        templateId={selectedTemplate.id}
+        templateName={selectedTemplate.name}
+        onComplete={handleSmartFillComplete}
+        onCancel={handleSmartFillCancel}
+      />
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <header role="banner" className="flex items-center justify-between px-8 py-6 bg-white shadow-sm sticky top-0 z-50">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-xl">i</span>
+          </div>
+          <span className="text-2xl font-bold text-gray-900">iDoc</span>
+        </div>
+        <button
+          onClick={onLogin}
+          className="px-6 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition-colors"
+          aria-label="Accéder à mon compte"
+        >
+          Mon Compte →
+        </button>
+      </header>
+
+      <main role="main">
+        <section className="max-w-6xl mx-auto px-4 py-16 text-center" aria-labelledby="hero-title">
+          <h1 id="hero-title" className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight animate-fade-in">
+            Vos documents légaux.
+            <br />
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Instantanés. 1,99$.
+            </span>
+          </h1>
+
+          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+            Créez, remplissez et téléchargez vos documents professionnels en moins de 2 minutes.
+            Sans inscription. Paiement sécurisé.
+          </p>
+
+          <div className="mb-8">
+            {loadingTemplates ? (
+              <div className="text-center text-gray-500">Chargement des templates...</div>
+            ) : (
+              <EnhancedSearchBar templates={templates} onSelectTemplate={handleTemplateSelect} />
+            )}
+          </div>
+
+          <div className="flex items-center justify-center space-x-8 mb-16">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-green-600" />
+              </div>
+              <span className="font-semibold">12,450</span>
+              <span className="text-sm">documents</span>
+            </div>
+            <div className="w-px h-8 bg-gray-300"></div>
+            <div className="flex items-center space-x-2 text-gray-700">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-bold text-xs">👥</span>
+              </div>
+              <span className="font-semibold">2,340</span>
+              <span className="text-sm">utilisateurs actifs</span>
+            </div>
+            <div className="w-px h-8 bg-gray-300"></div>
+            <div className="flex items-center space-x-2 text-gray-700">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold">Live</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
+            C'est aussi simple que 1-2-3
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                <span className="text-white text-2xl font-bold">1</span>
+              </div>
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Recherchez</h3>
+                <p className="text-gray-600">
+                  Trouvez le document dont vous avez besoin parmi plus de 50 modèles validés
+                </p>
+              </div>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                <span className="text-white text-2xl font-bold">2</span>
+              </div>
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Remplissez</h3>
+                <p className="text-gray-600">
+                  Complétez le formulaire intelligent avec pré-remplissage automatique
+                </p>
+              </div>
+            </div>
+
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                <span className="text-white text-2xl font-bold">3</span>
+              </div>
+              <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Téléchargez</h3>
+                <p className="text-gray-600">
+                  Payez 1,99$ et recevez votre PDF prêt à l'emploi instantanément
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-16">
+          <div className="max-w-6xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
+              Pourquoi choisir iDoc?
+            </h2>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center text-center p-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Zap className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Ultra-rapide</h3>
+                <p className="text-gray-600">
+                  Créez vos documents en moins de 2 minutes. Formulaire intelligent avec auto-complétion.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center text-center p-6">
+                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Shield className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">100% Sécurisé</h3>
+                <p className="text-gray-600">
+                  Paiement crypté par Stripe. Vos données sont protégées et jamais partagées.
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center text-center p-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Download className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Téléchargement instantané</h3>
+                <p className="text-gray-600">
+                  PDF haute qualité disponible immédiatement. Copie par email automatique.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-16">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-12 text-center text-white shadow-2xl">
+            <h2 className="text-4xl font-bold mb-6">
+              Une solution pour chaque besoin
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 mt-12">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all">
+                <h3 className="text-2xl font-bold mb-4">iDoc Pro</h3>
+                <p className="text-blue-100 mb-6">
+                  Documents illimités, signature électronique, IA juridique RegulaSmart
+                </p>
+                <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl hover:scale-105 transition-all">
+                  Découvrir iDoc Pro
+                </button>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all">
+                <h3 className="text-2xl font-bold mb-4">iDoc Connect (API)</h3>
+                <p className="text-blue-100 mb-6">
+                  Intégrez la génération de PDF dans vos applications via API RESTful
+                </p>
+                <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl hover:scale-105 transition-all">
+                  Documentation API
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <Suspense fallback={<div className="h-40"></div>}>
+          <DocVaultPromo />
+        </Suspense>
+
+        <section className="bg-gradient-to-br from-blue-600 to-indigo-600 py-20 text-white text-center">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-4xl font-bold mb-6">
+              Prêt à créer votre document?
+            </h2>
+            <p className="text-xl text-blue-100 mb-8">
+              Rejoignez les milliers d'utilisateurs qui nous font confiance
+            </p>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="px-12 py-4 bg-white text-blue-600 font-bold text-lg rounded-lg hover:shadow-2xl hover:scale-105 transition-all"
+              aria-label="Commencer la création de document"
+            >
+              Commencer maintenant - 1,99$
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer role="contentinfo" className="bg-gray-900 text-gray-300 py-12">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <p className="text-sm">© 2025 iDoc. Tous droits réservés.</p>
+          <div className="flex items-center justify-center space-x-6 mt-4 text-sm">
+            <a href="#" className="hover:text-white transition-colors">Conditions</a>
+            <span>•</span>
+            <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
+            <span>•</span>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          </div>
+        </div>
+      </footer>
+
+      <Suspense fallback={null}>
+        <FomoWidget />
+      </Suspense>
+
+      <style>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default ImprovedHomepage;
