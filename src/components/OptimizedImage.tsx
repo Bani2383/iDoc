@@ -22,6 +22,8 @@ interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 
   onLoad?: () => void;
   /** Callback when image fails */
   onError?: () => void;
+  /** Enable WebP with fallback (default: true) */
+  useWebP?: boolean;
 }
 
 /**
@@ -37,6 +39,7 @@ export function OptimizedImage({
   loading = 'lazy',
   onLoad,
   onError,
+  useWebP = true,
   className = '',
   ...props
 }: OptimizedImageProps) {
@@ -106,6 +109,9 @@ export function OptimizedImage({
     );
   }
 
+  // Generate WebP source if enabled
+  const webpSrc = useWebP && src ? src.replace(/\.(png|jpe?g)$/i, '.webp') : null;
+
   return (
     <div className="relative overflow-hidden">
       {/* Placeholder */}
@@ -118,20 +124,42 @@ export function OptimizedImage({
         />
       )}
 
-      {/* Actual image */}
-      <img
-        ref={imgRef}
-        src={isInView ? src : placeholder}
-        alt={alt}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        } ${className}`}
-        onLoad={handleLoad}
-        onError={handleError}
-        loading={loading}
-        decoding="async"
-        {...props}
-      />
+      {/* Actual image with WebP support */}
+      {useWebP && webpSrc ? (
+        <picture>
+          <source
+            srcSet={isInView ? webpSrc : placeholder}
+            type="image/webp"
+          />
+          <img
+            ref={imgRef}
+            src={isInView ? src : placeholder}
+            alt={alt}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            } ${className}`}
+            onLoad={handleLoad}
+            onError={handleError}
+            loading={loading}
+            decoding="async"
+            {...props}
+          />
+        </picture>
+      ) : (
+        <img
+          ref={imgRef}
+          src={isInView ? src : placeholder}
+          alt={alt}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          } ${className}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          loading={loading}
+          decoding="async"
+          {...props}
+        />
+      )}
     </div>
   );
 }
