@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, ArrowLeft, Check, User, FileText, Download } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, User, FileText, Download, MapPin } from 'lucide-react';
 
 interface FormField {
   id: string;
