@@ -60,7 +60,7 @@ class PDFGenerator {
 
     yPosition += 5;
 
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('times', 'normal');
     doc.setFontSize(12);
 
     const paragraphs = processedContent.split('\n\n');

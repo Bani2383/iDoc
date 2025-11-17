@@ -27,6 +27,7 @@ export function generatePRDPDF(): void {
   const addHeader = () => {
     doc.setFillColor(0, 102, 204);
     doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
     doc.rect(0, 0, 210, 20, 'F');
     doc.text('PRD iDoc v2.0 - Spécifications Techniques et Fonctionnelles', 105, 12, { align: 'center' });
@@ -34,6 +35,7 @@ export function generatePRDPDF(): void {
 
   const addFooter = (pageNum: number) => {
     doc.setTextColor(128, 128, 128);
+    doc.setFont('times', 'normal');
     doc.setFontSize(8);
     doc.text(`Page ${pageNum}`, 105, 290, { align: 'center' });
   };
@@ -203,6 +205,7 @@ export function generatePRDPDF(): void {
 
     doc.setFillColor(...phase.color);
     doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.rect(10, yPosition, 190, 10, 'F');
     doc.text(`Phase ${phaseNumber}: ${phase.title}`, 105, yPosition + 7, { align: 'center' });
@@ -210,6 +213,7 @@ export function generatePRDPDF(): void {
 
     doc.setTextColor(0, 0, 0);
     doc.setFillColor(200, 200, 200);
+    doc.setFont('times', 'normal');
     doc.setFontSize(10);
     doc.rect(10, yPosition, 30, 8, 'FD');
     doc.rect(40, yPosition, 50, 8, 'FD');
@@ -251,6 +255,7 @@ export function generatePRDPDF(): void {
       doc.rect(90, yPosition, 60, 8, 'FD');
       doc.rect(150, yPosition, 50, 8, 'FD');
 
+      doc.setFont('times', 'normal');
       doc.setFontSize(9);
       doc.text(`${phaseNumber}.${moduleIndex + 1} ${module.name}`, 12, yPosition + 5);
       doc.text(doc.splitTextToSize(module.userStory, 48)[0], 42, yPosition + 5);
@@ -268,11 +273,13 @@ export function generatePRDPDF(): void {
   addHeader();
   addFooter(currentPage);
 
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
   doc.text('Table des Matières', 105, 35, { align: 'center' });
 
   yPosition = 50;
+  doc.setFont('times', 'normal');
   doc.setFontSize(12);
   toc.forEach((entry) => {
     if (yPosition > 270) {
