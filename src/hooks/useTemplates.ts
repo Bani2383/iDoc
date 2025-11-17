@@ -43,13 +43,21 @@ export function useTemplates() {
 
       const { data, error: fetchError } = await supabase
         .from('document_templates')
-        .select('id, name, category, description, content, fields, is_active')
+        .select('id, name, category, description, template_content, template_variables, is_active')
         .eq('is_active', true)
         .order('name');
 
       if (fetchError) throw fetchError;
 
-      const templatesData = data || [];
+      const templatesData = (data || []).map((template: any) => ({
+        id: template.id,
+        name: template.name,
+        category: template.category,
+        description: template.description,
+        content: template.template_content,
+        fields: template.template_variables,
+        is_active: template.is_active
+      }));
       templateCache.set('active_templates', templatesData);
       setTemplates(templatesData);
     } catch (err) {

@@ -90,6 +90,27 @@ class TemplateCache {
     this.cleanup();
     return this.cache.size;
   }
+
+  /**
+   * Invalidate all cache entries
+   */
+  invalidateAll(): void {
+    this.clear();
+  }
+
+  /**
+   * Get or fetch data with caching
+   */
+  async getOrFetch<T>(key: string, fetcher: () => Promise<T>, ttl?: number): Promise<T> {
+    const cached = this.get<T>(key);
+    if (cached !== null) {
+      return cached;
+    }
+
+    const data = await fetcher();
+    this.set(key, data, ttl);
+    return data;
+  }
 }
 
 export const templateCache = new TemplateCache();
