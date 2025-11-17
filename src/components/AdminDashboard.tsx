@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog } from 'lucide-react';
+import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -12,6 +12,8 @@ import { AdminBillingDashboard } from './AdminBillingDashboard';
 import { AdminAccountingPanel } from './AdminAccountingPanel';
 import { AdminInvoicesPanel } from './AdminInvoicesPanel';
 import { AdminUserActivityPanel } from './AdminUserActivityPanel';
+import { ClientsManager } from './ClientsManager';
+import { DossiersModule } from './DossiersModule';
 
 interface Stats {
   totalUsers: number;
@@ -36,7 +38,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'user-activity'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'user-activity' | 'clients' | 'dossiers'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -239,6 +241,28 @@ export function AdminDashboard() {
               <UserCog className={`w-5 h-5 ${activeTab === 'user-activity' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
               <span>Activité</span>
             </button>
+            <button
+              onClick={() => setActiveTab('clients')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'clients'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <UserCheck className={`w-5 h-5 ${activeTab === 'clients' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Clients</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('dossiers')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'dossiers'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <Folder className={`w-5 h-5 ${activeTab === 'dossiers' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Dossiers</span>
+            </button>
           </div>
         </div>
       </header>
@@ -260,6 +284,10 @@ export function AdminDashboard() {
           <AdminInvoicesPanel />
         ) : activeTab === 'user-activity' ? (
           <AdminUserActivityPanel />
+        ) : activeTab === 'clients' ? (
+          <ClientsManager />
+        ) : activeTab === 'dossiers' ? (
+          <DossiersModule />
         ) : (
           <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
