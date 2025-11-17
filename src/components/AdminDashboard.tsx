@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut } from 'lucide-react';
+import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -8,6 +8,10 @@ import { UserManager } from './UserManager';
 import { LoginStatsManager } from './LoginStatsManager';
 import { SiteSettingsManager } from './SiteSettingsManager';
 import PRDExportButton from './PRDExportButton';
+import { AdminBillingDashboard } from './AdminBillingDashboard';
+import { AdminAccountingPanel } from './AdminAccountingPanel';
+import { AdminInvoicesPanel } from './AdminInvoicesPanel';
+import { AdminUserActivityPanel } from './AdminUserActivityPanel';
 
 interface Stats {
   totalUsers: number;
@@ -32,7 +36,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'user-activity'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -191,6 +195,50 @@ export function AdminDashboard() {
               <Sliders className={`w-5 h-5 ${activeTab === 'settings' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
               <span>Paramètres</span>
             </button>
+            <button
+              onClick={() => setActiveTab('billing')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'billing'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <DollarSign className={`w-5 h-5 ${activeTab === 'billing' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Facturation</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('accounting')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'accounting'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <Calculator className={`w-5 h-5 ${activeTab === 'accounting' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Comptabilité</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('invoices')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'invoices'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <Receipt className={`w-5 h-5 ${activeTab === 'invoices' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Factures</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('user-activity')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'user-activity'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <UserCog className={`w-5 h-5 ${activeTab === 'user-activity' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Activité</span>
+            </button>
           </div>
         </div>
       </header>
@@ -204,6 +252,14 @@ export function AdminDashboard() {
           <LoginStatsManager />
         ) : activeTab === 'settings' ? (
           <SiteSettingsManager />
+        ) : activeTab === 'billing' ? (
+          <AdminBillingDashboard />
+        ) : activeTab === 'accounting' ? (
+          <AdminAccountingPanel />
+        ) : activeTab === 'invoices' ? (
+          <AdminInvoicesPanel />
+        ) : activeTab === 'user-activity' ? (
+          <AdminUserActivityPanel />
         ) : (
           <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

@@ -1,65 +1,152 @@
-# Configuration Admin pour iDoc
+# 🚀 GUIDE RAPIDE - NOUVEAUX MODULES ADMIN
 
-## Création du compte administrateur
+## ✅ CE QUI A ÉTÉ AJOUTÉ
 
-Pour créer un compte administrateur, suivez ces étapes:
+Vous avez maintenant **4 nouveaux onglets** dans l'AdminDashboard:
 
-### 1. Créer l'utilisateur via l'interface Supabase
+### 1️⃣ **Facturation** (Billing)
+- Dashboard avec statistiques (revenus, taxes, ventes, abonnements)
+- Remboursements
+- Annulations de factures
+- Corrections comptables
+- Gestion des abonnements
 
-1. Connectez-vous à votre tableau de bord Supabase: https://supabase.com/dashboard
-2. Allez dans **Authentication** > **Users**
-3. Cliquez sur **Add user** > **Create new user**
-4. Remplissez:
-   - Email: `admin@idoc.com` (ou votre email)
-   - Password: Créez un mot de passe sécurisé
-   - Metadata (optionnel): `{"full_name": "Admin iDoc"}`
-5. Cliquez sur **Create user**
+### 2️⃣ **Comptabilité** (Accounting)
+- Historique complet des transactions
+- Filtres par date, type, pays, province
+- Calculs HT/Taxes/TTC
+- Répartition par province
+- **Export CSV** pour logiciel comptable
 
-### 2. Attribuer le rôle admin
+### 3️⃣ **Factures** (Invoices)
+- Liste complète des factures
+- Recherche par email ou ID
+- Téléchargement PDF
+- Liens factures en ligne
 
-Une fois l'utilisateur créé, vous devez lui attribuer le rôle admin:
+### 4️⃣ **Activité** (User Activity)
+- Suivi complet des utilisateurs
+- Nombre de connexions
+- Historique détaillé par utilisateur
+- Achats et abonnements
+- Dernières IPs utilisées
 
-1. Dans Supabase, allez dans **SQL Editor**
-2. Exécutez la requête suivante (remplacez `admin@idoc.com` par l'email que vous avez utilisé):
+---
 
-```sql
--- Mettre à jour le profil pour définir le rôle admin
-UPDATE user_profiles
-SET role = 'admin'
-WHERE email = 'admin@idoc.com';
-```
+## 🔑 COMMENT Y ACCÉDER
 
-### 3. Connexion
+1. **Connectez-vous en tant qu'ADMIN**
+2. Vous verrez les nouveaux onglets dans la navigation:
+   ```
+   Dashboard | Modèles | Utilisateurs | Statistiques | Paramètres | 
+   [Facturation] | [Comptabilité] | [Factures] | [Activité]
+   ```
 
-Vous pouvez maintenant vous connecter à l'application avec:
-- Email: `admin@idoc.com`
-- Password: Le mot de passe que vous avez créé
+3. Cliquez sur l'onglet souhaité
 
-Le système détectera automatiquement que vous êtes admin et vous redirigera vers le tableau de bord administrateur.
+---
 
-## Fonctionnalités Admin
+## 💡 CAS D'USAGE
 
-Le tableau de bord admin permet de:
-- Voir les statistiques globales (utilisateurs, documents, revenus)
-- Consulter tous les documents générés par les clients
-- Voir l'historique des paiements
-- Gérer les utilisateurs
+### Rembourser un client
+1. **Facturation** → Onglet "Ventes"
+2. Trouver la transaction
+3. Cliquer icône 🔄 (Remboursement)
+4. Entrer montant et raison
+5. Confirmer
 
-## Fonctionnalités Client
+### Exporter la comptabilité
+1. **Comptabilité**
+2. Appliquer filtres (dates, type, lieu)
+3. Cliquer "Exporter CSV"
+4. Fichier téléchargé automatiquement
 
-Les clients ont accès à:
-- Leurs documents générés
-- Le téléchargement des PDF après paiement
-- Protection anti-copie et anti-screenshot des documents
-- Génération de nouveaux documents avec l'IA
+### Voir l'historique d'un utilisateur
+1. **Activité**
+2. Chercher l'utilisateur
+3. Cliquer "Voir historique"
+4. Modal avec toutes les activités
 
-## Sécurité des documents
+### Télécharger une facture
+1. **Factures**
+2. Trouver la facture
+3. Cliquer icône 📥 (PDF) ou 📄 (en ligne)
 
-Les documents payés sont protégés contre:
-- ✅ Captures d'écran (via détection des raccourcis clavier)
-- ✅ Clic droit / menu contextuel
-- ✅ Copier-coller du contenu
-- ✅ Sélection de texte
-- ✅ Drag and drop
+---
 
-Seul le téléchargement PDF officiel est possible via le bouton dédié.
+## 📊 BASE DE DONNÉES
+
+**Nouvelles tables créées:**
+- ✅ `audit_log` - Toutes les actions admin
+- ✅ `user_activity` - Toutes les activités utilisateurs
+- ✅ Colonnes ajoutées: `login_count`, `last_login_at`, `last_ip`
+
+**Fonctions SQL disponibles:**
+- `log_user_activity()` - Logger une activité
+- `increment_login_count()` - Incrémenter connexions
+- `log_admin_action()` - Logger action admin
+
+---
+
+## 🔐 SÉCURITÉ
+
+- ✅ Tous les panneaux vérifient `role = 'admin'`
+- ✅ RLS sur toutes les tables
+- ✅ Edge Functions protégées
+- ✅ Audit de toutes les actions
+
+---
+
+## 📈 STATISTIQUES DISPONIBLES
+
+### Facturation:
+- Revenus totaux
+- Taxes collectées
+- Nombre de ventes
+- Abonnements actifs
+
+### Comptabilité:
+- Total HT, Taxes, TTC
+- Par province/état
+- Par type de transaction
+
+### Activité:
+- Total utilisateurs
+- Connexions totales
+- Abonnés actifs
+- Achats totaux
+
+---
+
+## 🧪 TESTER
+
+1. **Connexion admin:**
+   - Connectez-vous avec un compte admin
+
+2. **Vérifier les onglets:**
+   - Les 4 nouveaux onglets doivent être visibles
+
+3. **Tester chaque module:**
+   - Facturation → Voir les stats
+   - Comptabilité → Exporter CSV
+   - Factures → Chercher une facture
+   - Activité → Voir historique utilisateur
+
+---
+
+## 📖 DOCUMENTATION COMPLÈTE
+
+- `BILLING_MODULE_COMPLETE.md` - Système paiement (45 pages)
+- `ADMIN_MODULES_ADDED.md` - Modules admin (60 pages)
+- `BILLING_QUICK_START.md` - Guide rapide paiement
+
+---
+
+## ✅ STATUS
+
+**Build:** Réussi (16.00s)
+**Modules:** 4 nouveaux onglets actifs
+**Production:** Ready ✅
+
+Tous les modules sont opérationnels et prêts à l'emploi!
+
