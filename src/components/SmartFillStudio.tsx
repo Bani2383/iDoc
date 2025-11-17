@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, ArrowLeft, Check, User, FileText, Download, MapPin } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface FormField {
   id: string;
@@ -45,49 +46,74 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [steps, setSteps] = useState<WizardStep[]>([]);
+  const [templateContent, setTemplateContent] = useState<string>('');
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
 
-  const steps: WizardStep[] = [
-    {
-      id: 'personal',
-      title: 'Commençons par vous',
-      subtitle: 'Informations personnelles',
-      icon: User,
-      fields: [
-        { id: 'firstName', label: 'Prénom', type: 'text', placeholder: 'Jean', required: true },
-        { id: 'lastName', label: 'Nom', type: 'text', placeholder: 'Dupont', required: true },
-        { id: 'email', label: 'Email', type: 'email', placeholder: 'jean.dupont@exemple.com', required: true }
-      ]
-    },
-    {
-      id: 'location',
-      title: 'Où se trouve le bien?',
-      subtitle: 'Adresse du logement',
-      icon: MapPin,
-      fields: [
-        { id: 'street', label: 'Rue et numéro', type: 'text', placeholder: '123 rue Principale', required: true },
-        { id: 'city', label: 'Ville', type: 'text', placeholder: 'Montréal', required: true, prefillKey: 'city' },
-        { id: 'province', label: 'Province/État', type: 'text', placeholder: 'Québec', required: true, prefillKey: 'region' },
-        { id: 'postal', label: 'Code postal', type: 'text', placeholder: 'H1A 1A1', required: true, prefillKey: 'postal' },
-        { id: 'country', label: 'Pays', type: 'text', placeholder: 'Canada', required: true, prefillKey: 'country' }
-      ]
-    },
-    {
-      id: 'details',
-      title: 'Détails du document',
-      subtitle: 'Informations spécifiques',
-      icon: FileText,
-      fields: [
-        { id: 'startDate', label: 'Date de début', type: 'date', required: true },
-        { id: 'monthlyRent', label: 'Loyer mensuel', type: 'text', placeholder: '1500', required: false },
-        { id: 'additionalInfo', label: 'Informations supplémentaires', type: 'textarea', placeholder: 'Détails additionnels...', required: false }
-      ]
-    }
-  ];
-
   useEffect(() => {
+    loadTemplateData();
     fetchGeolocation();
-  }, []);
+  }, [templateId]);
+
+  const loadTemplateData = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('document_templates')
+        .select('template_content, template_variables')
+        .eq('id', templateId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error('Template not found');
+
+      setTemplateContent(data.template_content || '');
+
+      const fields = data.template_variables || [];
+      const wizardSteps = createStepsFromFields(fields);
+      setSteps(wizardSteps);
+    } catch (err) {
+      console.error('Error loading template:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createStepsFromFields = (fields: any[]): WizardStep[] => {
+    if (!fields || fields.length === 0) {
+      return [{
+        id: 'default',
+        title: 'Remplissez le document',
+        subtitle: 'Informations requises',
+        icon: FileText,
+        fields: []
+      }];
+    }
+
+    const formFields: FormField[] = fields.map((field: any) => ({
+      id: field.key || field.id || `field_${Math.random()}`,
+      label: field.label || field.name || 'Champ',
+      type: (field.type === 'textarea' ? 'textarea' : field.type === 'date' ? 'date' : field.type === 'number' ? 'text' : field.type === 'select' ? 'select' : 'text') as any,
+      placeholder: '',
+      required: field.required ?? false,
+      options: field.options
+    }));
+
+    const chunkSize = 5;
+    const wizardSteps: WizardStep[] = [];
+
+    for (let i = 0; i < formFields.length; i += chunkSize) {
+      wizardSteps.push({
+        id: `step_${i / chunkSize + 1}`,
+        title: i === 0 ? 'Commençons' : `Étape ${i / chunkSize + 1}`,
+        subtitle: `Informations requises (${i + 1}-${Math.min(i + chunkSize, formFields.length)})`,
+        icon: i === 0 ? User : FileText,
+        fields: formFields.slice(i, i + chunkSize)
+      });
+    }
+
+    return wizardSteps;
+  };
 
   useEffect(() => {
     if (Object.keys(geolocation).length > 0) {
@@ -184,6 +210,31 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
   };
 
   const renderPDFPreview = () => {
+    const renderContent = () => {
+      if (!templateContent) {
+        return <p className="text-gray-500 italic">Chargement de l'aperçu...</p>;
+      }
+
+      let content = templateContent;
+      Object.keys(formData).forEach((key) => {
+        const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+        const value = formData[key] || '___________';
+        content = content.replace(regex, value);
+      });
+
+      const lines = content.split('\n');
+      return lines.map((line, index) => {
+        if (line.trim() === '') {
+          return <br key={index} />;
+        }
+        return (
+          <p key={index} className="mb-2 whitespace-pre-wrap">
+            {line}
+          </p>
+        );
+      });
+    };
+
     return (
       <div className="bg-white shadow-2xl rounded-lg p-8 h-full overflow-auto">
         <div className="max-w-2xl mx-auto">
@@ -192,141 +243,14 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
             <p className="text-sm text-gray-500 mt-2">Prévisualisation en temps réel</p>
           </div>
 
-          <div className="space-y-6 text-gray-800 leading-relaxed">
-            <section>
-              <h2 className="text-xl font-semibold mb-3 text-blue-600">Parties du contrat</h2>
-              <p>
-                Entre les soussignés :<br />
-                <span
-                  data-field="firstName"
-                  className={`inline-block min-w-[100px] border-b-2 ${
-                    focusedField === 'firstName' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.firstName || '___________'}
-                </span>
-                {' '}
-                <span
-                  data-field="lastName"
-                  className={`inline-block min-w-[100px] border-b-2 ${
-                    focusedField === 'lastName' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.lastName || '___________'}
-                </span>
-                , ci-après dénommé "le Locataire"
-              </p>
-              <p className="mt-2">
-                Adresse email: {' '}
-                <span
-                  data-field="email"
-                  className={`inline-block min-w-[200px] border-b-2 ${
-                    focusedField === 'email' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.email || '___________'}
-                </span>
-              </p>
-            </section>
+          <div className="space-y-2 text-gray-800 leading-relaxed font-serif">
+            {renderContent()}
+          </div>
 
-            <section>
-              <h2 className="text-xl font-semibold mb-3 text-blue-600">Adresse du bien loué</h2>
-              <p>
-                <span
-                  data-field="street"
-                  className={`inline-block min-w-[200px] border-b-2 ${
-                    focusedField === 'street' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.street || '___________'}
-                </span>
-              </p>
-              <p className="mt-2">
-                <span
-                  data-field="city"
-                  className={`inline-block min-w-[120px] border-b-2 ${
-                    focusedField === 'city' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.city || '___________'}
-                </span>
-                {', '}
-                <span
-                  data-field="province"
-                  className={`inline-block min-w-[100px] border-b-2 ${
-                    focusedField === 'province' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.province || '___________'}
-                </span>
-              </p>
-              <p className="mt-2">
-                <span
-                  data-field="postal"
-                  className={`inline-block min-w-[100px] border-b-2 ${
-                    focusedField === 'postal' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.postal || '___________'}
-                </span>
-                {', '}
-                <span
-                  data-field="country"
-                  className={`inline-block min-w-[100px] border-b-2 ${
-                    focusedField === 'country' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.country || '___________'}
-                </span>
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold mb-3 text-blue-600">Conditions du bail</h2>
-              <p>
-                Date de début: {' '}
-                <span
-                  data-field="startDate"
-                  className={`inline-block min-w-[120px] border-b-2 ${
-                    focusedField === 'startDate' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                  } transition-all duration-200 px-1`}
-                >
-                  {formData.startDate || '___________'}
-                </span>
-              </p>
-              {formData.monthlyRent && (
-                <p className="mt-2">
-                  Loyer mensuel: {' '}
-                  <span
-                    data-field="monthlyRent"
-                    className={`inline-block min-w-[100px] border-b-2 ${
-                      focusedField === 'monthlyRent' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                    } transition-all duration-200 px-1 font-semibold`}
-                  >
-                    {formData.monthlyRent} $
-                  </span>
-                </p>
-              )}
-              {formData.additionalInfo && (
-                <p className="mt-4">
-                  <strong>Informations supplémentaires:</strong><br />
-                  <span
-                    data-field="additionalInfo"
-                    className={`block mt-2 p-3 border-2 rounded ${
-                      focusedField === 'additionalInfo' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-                    } transition-all duration-200`}
-                  >
-                    {formData.additionalInfo}
-                  </span>
-                </p>
-              )}
-            </section>
-
-            <section className="mt-8 pt-6 border-t-2 border-gray-300">
-              <p className="text-sm text-gray-500 italic">
-                Ce document sera généré automatiquement une fois le formulaire complété.
-              </p>
-            </section>
+          <div className="mt-8 pt-6 border-t-2 border-gray-300">
+            <p className="text-sm text-gray-500 italic">
+              Ce document sera généré en PDF une fois le formulaire complété.
+            </p>
           </div>
         </div>
       </div>
