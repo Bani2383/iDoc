@@ -30,6 +30,13 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log('PDFSignatureEditor mounted');
+    return () => {
+      console.log('PDFSignatureEditor unmounted');
+    };
+  }, []);
+
+  useEffect(() => {
     if (pdfDataUrl && canvasRef.current) {
       renderPdfToCanvas();
     }
@@ -199,7 +206,7 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-gray-900 z-[9999] overflow-hidden">
       <div className="h-full flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4">

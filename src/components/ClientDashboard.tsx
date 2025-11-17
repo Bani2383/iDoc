@@ -143,14 +143,16 @@ export function ClientDashboard() {
   };
 
   if (showPDFSignatureEditor) {
+    console.log('🖊️ Rendering PDFSignatureEditor');
     return (
       <PDFSignatureEditor
         onClose={() => {
+          console.log('🖊️ PDFSignatureEditor onClose called');
           setShowPDFSignatureEditor(false);
           fetchDocuments();
         }}
         onComplete={(signedPdfBlob) => {
-          console.log('PDF signé créé:', signedPdfBlob.size, 'bytes');
+          console.log('🖊️ PDF signé créé:', signedPdfBlob.size, 'bytes');
           setShowPDFSignatureEditor(false);
           fetchDocuments();
         }}
@@ -342,7 +344,11 @@ export function ClientDashboard() {
               <h2 className="text-2xl font-bold text-gray-900">Mes Documents</h2>
               <div className="flex items-center space-x-3">
                 <button
-                  onClick={() => setShowPDFSignatureEditor(true)}
+                  onClick={() => {
+                    console.log('🖊️ Bouton "Signer un PDF" cliqué, state actuel:', showPDFSignatureEditor);
+                    setShowPDFSignatureEditor(true);
+                    console.log('🖊️ State mis à jour à true');
+                  }}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   <Edit3 className="w-4 h-4" />
