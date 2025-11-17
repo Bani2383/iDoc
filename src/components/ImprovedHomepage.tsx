@@ -1,6 +1,10 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import EnhancedSearchBar from './EnhancedSearchBar';
 import SmartFillStudio from './SmartFillStudio';
+import AnimatedTemplateShowcase from './AnimatedTemplateShowcase';
+import TemplateCarousel from './TemplateCarousel';
+import DynamicTemplateGrid from './DynamicTemplateGrid';
+import TemplateStats from './TemplateStats';
 import { Zap, Shield, Download, TrendingUp } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -366,6 +370,14 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
             </div>
           </div>
         </section>
+
+        <TemplateStats />
+
+        <TemplateCarousel onSelectTemplate={handleTemplateSelect} />
+
+        <DynamicTemplateGrid onSelectTemplate={handleTemplateSelect} />
+
+        <AnimatedTemplateShowcase onSelectTemplate={handleTemplateSelect} />
 
         <Suspense fallback={<div className="h-40"></div>}>
           <DocVaultPromo />
