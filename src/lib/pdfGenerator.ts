@@ -18,8 +18,10 @@ class PDFGenerator {
     let processedContent = content;
 
     Object.entries(fields).forEach(([key, value]) => {
-      const regex = new RegExp(`\\{${key}\\}`, 'g');
-      processedContent = processedContent.replace(regex, value || '');
+      const regex1 = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+      const regex2 = new RegExp(`\\{${key}\\}`, 'g');
+      processedContent = processedContent.replace(regex1, value || '');
+      processedContent = processedContent.replace(regex2, value || '');
     });
 
     const doc = new jsPDF({

@@ -7,6 +7,8 @@ import DynamicTemplateGrid from './DynamicTemplateGrid';
 import TemplateStats from './TemplateStats';
 import { Zap, Shield, Download, TrendingUp } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { pdfGenerator } from '../lib/pdfGenerator';
+import { useAuth } from '../contexts/AuthContext';
 
 const FomoWidget = lazy(() => import('./FomoWidget'));
 const DocVaultPromo = lazy(() => import('./DocVaultPromo'));
@@ -23,10 +25,12 @@ interface ImprovedHomepageProps {
 }
 
 const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
+  const { user } = useAuth();
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [showSmartFill, setShowSmartFill] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   useEffect(() => {
     fetchTemplates();
@@ -68,15 +72,112 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
     setShowSmartFill(true);
   };
 
-  const handleSmartFillComplete = (data: Record<string, string>) => {
-    console.log('Form completed:', data);
-    setShowSmartFill(false);
+  const handleSmartFillComplete = async (data: Record<string, string>) => {
+    if (!selectedTemplate) {
+      console.error('No template selected');
+      return;
+    }
+
+    try {
+      setGeneratingPDF(true);
+      console.log('Starting PDF generation for template:', selectedTemplate.id);
+      console.log('User authenticated:', !!user, user?.email);
+      console.log('Form data:', data);
+
+      const { data: templateData, error: templateError } = await supabase
+        .from('document_templates')
+        .select('template_content')
+        .eq('id', selectedTemplate.id)
+        .maybeSingle();
+
+      if (templateError) {
+        console.error('Template fetch error:', templateError);
+        throw new Error(`Erreur de chargement du template: ${templateError.message}`);
+      }
+
+      if (!templateData) {
+        throw new Error('Template introuvable');
+      }
+
+      console.log('Template loaded, generating content...');
+
+      let content = templateData.template_content || '';
+      Object.entries(data).forEach(([key, value]) => {
+        const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+        content = content.replace(regex, value);
+      });
+
+      console.log('Content prepared, generating PDF...');
+
+      const pdfBlob = await pdfGenerator.generatePDF({
+        title: selectedTemplate.name,
+        content: content,
+        fields: data,
+        metadata: {
+          author: user?.email || 'iDoc User',
+          subject: selectedTemplate.name
+        }
+      });
+
+      console.log('PDF generated, size:', pdfBlob.size);
+
+      if (user) {
+        console.log('Saving document to database...');
+        try {
+          const { error: insertError } = await supabase.from('user_documents').insert({
+            user_id: user.id,
+            template_id: selectedTemplate.id,
+            document_name: selectedTemplate.name,
+            filled_data: data,
+            status: 'completed'
+          });
+
+          if (insertError) {
+            console.error('Database insert error:', insertError);
+          } else {
+            console.log('Document saved to database successfully');
+          }
+        } catch (dbError) {
+          console.error('Error saving document to database:', dbError);
+        }
+      } else {
+        console.warn('User not authenticated, document not saved to database');
+      }
+
+      console.log('Downloading PDF...');
+      await pdfGenerator.downloadPDF(pdfBlob, `${selectedTemplate.name}-${Date.now()}`);
+
+      setShowSmartFill(false);
+      setSelectedTemplate(null);
+
+      console.log('PDF generation completed successfully');
+      alert('✅ Votre document a été généré avec succès!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      alert(`❌ Erreur lors de la génération du document: ${errorMessage}`);
+    } finally {
+      setGeneratingPDF(false);
+    }
   };
 
   const handleSmartFillCancel = () => {
     setShowSmartFill(false);
     setSelectedTemplate(null);
   };
+
+  if (generatingPDF) {
+    return (
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-12 text-center max-w-md">
+          <div className="animate-spin rounded-full h-20 w-20 border-b-4 border-blue-600 mx-auto mb-6"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Génération en cours...</h2>
+          <p className="text-gray-600 mb-2">Création de votre document PDF</p>
+          <p className="text-sm text-gray-500">Veuillez patienter quelques instants</p>
+        </div>
+      </div>
+    );
+  }
 
   if (showSmartFill && selectedTemplate) {
     return (
