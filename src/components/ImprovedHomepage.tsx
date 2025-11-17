@@ -87,20 +87,124 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <header role="banner" className="flex items-center justify-between px-8 py-6 bg-white shadow-sm sticky top-0 z-50">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">i</span>
+      <header role="banner" className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo simplifié */}
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">
+                <span className="text-gray-900">i</span>
+                <span className="text-blue-600">Doc</span>
+              </span>
+            </div>
+
+            {/* Navigation Desktop */}
+            <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label="Navigation principale">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-gray-700 hover:text-blue-600 transition-colors"
+                aria-label="Retour en haut"
+              >
+                Accueil
+              </button>
+              <button
+                onClick={() => document.getElementById('documents-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-gray-700 hover:text-blue-600 transition-colors"
+                aria-label="Voir les documents"
+              >
+                Documents
+              </button>
+              <button
+                onClick={onLogin}
+                className="text-gray-700 hover:text-blue-600 transition-colors"
+                aria-label="Signer un PDF"
+              >
+                Signer un PDF
+              </button>
+              <button
+                onClick={onLogin}
+                className="text-gray-700 hover:text-blue-600 transition-colors"
+                aria-label="FAQ et démo"
+              >
+                FAQ & Démo
+              </button>
+              <button
+                onClick={onLogin}
+                className="px-6 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition-colors flex items-center space-x-2"
+                aria-label="Se connecter"
+              >
+                <span>Connexion</span>
+              </button>
+            </nav>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden text-gray-700"
+              onClick={() => {
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (mobileMenu) {
+                  mobileMenu.classList.toggle('hidden');
+                }
+              }}
+              aria-label="Ouvrir le menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
-          <span className="text-2xl font-bold text-gray-900">iDoc</span>
+
+          {/* Mobile Navigation */}
+          <div id="mobile-menu" className="hidden md:hidden py-4 border-t border-gray-200">
+            <nav className="flex flex-col space-y-3">
+              <button
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+                className="text-gray-700 hover:text-blue-600 py-2 text-left"
+              >
+                Accueil
+              </button>
+              <button
+                onClick={() => {
+                  document.getElementById('documents-section')?.scrollIntoView({ behavior: 'smooth' });
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+                className="text-gray-700 hover:text-blue-600 py-2 text-left"
+              >
+                Documents
+              </button>
+              <button
+                onClick={() => {
+                  onLogin?.();
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+                className="text-gray-700 hover:text-blue-600 py-2 text-left"
+              >
+                Signer un PDF
+              </button>
+              <button
+                onClick={() => {
+                  onLogin?.();
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+                className="text-gray-700 hover:text-blue-600 py-2 text-left"
+              >
+                FAQ & Démo
+              </button>
+              <button
+                onClick={() => {
+                  onLogin?.();
+                  document.getElementById('mobile-menu')?.classList.add('hidden');
+                }}
+                className="text-blue-600 font-semibold py-2 text-left"
+              >
+                Connexion
+              </button>
+            </nav>
+          </div>
         </div>
-        <button
-          onClick={onLogin}
-          className="px-6 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition-colors"
-          aria-label="Accéder à mon compte"
-        >
-          Mon Compte →
-        </button>
       </header>
 
       <main role="main">
