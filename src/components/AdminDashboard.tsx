@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck } from 'lucide-react';
+import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,6 +14,7 @@ import { AdminInvoicesPanel } from './AdminInvoicesPanel';
 import { AdminUserActivityPanel } from './AdminUserActivityPanel';
 import { ClientsManager } from './ClientsManager';
 import { DossiersModule } from './DossiersModule';
+import { TemplateLabModule } from './TemplateLabModule';
 
 interface Stats {
   totalUsers: number;
@@ -38,7 +39,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'user-activity' | 'clients' | 'dossiers'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'user-activity' | 'clients' | 'dossiers' | 'template-lab'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -263,6 +264,17 @@ export function AdminDashboard() {
               <Folder className={`w-5 h-5 ${activeTab === 'dossiers' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
               <span>Dossiers</span>
             </button>
+            <button
+              onClick={() => setActiveTab('template-lab')}
+              className={`pb-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center space-x-2 ${
+                activeTab === 'template-lab'
+                  ? colors.tabActive
+                  : colors.tabInactive
+              }`}
+            >
+              <Beaker className={`w-5 h-5 ${activeTab === 'template-lab' ? (theme === 'minimal' ? 'text-black' : 'text-blue-600') : 'text-gray-500'}`} />
+              <span>Lab</span>
+            </button>
           </div>
         </div>
       </header>
@@ -288,6 +300,8 @@ export function AdminDashboard() {
           <ClientsManager />
         ) : activeTab === 'dossiers' ? (
           <DossiersModule />
+        ) : activeTab === 'template-lab' ? (
+          <TemplateLabModule />
         ) : (
           <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
