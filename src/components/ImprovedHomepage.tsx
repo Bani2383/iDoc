@@ -22,9 +22,10 @@ interface Template {
 
 interface ImprovedHomepageProps {
   onLogin?: () => void;
+  onSignPDF?: () => void;
 }
 
-const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
+const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF }) => {
   const { user } = useAuth();
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [showSmartFill, setShowSmartFill] = useState(false);
@@ -116,7 +117,8 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
         metadata: {
           author: user?.email || 'iDoc User',
           subject: selectedTemplate.name
-        }
+        },
+        signatureData: data.signature
       });
 
       console.log('PDF generated, size:', pdfBlob.size);
@@ -220,7 +222,7 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
                 Documents
               </button>
               <button
-                onClick={onLogin}
+                onClick={onSignPDF}
                 className="text-gray-700 hover:text-blue-600 transition-colors"
                 aria-label="Signer un PDF"
               >
@@ -282,7 +284,7 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin }) => {
               </button>
               <button
                 onClick={() => {
-                  onLogin?.();
+                  onSignPDF?.();
                   document.getElementById('mobile-menu')?.classList.add('hidden');
                 }}
                 className="text-gray-700 hover:text-blue-600 py-2 text-left"

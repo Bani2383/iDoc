@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, ArrowLeft, Check, User, FileText, Download, MapPin } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, User, FileText, Download, MapPin, Edit3 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { SignaturePad } from './SignaturePad';
 
 interface FormField {
   id: string;
@@ -48,6 +49,9 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [steps, setSteps] = useState<WizardStep[]>([]);
   const [templateContent, setTemplateContent] = useState<string>('');
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [signatureData, setSignatureData] = useState<string | null>(null);
+  const [signatureMode, setSignatureMode] = useState<'electronic' | 'manual' | null>(null);
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -198,9 +202,22 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
       if (currentStep < steps.length - 1) {
         setCurrentStep(prev => prev + 1);
       } else {
-        onComplete(formData);
+        if (!signatureMode) {
+          return;
+        }
+
+        const finalData = { ...formData };
+        if (signatureMode === 'electronic' && signatureData) {
+          finalData['signature'] = signatureData;
+        }
+        onComplete(finalData);
       }
     }
+  };
+
+  const handleSignatureSave = (signature: string) => {
+    setSignatureData(signature);
+    setShowSignaturePad(false);
   };
 
   const handleBack = () => {
@@ -309,6 +326,96 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">{currentStepData.title}</h1>
                 <p className="text-lg text-gray-600">{currentStepData.subtitle}</p>
               </div>
+
+              {/* Signature Selection on Last Step */}
+              {currentStep === steps.length - 1 && (
+                <div className="mb-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-xl animate-slide-up">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
+                    <Edit3 className="w-5 h-5 text-blue-600" />
+                    <span>Signature du document</span>
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <button
+                      onClick={() => setSignatureMode('electronic')}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        signatureMode === 'electronic'
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-300 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <Edit3 className={`w-8 h-8 mx-auto mb-2 ${
+                          signatureMode === 'electronic' ? 'text-blue-600' : 'text-gray-400'
+                        }`} />
+                        <p className="font-semibold text-gray-900 mb-1">Signature électronique</p>
+                        <p className="text-xs text-gray-600">Signer directement dans le PDF</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setSignatureMode('manual')}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        signatureMode === 'manual'
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-300 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <Download className={`w-8 h-8 mx-auto mb-2 ${
+                          signatureMode === 'manual' ? 'text-blue-600' : 'text-gray-400'
+                        }`} />
+                        <p className="font-semibold text-gray-900 mb-1">Signature manuelle</p>
+                        <p className="text-xs text-gray-600">Imprimer et signer à la main</p>
+                      </div>
+                    </button>
+                  </div>
+
+                  {signatureMode === 'electronic' && (
+                    <div className="mt-4">
+                      {!signatureData ? (
+                        <button
+                          onClick={() => setShowSignaturePad(true)}
+                          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                        >
+                          Créer ma signature électronique
+                        </button>
+                      ) : (
+                        <div className="bg-white border-2 border-green-500 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm font-semibold text-green-700">
+                              ✓ Signature prête
+                            </p>
+                            <button
+                              onClick={() => setShowSignaturePad(true)}
+                              className="text-sm text-blue-600 hover:text-blue-800"
+                            >
+                              Modifier
+                            </button>
+                          </div>
+                          <img src={signatureData} alt="Signature" className="w-full h-auto max-h-24 object-contain" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {signatureMode === 'manual' && (
+                    <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800">
+                        ℹ️ Le document sera généré sans signature électronique. Vous pourrez l'imprimer et le signer manuellement.
+                      </p>
+                    </div>
+                  )}
+
+                  {!signatureMode && (
+                    <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-700 font-semibold">
+                        ⚠️ Veuillez choisir une option de signature
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-6">
                 {currentStepData.fields.map((field, index) => (
@@ -440,6 +547,14 @@ const SmartFillStudio: React.FC<SmartFillStudioProps> = ({
           animation: shake 0.3s ease-in-out;
         }
       `}</style>
+
+      {/* Signature Pad Modal */}
+      {showSignaturePad && (
+        <SignaturePad
+          onClose={() => setShowSignaturePad(false)}
+          onSave={handleSignatureSave}
+        />
+      )}
     </div>
   );
 };

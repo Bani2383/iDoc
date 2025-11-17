@@ -25,6 +25,7 @@ const InitialSetup = lazy(() => import('./components/InitialSetup').then(m => ({
 const FAQPage = lazy(() => import('./components/FAQPage').then(m => ({ default: m.FAQPage })));
 const SignatureFeaturePage = lazy(() => import('./components/SignatureFeaturePage').then(m => ({ default: m.SignatureFeaturePage })));
 const ImprovedHomepage = lazy(() => import('./components/ImprovedHomepage'));
+const PDFSignatureEditor = lazy(() => import('./components/PDFSignatureEditor').then(m => ({ default: m.PDFSignatureEditor })));
 
 /**
  * Main application component
@@ -38,7 +39,8 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign'>('improved');
+  const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
 
   /**
    * Handles template selection for guest users
@@ -125,6 +127,17 @@ function App() {
     );
   }
 
+  // PDF Signature Editor
+  if (showPDFSignatureEditor) {
+    return (
+      <Suspense fallback={<LoadingSpinner text="Chargement de l'éditeur de signature..." />}>
+        <PDFSignatureEditor
+          onClose={() => setShowPDFSignatureEditor(false)}
+        />
+      </Suspense>
+    );
+  }
+
   // Main application layout for guest users
   return (
     <div className="min-h-screen bg-white">
@@ -143,7 +156,10 @@ function App() {
       <main role="main">
         {currentView === 'improved' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement de la nouvelle interface..." />}>
-            <ImprovedHomepage onLogin={() => setShowAuthModal(true)} />
+            <ImprovedHomepage
+              onLogin={() => setShowAuthModal(true)}
+              onSignPDF={() => setShowPDFSignatureEditor(true)}
+            />
           </Suspense>
         ) : currentView === 'conversion' ? (
           <ConversionLandingPage onTemplateSelect={handleTemplateSelect} />

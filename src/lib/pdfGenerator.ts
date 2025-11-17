@@ -9,11 +9,12 @@ export interface DocumentData {
     subject?: string;
     keywords?: string[];
   };
+  signatureData?: string;
 }
 
 class PDFGenerator {
   async generatePDF(documentData: DocumentData): Promise<Blob> {
-    const { title, content, fields = {}, metadata = {} } = documentData;
+    const { title, content, fields = {}, metadata = {}, signatureData } = documentData;
 
     let processedContent = content;
 
@@ -108,6 +109,32 @@ class PDFGenerator {
       if (metadata.subject) {
         doc.text(`Sujet: ${metadata.subject}`, margins.left, yPosition);
       }
+    }
+
+    if (signatureData && signatureData.startsWith('data:image')) {
+      if (yPosition + 60 > pageHeight - margins.bottom) {
+        doc.addPage();
+        yPosition = margins.top;
+      } else {
+        yPosition += 15;
+      }
+
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margins.left, yPosition, pageWidth - margins.right, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Signature:', margins.left, yPosition);
+      yPosition += 8;
+
+      const signatureWidth = 60;
+      const signatureHeight = 30;
+      doc.addImage(signatureData, 'PNG', margins.left, yPosition, signatureWidth, signatureHeight);
+      yPosition += signatureHeight + 5;
+
+      const currentDate = new Date().toLocaleDateString('fr-FR');
+      doc.text(`Date: ${currentDate}`, margins.left, yPosition);
     }
 
     return doc.output('blob');
