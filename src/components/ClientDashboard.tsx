@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Download, Clock, CheckCircle, Shield, Plus, Sparkles, Home, User, CreditCard, LogOut, Settings, RefreshCw, X, Users, TrendingUp } from 'lucide-react';
+import { FileText, Download, Clock, CheckCircle, Shield, Plus, Sparkles, Home, User, CreditCard, LogOut, Settings, RefreshCw, X, Users, TrendingUp, Edit3 } from 'lucide-react';
 import { supabase, DocumentTemplate } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -12,6 +12,7 @@ import { ClientProfilePage } from './ClientProfilePage';
 import { ClientBillingPage } from './ClientBillingPage';
 import ProSubscriptionPage from './ProSubscriptionPage';
 import AffiliateDashboard from './AffiliateDashboard';
+import { PDFSignatureEditor } from './PDFSignatureEditor';
 
 interface GeneratedDocument {
   id: string;
@@ -34,6 +35,7 @@ export function ClientDashboard() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [currentPage, setCurrentPage] = useState<'home' | 'profile' | 'billing' | 'documents' | 'pro' | 'affiliate'>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [showRestorePrompt, setShowRestorePrompt] = useState(false);
@@ -82,6 +84,8 @@ export function ClientDashboard() {
     } else if (page === 'documents-ai') {
       setCurrentPage('documents');
       setShowAIGenerator(true);
+    } else if (page === 'sign-pdf') {
+      setShowPDFSignatureEditor(true);
     } else {
       setCurrentPage(page as 'home' | 'profile' | 'billing' | 'documents' | 'pro' | 'affiliate');
     }
@@ -137,6 +141,33 @@ export function ClientDashboard() {
       </span>
     );
   };
+
+  if (showPDFSignatureEditor) {
+    return (
+      <PDFSignatureEditor
+        onClose={() => {
+          setShowPDFSignatureEditor(false);
+          fetchDocuments();
+        }}
+        onComplete={(signedPdfBlob) => {
+          console.log('PDF signé créé:', signedPdfBlob.size, 'bytes');
+          setShowPDFSignatureEditor(false);
+          fetchDocuments();
+        }}
+      />
+    );
+  }
+
+  if (showAIGenerator) {
+    return (
+      <AIDocumentGenerator
+        onClose={() => {
+          setShowAIGenerator(false);
+          fetchDocuments();
+        }}
+      />
+    );
+  }
 
   if (selectedTemplateId) {
     const initialData = savedData?.templateId === selectedTemplateId ? {
@@ -309,13 +340,22 @@ export function ClientDashboard() {
 
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Mes Documents</h2>
-              <button
-                onClick={() => setShowTemplates(!showTemplates)}
-                className={`flex items-center space-x-2 ${colors.primary} text-white px-4 py-2 rounded-lg transition-colors`}
-              >
-                <Plus className="w-4 h-4" />
-                <span>Nouveau document</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowPDFSignatureEditor(true)}
+                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  <span>Signer un PDF</span>
+                </button>
+                <button
+                  onClick={() => setShowTemplates(!showTemplates)}
+                  className={`flex items-center space-x-2 ${colors.primary} text-white px-4 py-2 rounded-lg transition-colors`}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Nouveau document</span>
+                </button>
+              </div>
             </div>
 
             {showTemplates && (

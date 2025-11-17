@@ -1,4 +1,4 @@
-import { FileText, Clock, TrendingUp, Sparkles, CreditCard, Users } from 'lucide-react';
+import { FileText, Clock, TrendingUp, Sparkles, CreditCard, Users, Edit3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -19,6 +19,14 @@ export function ClientHomePage({ onNavigate, documentsCount }: ClientHomePagePro
       color: 'bg-black',
       hoverColor: 'hover:bg-gray-800',
       action: () => onNavigate('documents-new')
+    },
+    {
+      icon: Edit3,
+      title: 'Signer un PDF',
+      description: 'Ajoutez votre signature électronique',
+      color: 'bg-green-600',
+      hoverColor: 'hover:bg-green-700',
+      action: () => onNavigate('sign-pdf')
     },
     {
       icon: Sparkles,
@@ -44,6 +52,14 @@ export function ClientHomePage({ onNavigate, documentsCount }: ClientHomePagePro
       color: 'bg-blue-600',
       hoverColor: 'hover:bg-blue-700',
       action: () => onNavigate('documents-new')
+    },
+    {
+      icon: Edit3,
+      title: 'Signer un PDF',
+      description: 'Ajoutez votre signature électronique',
+      color: 'bg-green-600',
+      hoverColor: 'hover:bg-green-700',
+      action: () => onNavigate('sign-pdf')
     },
     {
       icon: Sparkles,
