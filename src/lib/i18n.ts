@@ -43,17 +43,28 @@ class I18n {
   private listeners: Set<(lang: LanguageCode) => void> = new Set();
 
   constructor() {
+    const urlLang = this.getLanguageFromURL();
     const savedLang = localStorage.getItem('language') as LanguageCode;
     const browserLang = navigator.language.split('-')[0] as LanguageCode;
 
+    const isURLSupported = urlLang && SUPPORTED_LANGUAGES.some(l => l.code === urlLang);
     const isSupported = SUPPORTED_LANGUAGES.some(l => l.code === savedLang);
     const isBrowserSupported = SUPPORTED_LANGUAGES.some(l => l.code === browserLang);
 
-    if (savedLang && isSupported) {
+    if (isURLSupported) {
+      this.currentLanguage = urlLang;
+      localStorage.setItem('language', urlLang);
+    } else if (savedLang && isSupported) {
       this.currentLanguage = savedLang;
     } else if (isBrowserSupported) {
       this.currentLanguage = browserLang;
     }
+  }
+
+  private getLanguageFromURL(): LanguageCode | null {
+    const params = new URLSearchParams(window.location.search);
+    const langParam = params.get('lang');
+    return langParam as LanguageCode | null;
   }
 
   async loadTranslations(lang: LanguageCode): Promise<void> {
