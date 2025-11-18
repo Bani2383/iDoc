@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Users, UserCheck, UserCog } from 'lucide-react';
 import { UserManager } from './UserManager';
-import { ClientsManager } from './ClientsManager';
+import { AdminClientsView } from './AdminClientsView';
 import { AdminUserActivityPanel } from './AdminUserActivityPanel';
 
 export function UserManagementHub() {
@@ -10,8 +10,8 @@ export function UserManagementHub() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900">Gestion des Utilisateurs</h2>
-        <p className="text-gray-600 mt-1">Gérez tous vos utilisateurs et clients</p>
+        <h2 className="text-3xl font-bold text-gray-900">Gestion des Utilisateurs & Clients</h2>
+        <p className="text-gray-600 mt-1">Gérez vos utilisateurs, clients payants et leur activité</p>
       </div>
 
       {/* Sub-tabs */}
@@ -26,7 +26,7 @@ export function UserManagementHub() {
             }`}
           >
             <Users className="w-5 h-5" />
-            <span>Utilisateurs</span>
+            <span>Tous les Utilisateurs</span>
           </button>
 
           <button
@@ -38,7 +38,7 @@ export function UserManagementHub() {
             }`}
           >
             <UserCheck className="w-5 h-5" />
-            <span>Clients</span>
+            <span>Clients & Achats</span>
           </button>
 
           <button
@@ -50,7 +50,7 @@ export function UserManagementHub() {
             }`}
           >
             <UserCog className="w-5 h-5" />
-            <span>Activité</span>
+            <span>Journal d'Activité</span>
           </button>
         </div>
       </div>
@@ -58,7 +58,7 @@ export function UserManagementHub() {
       {/* Content */}
       <div>
         {activeSubTab === 'users' && <UserManager />}
-        {activeSubTab === 'clients' && <ClientsManager />}
+        {activeSubTab === 'clients' && <AdminClientsView />}
         {activeSubTab === 'activity' && <AdminUserActivityPanel />}
       </div>
     </div>
