@@ -4,17 +4,15 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { TemplateManager } from './TemplateManager';
-import { UserManager } from './UserManager';
 import { LoginStatsManager } from './LoginStatsManager';
 import { SiteSettingsManager } from './SiteSettingsManager';
 import PRDExportButton from './PRDExportButton';
 import { AdminBillingDashboard } from './AdminBillingDashboard';
 import { AdminAccountingPanel } from './AdminAccountingPanel';
 import { AdminInvoicesPanel } from './AdminInvoicesPanel';
-import { AdminUserActivityPanel } from './AdminUserActivityPanel';
-import { ClientsManager } from './ClientsManager';
 import { DossiersModule } from './DossiersModule';
 import { TemplateLabModule } from './TemplateLabModule';
+import { UserManagementHub } from './UserManagementHub';
 
 interface Stats {
   totalUsers: number;
@@ -39,7 +37,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'user-activity' | 'clients' | 'dossiers' | 'template-lab'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -147,9 +145,8 @@ export function AdminDashboard() {
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</p>
           </div>
-          <NavButton tab="clients" icon={UserCheck} label="Clients" active={activeTab === 'clients'} />
+          <NavButton tab="users" icon={Users} label="Utilisateurs & Clients" active={activeTab === 'users'} />
           <NavButton tab="dossiers" icon={Folder} label="Dossiers" active={activeTab === 'dossiers'} />
-          <NavButton tab="users" icon={Users} label="Utilisateurs" active={activeTab === 'users'} />
 
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Finance</p>
@@ -162,7 +159,6 @@ export function AdminDashboard() {
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Système</p>
           </div>
           <NavButton tab="stats" icon={Activity} label="Statistiques" active={activeTab === 'stats'} />
-          <NavButton tab="user-activity" icon={UserCog} label="Activité Users" active={activeTab === 'user-activity'} />
           <NavButton tab="settings" icon={Sliders} label="Paramètres" active={activeTab === 'settings'} />
         </nav>
 
@@ -192,7 +188,7 @@ export function AdminDashboard() {
           {activeTab === 'templates' ? (
             <TemplateManager />
           ) : activeTab === 'users' ? (
-            <UserManager />
+            <UserManagementHub />
           ) : activeTab === 'stats' ? (
             <LoginStatsManager />
           ) : activeTab === 'settings' ? (
@@ -203,10 +199,6 @@ export function AdminDashboard() {
             <AdminAccountingPanel />
           ) : activeTab === 'invoices' ? (
             <AdminInvoicesPanel />
-          ) : activeTab === 'user-activity' ? (
-            <AdminUserActivityPanel />
-          ) : activeTab === 'clients' ? (
-            <ClientsManager />
           ) : activeTab === 'dossiers' ? (
             <DossiersModule />
           ) : activeTab === 'template-lab' ? (
