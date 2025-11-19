@@ -26,6 +26,7 @@ const FAQPage = lazy(() => import('./components/FAQPage').then(m => ({ default: 
 const SignatureFeaturePage = lazy(() => import('./components/SignatureFeaturePage').then(m => ({ default: m.SignatureFeaturePage })));
 const ImprovedHomepage = lazy(() => import('./components/ImprovedHomepage'));
 const PDFSignatureEditor = lazy(() => import('./components/PDFSignatureEditor').then(m => ({ default: m.PDFSignatureEditor })));
+const SEODemoPage = lazy(() => import('./components/SEODemoPage').then(m => ({ default: m.SEODemoPage })));
 
 /**
  * Main application component
@@ -39,7 +40,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo'>('seo-demo');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
 
   /**
@@ -154,7 +155,11 @@ function App() {
       />
 
       <main role="main">
-        {currentView === 'improved' ? (
+        {currentView === 'seo-demo' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement de la démo SEO..." />}>
+            <SEODemoPage />
+          </Suspense>
+        ) : currentView === 'improved' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement de la nouvelle interface..." />}>
             <ImprovedHomepage
               onLogin={() => setShowAuthModal(true)}
