@@ -54,5 +54,18 @@ Allow: /
 User-agent: YandexBot
 Allow: /
 
+# Priority pages for AI crawlers
+User-agent: GPTBot
+Allow: /ai
+Allow: /modele/
+Allow: /model/
+Allow: /quick/
+Allow: /categorie/
+
+User-agent: ChatGPT-User
+Allow: /ai
+Allow: /modele/
+Allow: /model/
+
 # Sitemap location
-Sitemap: https://idoc.app/sitemap.xml
+Sitemap: https://id0c.com/sitemap.xml
