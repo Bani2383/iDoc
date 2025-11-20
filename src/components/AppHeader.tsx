@@ -9,11 +9,13 @@ import { useState, startTransition } from 'react';
 import { Menu, X, LogIn } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 
+type ViewType = 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail';
+
 interface AppHeaderProps {
   /** Current view state */
-  currentView: 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved';
+  currentView: ViewType;
   /** Function to change current view */
-  onViewChange: (view: 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved') => void;
+  onViewChange: (view: ViewType) => void;
   /** Function to show authentication modal */
   onShowAuth: () => void;
 }
@@ -27,7 +29,7 @@ interface AppHeaderProps {
 export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleViewChange = (view: 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved') => {
+  const handleViewChange = (view: ViewType) => {
     startTransition(() => onViewChange(view));
     setMobileMenuOpen(false);
 
@@ -93,6 +95,14 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
               FAQ & Démo
             </button>
             <button
+              onClick={() => handleViewChange('articles')}
+              className={navButtonClass}
+              aria-current={currentView === 'articles' ? 'page' : undefined}
+              aria-label="Accéder au blog"
+            >
+              Blog
+            </button>
+            <button
               onClick={onShowAuth}
               className={`${navButtonClass} flex items-center space-x-2`}
               aria-label="Se connecter"
@@ -155,6 +165,13 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
                 aria-label="Accéder à la FAQ et démo"
               >
                 FAQ & Démo
+              </button>
+              <button
+                onClick={() => handleViewChange('articles')}
+                className={`${navButtonClass} py-2 text-left`}
+                aria-label="Accéder au blog"
+              >
+                Blog
               </button>
               <button
                 onClick={() => {

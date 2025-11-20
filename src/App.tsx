@@ -5,7 +5,7 @@
  * @component
  */
 
-import { useState, lazy, Suspense, startTransition } from 'react';
+import { useState, lazy, Suspense, startTransition, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { LandingPage } from './components/LandingPage';
 import { ConversionLandingPage } from './components/ConversionLandingPage';
@@ -45,6 +45,21 @@ function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleNavigate = (event: CustomEvent) => {
+      const { view, slug } = event.detail;
+      if (view === 'articles') {
+        setCurrentView('articles');
+      } else if (view === 'article' && slug) {
+        setArticleSlug(slug);
+        setCurrentView('article-detail');
+      }
+    };
+
+    window.addEventListener('navigate', handleNavigate as EventListener);
+    return () => window.removeEventListener('navigate', handleNavigate as EventListener);
+  }, []);
 
   /**
    * Handles template selection for guest users
