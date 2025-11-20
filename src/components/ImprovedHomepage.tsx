@@ -5,7 +5,7 @@ import AnimatedTemplateShowcase from './AnimatedTemplateShowcase';
 import TemplateCarousel from './TemplateCarousel';
 import DynamicTemplateGrid from './DynamicTemplateGrid';
 import TemplateStats from './TemplateStats';
-import { Zap, Shield, Download, TrendingUp } from 'lucide-react';
+import { Zap, Shield, Download, TrendingUp, BookOpen, ArrowRight, Calendar, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { pdfGenerator } from '../lib/pdfGenerator';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,6 +25,17 @@ interface ImprovedHomepageProps {
   onSignPDF?: () => void;
 }
 
+interface Article {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  view_count: number;
+  published_at: string;
+  featured_image_url: string | null;
+}
+
 const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF }) => {
   const { user } = useAuth();
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -32,9 +43,11 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     fetchTemplates();
+    fetchArticles();
   }, []);
 
   const fetchTemplates = async () => {
@@ -65,6 +78,22 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
       ]);
     } finally {
       setLoadingTemplates(false);
+    }
+  };
+
+  const fetchArticles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('id, slug, title, excerpt, category, view_count, published_at, featured_image_url')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setArticles(data || []);
+    } catch (err) {
+      console.error('Error fetching articles:', err);
     }
   };
 
@@ -503,6 +532,89 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
             </button>
           </div>
         </section>
+
+        {articles.length > 0 && (
+          <section className="py-20 px-4 bg-gradient-to-b from-white to-gray-50">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Blog & Conseils
+                </div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                  Guides et Ressources
+                </h2>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  Découvrez nos derniers conseils pour optimiser vos documents
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {articles.map((article) => (
+                  <div
+                    key={article.id}
+                    className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer"
+                    onClick={() => {
+                      const event = new CustomEvent('navigate', {
+                        detail: { view: 'article', slug: article.slug }
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    {article.featured_image_url && (
+                      <div className="h-48 overflow-hidden">
+                        <img
+                          src={article.featured_image_url}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <div className="flex items-center gap-3 mb-3 text-sm">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium capitalize">
+                          {article.category}
+                        </span>
+                        <span className="flex items-center text-gray-500">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          {new Date(article.published_at).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                        {article.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center text-sm text-gray-500">
+                          <Eye className="w-4 h-4 mr-1" />
+                          {article.view_count} lectures
+                        </span>
+                        <span className="text-blue-600 font-medium flex items-center group-hover:translate-x-1 transition-transform">
+                          Lire plus <ArrowRight className="w-4 h-4 ml-1" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center mt-12">
+                <button
+                  onClick={() => {
+                    const event = new CustomEvent('navigate', { detail: { view: 'articles' } });
+                    window.dispatchEvent(event);
+                  }}
+                  className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+                >
+                  Voir tous les articles
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
 
       <footer role="contentinfo" className="bg-gray-900 text-gray-300 py-12">
