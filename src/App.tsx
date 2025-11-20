@@ -27,6 +27,8 @@ const SignatureFeaturePage = lazy(() => import('./components/SignatureFeaturePag
 const ImprovedHomepage = lazy(() => import('./components/ImprovedHomepage'));
 const PDFSignatureEditor = lazy(() => import('./components/PDFSignatureEditor').then(m => ({ default: m.PDFSignatureEditor })));
 const SEODemoPage = lazy(() => import('./components/SEODemoPage').then(m => ({ default: m.SEODemoPage })));
+const ArticlesList = lazy(() => import('./components/ArticlesList'));
+const ArticleDetail = lazy(() => import('./components/ArticleDetail'));
 
 /**
  * Main application component
@@ -40,8 +42,9 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
+  const [articleSlug, setArticleSlug] = useState<string | null>(null);
 
   /**
    * Handles template selection for guest users
@@ -155,7 +158,15 @@ function App() {
       />
 
       <main role="main">
-        {currentView === 'seo-demo' ? (
+        {currentView === 'articles' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement des articles..." />}>
+            <ArticlesList />
+          </Suspense>
+        ) : currentView === 'article-detail' && articleSlug ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement de l'article..." />}>
+            <ArticleDetail slug={articleSlug} />
+          </Suspense>
+        ) : currentView === 'seo-demo' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement de la démo SEO..." />}>
             <SEODemoPage />
           </Suspense>
