@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Calendar, Tag, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Calendar, Tag, Save, X, BarChart3 } from 'lucide-react';
+import ArticleStatsDashboard from './ArticleStatsDashboard';
 
 interface Article {
   id: string;
@@ -23,6 +24,7 @@ interface Article {
 }
 
 export default function AdminArticlesManager() {
+  const [activeView, setActiveView] = useState<'list' | 'stats'>('list');
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
@@ -377,6 +379,35 @@ export default function AdminArticlesManager() {
         </button>
       </div>
 
+      <div className="flex gap-2 mb-6 border-b border-gray-200">
+        <button
+          onClick={() => setActiveView('list')}
+          className={`px-4 py-2 font-medium transition-colors ${
+            activeView === 'list'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Liste des articles
+        </button>
+        <button
+          onClick={() => setActiveView('stats')}
+          className={`px-4 py-2 font-medium transition-colors flex items-center ${
+            activeView === 'stats'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <BarChart3 className="w-4 h-4 mr-2" />
+          Statistiques
+        </button>
+      </div>
+
+      {activeView === 'stats' ? (
+        <ArticleStatsDashboard />
+      ) : (
+        <div>
+
       <div className="space-y-4">
         {articles.map((article) => (
           <div
@@ -464,6 +495,8 @@ export default function AdminArticlesManager() {
           </div>
         )}
       </div>
+        </div>
+      )}
     </div>
   );
 }
