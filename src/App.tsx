@@ -90,6 +90,10 @@ function App() {
     }, 100);
   };
 
+  const handleSignatureStart = () => {
+    setShowPDFSignatureEditor(true);
+  };
+
   // Loading state
   if (loading) {
     return <LoadingSpinner text="Chargement de l'application..." />;
@@ -200,7 +204,7 @@ function App() {
           <LandingPage onGetStarted={handleGetStarted} />
         ) : currentView === 'signature' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
-            <SignatureFeaturePage onGetStarted={handleGetStarted} />
+            <SignatureFeaturePage onGetStarted={handleSignatureStart} />
           </Suspense>
         ) : currentView === 'faq' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
