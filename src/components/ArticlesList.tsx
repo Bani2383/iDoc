@@ -87,7 +87,7 @@ export default function ArticlesList() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors capitalize ${
                 selectedCategory === cat
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -108,7 +108,13 @@ export default function ArticlesList() {
           {filteredArticles.map(article => (
             <article
               key={article.id}
-              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200"
+              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200 cursor-pointer"
+              onClick={() => {
+                const event = new CustomEvent('navigate', {
+                  detail: { view: 'article', slug: article.slug }
+                });
+                window.dispatchEvent(event);
+              }}
             >
               {article.featured_image_url && (
                 <img
@@ -160,12 +166,9 @@ export default function ArticlesList() {
                     })}
                   </div>
 
-                  <a
-                    href={`/articles/${article.slug}`}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-                  >
+                  <span className="text-blue-600 font-medium text-sm">
                     Lire →
-                  </a>
+                  </span>
                 </div>
               </div>
             </article>
@@ -181,12 +184,20 @@ export default function ArticlesList() {
           <p className="text-gray-700 mb-6">
             Créez vos documents professionnels en quelques minutes avec nos modèles prêts à l'emploi.
           </p>
-          <a
-            href="/templates"
+          <button
+            onClick={() => {
+              const event = new CustomEvent('navigate', {
+                detail: { view: 'improved' }
+              });
+              window.dispatchEvent(event);
+              setTimeout(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }, 100);
+            }}
             className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
             Découvrir nos modèles
-          </a>
+          </button>
         </div>
       )}
     </div>

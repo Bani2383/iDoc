@@ -90,22 +90,31 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Article non trouvé</h1>
         <p className="text-gray-600 mb-8">L'article que vous recherchez n'existe pas ou a été supprimé.</p>
-        <a href="/articles" className="text-blue-600 hover:text-blue-700 font-medium">
+        <button
+          onClick={() => {
+            const event = new CustomEvent('navigate', { detail: { view: 'articles' } });
+            window.dispatchEvent(event);
+          }}
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
           ← Retour aux articles
-        </a>
+        </button>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <a
-        href="/articles"
+      <button
+        onClick={() => {
+          const event = new CustomEvent('navigate', { detail: { view: 'articles' } });
+          window.dispatchEvent(event);
+        }}
         className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Retour aux articles
-      </a>
+      </button>
 
       {article.featured_image_url && (
         <img

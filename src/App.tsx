@@ -54,6 +54,8 @@ function App() {
       } else if (view === 'article' && slug) {
         setArticleSlug(slug);
         setCurrentView('article-detail');
+      } else if (view === 'improved') {
+        setCurrentView('improved');
       }
     };
 
