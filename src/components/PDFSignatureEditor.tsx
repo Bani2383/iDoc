@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Download, X, Edit3, ZoomIn, ZoomOut, Move } from 'lucide-react';
+import { Upload, Download, X, Edit3, ZoomIn, ZoomOut, Move, AlignLeft, AlignRight, AlignCenter, Type } from 'lucide-react';
 import { SignaturePad } from './SignaturePad';
 import { jsPDF } from 'jspdf';
 
@@ -20,12 +20,15 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [showTextSignature, setShowTextSignature] = useState(false);
+  const [textSignature, setTextSignature] = useState('');
   const [signatures, setSignatures] = useState<SignaturePosition[]>([]);
   const [currentSignature, setCurrentSignature] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedSignatureIndex, setDraggedSignatureIndex] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [isPaid, setIsPaid] = useState(false);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +43,7 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
     if (pdfDataUrl && canvasRef.current) {
       renderPdfToCanvas();
     }
-  }, [pdfDataUrl, zoom]);
+  }, [pdfDataUrl, zoom, signatures, mousePosition]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,11 +107,88 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
       };
       img.src = sig.signatureData;
     });
+
+    if (currentSignature && mousePosition) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(img, mousePosition.x * zoom, mousePosition.y * zoom, 200 * zoom, 80 * zoom);
+        ctx.restore();
+      };
+      img.src = currentSignature;
+    }
   };
 
   const handleAddSignature = (signatureData: string) => {
     setCurrentSignature(signatureData);
     setShowSignaturePad(false);
+  };
+
+  const createTextSignature = () => {
+    if (!textSignature.trim()) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 120;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'black';
+    ctx.font = 'italic 48px "Brush Script MT", cursive';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(textSignature, canvas.width / 2, canvas.height / 2);
+
+    const signatureData = canvas.toDataURL();
+    setCurrentSignature(signatureData);
+    setShowTextSignature(false);
+    setTextSignature('');
+  };
+
+  const placeSignatureAt = (position: 'bottom-right' | 'bottom-left' | 'center' | 'top-right') => {
+    if (!currentSignature || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const width = 200;
+    const height = 80;
+    const padding = 50;
+
+    let x = 0;
+    let y = 0;
+
+    switch (position) {
+      case 'bottom-right':
+        x = (canvas.width / zoom) - width - padding;
+        y = (canvas.height / zoom) - height - padding;
+        break;
+      case 'bottom-left':
+        x = padding;
+        y = (canvas.height / zoom) - height - padding;
+        break;
+      case 'center':
+        x = (canvas.width / zoom) / 2 - width / 2;
+        y = (canvas.height / zoom) / 2 - height / 2;
+        break;
+      case 'top-right':
+        x = (canvas.width / zoom) - width - padding;
+        y = padding;
+        break;
+    }
+
+    const newSignature: SignaturePosition = {
+      x,
+      y,
+      width,
+      height,
+      signatureData: currentSignature
+    };
+
+    setSignatures([...signatures, newSignature]);
+    setCurrentSignature(null);
+    renderPdfToCanvas();
   };
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -137,22 +217,27 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
     e.stopPropagation();
   };
 
-  const handleSignatureDragMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDragging || draggedSignatureIndex === null || !canvasRef.current) return;
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
 
-    const updatedSignatures = [...signatures];
-    updatedSignatures[draggedSignatureIndex] = {
-      ...updatedSignatures[draggedSignatureIndex],
-      x,
-      y
-    };
+    if (currentSignature && !isDragging) {
+      setMousePosition({ x, y });
+    }
 
-    setSignatures(updatedSignatures);
-    renderPdfToCanvas();
+    if (isDragging && draggedSignatureIndex !== null) {
+      const updatedSignatures = [...signatures];
+      updatedSignatures[draggedSignatureIndex] = {
+        ...updatedSignatures[draggedSignatureIndex],
+        x,
+        y
+      };
+      setSignatures(updatedSignatures);
+      renderPdfToCanvas();
+    }
   };
 
   const handleSignatureDragEnd = () => {
@@ -277,19 +362,59 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
                     <h3 className="text-lg font-bold text-gray-900 mb-4">
                       2. Ajouter une signature
                     </h3>
-                    <button
-                      onClick={() => setShowSignaturePad(true)}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
-                    >
-                      <Edit3 className="w-5 h-5" />
-                      <span>Créer ma signature</span>
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setShowSignaturePad(true)}
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <Edit3 className="w-5 h-5" />
+                        <span>Dessiner ma signature</span>
+                      </button>
+                      <button
+                        onClick={() => setShowTextSignature(true)}
+                        className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <Type className="w-5 h-5" />
+                        <span>Taper ma signature</span>
+                      </button>
+                    </div>
                     {currentSignature && (
                       <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p className="text-xs text-blue-800 font-semibold mb-2">
-                          Signature prête - Cliquez sur le document pour la placer
+                        <p className="text-xs text-blue-800 font-semibold mb-3">
+                          Signature prête - Placement rapide:
                         </p>
-                        <img src={currentSignature} alt="Signature" className="w-full h-auto" />
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          <button
+                            onClick={() => placeSignatureAt('bottom-right')}
+                            className="flex items-center justify-center space-x-1 bg-white border border-blue-300 text-blue-700 py-2 px-3 rounded text-xs hover:bg-blue-50 transition-colors"
+                          >
+                            <AlignRight className="w-3 h-3" />
+                            <span>Bas droite</span>
+                          </button>
+                          <button
+                            onClick={() => placeSignatureAt('bottom-left')}
+                            className="flex items-center justify-center space-x-1 bg-white border border-blue-300 text-blue-700 py-2 px-3 rounded text-xs hover:bg-blue-50 transition-colors"
+                          >
+                            <AlignLeft className="w-3 h-3" />
+                            <span>Bas gauche</span>
+                          </button>
+                          <button
+                            onClick={() => placeSignatureAt('center')}
+                            className="flex items-center justify-center space-x-1 bg-white border border-blue-300 text-blue-700 py-2 px-3 rounded text-xs hover:bg-blue-50 transition-colors"
+                          >
+                            <AlignCenter className="w-3 h-3" />
+                            <span>Centre</span>
+                          </button>
+                          <button
+                            onClick={() => placeSignatureAt('top-right')}
+                            className="flex items-center justify-center space-x-1 bg-white border border-blue-300 text-blue-700 py-2 px-3 rounded text-xs hover:bg-blue-50 transition-colors"
+                          >
+                            <AlignRight className="w-3 h-3" />
+                            <span>Haut droite</span>
+                          </button>
+                        </div>
+                        <p className="text-xs text-blue-600 mb-2">ou cliquez sur le document</p>
+                        <img src={currentSignature} alt="Signature" className="w-full h-auto border border-blue-200 rounded" />
                       </div>
                     )}
                   </div>
@@ -389,8 +514,9 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
                 <canvas
                   ref={canvasRef}
                   onClick={handleCanvasClick}
-                  onMouseMove={handleSignatureDragMove}
+                  onMouseMove={handleMouseMove}
                   onMouseUp={handleSignatureDragEnd}
+                  onMouseLeave={() => setMousePosition(null)}
                   className={`max-w-full ${currentSignature ? 'cursor-crosshair' : 'cursor-default'}`}
                 />
               </div>
@@ -411,6 +537,58 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
           onClose={() => setShowSignaturePad(false)}
           onSave={handleAddSignature}
         />
+      )}
+
+      {/* Text Signature Modal */}
+      {showTextSignature && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[10000] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Taper ma signature</h3>
+              <button
+                onClick={() => {
+                  setShowTextSignature(false);
+                  setTextSignature('');
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Votre nom complet
+                </label>
+                <input
+                  type="text"
+                  value={textSignature}
+                  onChange={(e) => setTextSignature(e.target.value)}
+                  placeholder="Jean Dupont"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  autoFocus
+                />
+              </div>
+              {textSignature && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-xs text-gray-600 mb-2">Aperçu:</p>
+                  <div className="bg-white p-4 rounded border border-gray-200 text-center">
+                    <span style={{ fontFamily: '"Brush Script MT", cursive', fontSize: '32px' }}>
+                      {textSignature}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={createTextSignature}
+                disabled={!textSignature.trim()}
+                className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Créer la signature
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
