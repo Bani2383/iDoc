@@ -225,7 +225,7 @@ function App() {
         </Suspense>
       )}
 
-      <FOMONotification />
+      <DynamicFOMOSystem />
     </div>
   );
 }
