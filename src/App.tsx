@@ -30,6 +30,17 @@ const PDFSignatureEditor = lazy(() => import('./components/PDFSignatureEditor').
 const SEODemoPage = lazy(() => import('./components/SEODemoPage').then(m => ({ default: m.SEODemoPage })));
 const ArticlesList = lazy(() => import('./components/ArticlesList'));
 const ArticleDetail = lazy(() => import('./components/ArticleDetail'));
+const CreditsSystem = lazy(() => import('./components/CreditsSystem'));
+const SubscriptionPlans = lazy(() => import('./components/SubscriptionPlans'));
+const ReferralSystem = lazy(() => import('./components/ReferralSystem'));
+const AffiliateDashboardEnhanced = lazy(() => import('./components/AffiliateDashboardEnhanced'));
+const RevenueAnalyticsDashboard = lazy(() => import('./components/RevenueAnalyticsDashboard'));
+const FlashDealsWidget = lazy(() => import('./components/FlashDealsWidget'));
+const GamificationWidget = lazy(() => import('./components/GamificationWidget'));
+const CommercialChatbot = lazy(() => import('./components/CommercialChatbot'));
+const LiveFOMONotifications = lazy(() => import('./components/LiveFOMONotifications'));
+const ExitIntentOffer = lazy(() => import('./components/ExitIntentOffer'));
+const UpsellModal = lazy(() => import('./components/UpsellModal'));
 
 /**
  * Main application component
@@ -43,7 +54,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
 
@@ -180,7 +191,35 @@ function App() {
       />
 
       <main role="main">
-        {currentView === 'articles' ? (
+        {currentView === 'credits' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <CreditsSystem />
+          </Suspense>
+        ) : currentView === 'subscriptions' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <SubscriptionPlans />
+          </Suspense>
+        ) : currentView === 'referrals' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <ReferralSystem />
+          </Suspense>
+        ) : currentView === 'affiliate' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <AffiliateDashboardEnhanced />
+          </Suspense>
+        ) : currentView === 'revenue' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <RevenueAnalyticsDashboard />
+          </Suspense>
+        ) : currentView === 'flash-deals' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <FlashDealsWidget />
+          </Suspense>
+        ) : currentView === 'gamification' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <GamificationWidget />
+          </Suspense>
+        ) : currentView === 'articles' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement des articles..." />}>
             <ArticlesList />
           </Suspense>
@@ -226,6 +265,18 @@ function App() {
       )}
 
       <DynamicFOMOSystem />
+
+      <Suspense fallback={null}>
+        <LiveFOMONotifications />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <CommercialChatbot />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <ExitIntentOffer onClaim={(code) => alert(`Code promo ${code} appliqué !`)} />
+      </Suspense>
     </div>
   );
 }
