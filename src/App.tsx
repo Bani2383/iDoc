@@ -13,6 +13,7 @@ import { LanguageSEO } from './components/LanguageSEO';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { AppHeader } from './components/AppHeader';
 import { ClassicView } from './components/ClassicView';
+import FOMONotification from './components/FOMONotification';
 
 // Lazy loaded components for better performance
 const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
@@ -223,6 +224,8 @@ function App() {
           <AuthModal onClose={() => setShowAuthModal(false)} />
         </Suspense>
       )}
+
+      <FOMONotification />
     </div>
   );
 }
