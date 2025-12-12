@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase';
 import { pdfGenerator } from '../lib/pdfGenerator';
 import { useAuth } from '../contexts/AuthContext';
 
-const FomoWidget = lazy(() => import('./FomoWidget'));
+const DynamicFOMOSystem = lazy(() => import('./DynamicFOMOSystem'));
 const DocVaultPromo = lazy(() => import('./DocVaultPromo'));
 
 interface Template {
@@ -631,7 +631,7 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
       </footer>
 
       <Suspense fallback={null}>
-        <FomoWidget />
+        <DynamicFOMOSystem />
       </Suspense>
 
       <style>{`

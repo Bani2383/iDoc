@@ -13,7 +13,7 @@ import { LanguageSEO } from './components/LanguageSEO';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { AppHeader } from './components/AppHeader';
 import { ClassicView } from './components/ClassicView';
-import FOMONotification from './components/FOMONotification';
+import DynamicFOMOSystem from './components/DynamicFOMOSystem';
 
 // Lazy loaded components for better performance
 const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
