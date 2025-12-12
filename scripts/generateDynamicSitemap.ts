@@ -5,7 +5,7 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const SITE_URL = 'https://idoc.com'; // À remplacer par votre domaine
+const SITE_URL = 'https://id0c.com';
 
 interface SitemapUrl {
   loc: string;

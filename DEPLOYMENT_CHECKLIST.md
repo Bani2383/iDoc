@@ -26,7 +26,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ### 3. Configuration Domaine
-- [ ] Domaine acheté (ex: idoc.com)
+- [x] Domaine acheté (id0c.com)
 - [ ] DNS configuré
 - [ ] SSL/HTTPS activé automatiquement
 - [ ] Redirections www → non-www (ou inverse)
