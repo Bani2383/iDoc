@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Shield, User, Mail, Calendar, Edit, Trash2, X, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 
 interface UserProfile {
   id: string;
@@ -37,7 +38,7 @@ export function UserManager() {
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logger.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ export function UserManager() {
       
       alert(`Rôle mis à jour avec succès`);
     } catch (error) {
-      console.error('Error updating user role:', error);
+      logger.error('Error updating user role:', error);
       alert('Erreur lors de la mise à jour du rôle');
     }
   };
@@ -77,7 +78,7 @@ export function UserManager() {
       setUsers(users.filter(user => user.id !== userId));
       alert('Utilisateur supprimé avec succès');
     } catch (error) {
-      console.error('Error deleting user:', error);
+      logger.error('Error deleting user:', error);
       alert('Erreur lors de la suppression');
     }
   };
@@ -110,7 +111,7 @@ export function UserManager() {
       setEditForm(null);
       alert('Utilisateur mis à jour avec succès');
     } catch (error) {
-      console.error('Error updating user:', error);
+      logger.error('Error updating user:', error);
       alert('Erreur lors de la mise à jour');
     } finally {
       setSaving(false);

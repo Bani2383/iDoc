@@ -13,6 +13,7 @@ import { ClientBillingPage } from './ClientBillingPage';
 import ProSubscriptionPage from './ProSubscriptionPage';
 import AffiliateDashboard from './AffiliateDashboard';
 import { PDFSignatureEditor } from './PDFSignatureEditor';
+import { logger } from '../lib/logger';
 
 interface GeneratedDocument {
   id: string;
@@ -101,7 +102,7 @@ export function ClientDashboard() {
       if (error) throw error;
       setDocuments(data || []);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      logger.error('Error fetching documents:', error);
     } finally {
       setLoading(false);
     }
@@ -119,7 +120,7 @@ export function ClientDashboard() {
       if (error) throw error;
       setTemplates(data || []);
     } catch (error) {
-      console.error('Error fetching templates:', error);
+      logger.error('Error fetching templates:', error);
     }
   };
 
@@ -143,16 +144,16 @@ export function ClientDashboard() {
   };
 
   if (showPDFSignatureEditor) {
-    console.log('🖊️ Rendering PDFSignatureEditor');
+    logger.debug('Rendering PDFSignatureEditor');
     return (
       <PDFSignatureEditor
         onClose={() => {
-          console.log('🖊️ PDFSignatureEditor onClose called');
+          logger.debug('PDFSignatureEditor onClose called');
           setShowPDFSignatureEditor(false);
           fetchDocuments();
         }}
         onComplete={(signedPdfBlob) => {
-          console.log('🖊️ PDF signé créé:', signedPdfBlob.size, 'bytes');
+          logger.debug('PDF signé créé:', signedPdfBlob.size, 'bytes');
           setShowPDFSignatureEditor(false);
           fetchDocuments();
         }}
@@ -345,9 +346,9 @@ export function ClientDashboard() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => {
-                    console.log('🖊️ Bouton "Signer un PDF" cliqué, state actuel:', showPDFSignatureEditor);
+                    logger.debug('Bouton "Signer un PDF" cliqué, state actuel:', showPDFSignatureEditor);
                     setShowPDFSignatureEditor(true);
-                    console.log('🖊️ State mis à jour à true');
+                    logger.debug('State mis à jour à true');
                   }}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
@@ -424,7 +425,7 @@ export function ClientDashboard() {
                         <button
                           key={template.id}
                           onClick={() => {
-                            console.log('Template clicked:', template.id, template.name);
+                            logger.debug('Template clicked:', template.id, template.name);
                             setSelectedTemplateId(template.id);
                             setShowTemplates(false);
                             setSearchQuery('');

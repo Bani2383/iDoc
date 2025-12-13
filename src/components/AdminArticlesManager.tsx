@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Calendar, Tag, Save, X, BarChart3 } from 'lucide-react';
 import ArticleStatsDashboard from './ArticleStatsDashboard';
+import { logger } from '../lib/logger';
 
 interface Article {
   id: string;
@@ -58,7 +59,7 @@ export default function AdminArticlesManager() {
       if (error) throw error;
       setArticles(data || []);
     } catch (error) {
-      console.error('Erreur chargement articles:', error);
+      logger.error('Erreur chargement articles:', error);
       alert('Erreur lors du chargement des articles');
     } finally {
       setLoading(false);
@@ -128,7 +129,7 @@ export default function AdminArticlesManager() {
       setEditingArticle(null);
       fetchArticles();
     } catch (error: any) {
-      console.error('Erreur sauvegarde:', error);
+      logger.error('Erreur sauvegarde:', error);
       alert(`Erreur: ${error.message}`);
     }
   }
@@ -146,7 +147,7 @@ export default function AdminArticlesManager() {
       alert('Article supprimé');
       fetchArticles();
     } catch (error: any) {
-      console.error('Erreur suppression:', error);
+      logger.error('Erreur suppression:', error);
       alert(`Erreur: ${error.message}`);
     }
   }
@@ -164,7 +165,7 @@ export default function AdminArticlesManager() {
       if (error) throw error;
       fetchArticles();
     } catch (error: any) {
-      console.error('Erreur toggle publish:', error);
+      logger.error('Erreur toggle publish:', error);
       alert(`Erreur: ${error.message}`);
     }
   }
