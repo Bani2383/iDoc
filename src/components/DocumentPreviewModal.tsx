@@ -69,7 +69,7 @@ export function DocumentPreviewModal({
             <h4 className="font-bold text-gray-900 mb-3">À propos de ce document</h4>
             <p className="text-gray-700 leading-relaxed mb-4">{template.description}</p>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Clock className="w-6 h-6 text-blue-600" />

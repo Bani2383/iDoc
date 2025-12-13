@@ -29,6 +29,7 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
   const [zoom, setZoom] = useState(1);
   const [isPaid, setIsPaid] = useState(false);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -311,10 +312,27 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
           </div>
         </div>
 
+        {/* Mobile Sidebar Toggle */}
+        <button
+          onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+          className="sm:hidden fixed bottom-4 left-4 bg-blue-600 text-white rounded-full p-4 shadow-lg z-50"
+        >
+          <Edit3 className="w-6 h-6" />
+        </button>
+
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Sidebar - Tools */}
-          <div className="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto">
+          <div className={`${showMobileSidebar ? 'fixed inset-0 z-40 bg-white' : 'hidden'} sm:block sm:relative sm:w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto`}>
+            {/* Close button for mobile */}
+            {showMobileSidebar && (
+              <button
+                onClick={() => setShowMobileSidebar(false)}
+                className="sm:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            )}
             <div className="space-y-6">
               {/* Upload Section */}
               <div>

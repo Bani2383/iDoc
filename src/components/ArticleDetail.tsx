@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Calendar, Eye, Tag, ArrowLeft, ExternalLink } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 interface Article {
   id: string;
@@ -165,7 +166,7 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
 
       <div
         className="prose prose-lg max-w-none mb-12"
-        dangerouslySetInnerHTML={{ __html: article.content_html }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content_html) }}
       />
 
       {article.related_template && (
