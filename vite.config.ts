@@ -15,12 +15,15 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           supabase: ['@supabase/supabase-js'],
+          pdf: ['jspdf'],
+          icons: ['lucide-react'],
         },
       },
     },
     cssCodeSplit: true,
     sourcemap: false,
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1000,
+    reportCompressedSize: false,
   },
   esbuild: {
     drop: ['console', 'debugger'],
