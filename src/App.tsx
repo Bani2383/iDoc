@@ -41,6 +41,10 @@ const CommercialChatbot = lazy(() => import('./components/CommercialChatbot'));
 const LiveFOMONotifications = lazy(() => import('./components/LiveFOMONotifications'));
 const ExitIntentOffer = lazy(() => import('./components/ExitIntentOffer'));
 const UpsellModal = lazy(() => import('./components/UpsellModal'));
+const TrafficControlCenter = lazy(() => import('./components/TrafficControlCenter'));
+const ABTestingSystem = lazy(() => import('./components/ABTestingSystem'));
+const EmailAutomation = lazy(() => import('./components/EmailAutomation'));
+const AutomatedReporting = lazy(() => import('./components/AutomatedReporting'));
 
 /**
  * Main application component
@@ -54,7 +58,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
 
@@ -218,6 +222,22 @@ function App() {
         ) : currentView === 'gamification' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
             <GamificationWidget />
+          </Suspense>
+        ) : currentView === 'control-center' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <TrafficControlCenter />
+          </Suspense>
+        ) : currentView === 'ab-testing' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <ABTestingSystem />
+          </Suspense>
+        ) : currentView === 'email-automation' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <EmailAutomation />
+          </Suspense>
+        ) : currentView === 'reporting' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <AutomatedReporting />
           </Suspense>
         ) : currentView === 'articles' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement des articles..." />}>
