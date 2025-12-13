@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 
 interface CheckoutButtonProps {
   mode: 'model' | 'subscription';
@@ -88,7 +89,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
         throw new Error('URL de paiement non reçue');
       }
     } catch (err) {
-      console.error('Checkout error:', err);
+      logger.error('Checkout error:', err);
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       setLoading(false);
     }

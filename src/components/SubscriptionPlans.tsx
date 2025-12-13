@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Check, Crown, Zap, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../lib/logger';
 
 interface SubscriptionPlan {
   id: string;
@@ -50,7 +51,7 @@ export default function SubscriptionPlans() {
 
       if (data) setPlans(data);
     } catch (error) {
-      console.error('Error loading plans:', error);
+      logger.error('Error loading plans:', error);
     } finally {
       setLoading(false);
     }
@@ -69,7 +70,7 @@ export default function SubscriptionPlans() {
 
       if (data) setUserSub(data);
     } catch (error) {
-      console.error('Error loading subscription:', error);
+      logger.error('Error loading subscription:', error);
     }
   };
 
@@ -97,7 +98,7 @@ export default function SubscriptionPlans() {
       alert('Abonnement souscrit avec succès !');
       await loadUserSubscription();
     } catch (error) {
-      console.error('Error subscribing:', error);
+      logger.error('Error subscribing:', error);
       alert('Erreur lors de la souscription');
     } finally {
       setSubscribing(null);

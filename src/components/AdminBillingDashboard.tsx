@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DollarSign, FileText, TrendingUp, Users, Download, RefreshCw, XCircle, Edit, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../lib/logger';
 
 interface Purchase {
   id: string;
@@ -97,7 +98,7 @@ export const AdminBillingDashboard: React.FC = () => {
       ]);
       calculateStats();
     } catch (error) {
-      console.error('Error fetching billing data:', error);
+      logger.error('Error fetching billing data:', error);
     } finally {
       setLoading(false);
     }
@@ -110,7 +111,7 @@ export const AdminBillingDashboard: React.FC = () => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching purchases:', error);
+      logger.error('Error fetching purchases:', error);
     } else {
       setPurchases(data || []);
     }
@@ -123,7 +124,7 @@ export const AdminBillingDashboard: React.FC = () => {
       .order('created_at', { ascending: false});
 
     if (error) {
-      console.error('Error fetching subscriptions:', error);
+      logger.error('Error fetching subscriptions:', error);
     } else {
       setSubscriptions(data || []);
     }
@@ -137,7 +138,7 @@ export const AdminBillingDashboard: React.FC = () => {
       .limit(100);
 
     if (error) {
-      console.error('Error fetching accounting log:', error);
+      logger.error('Error fetching accounting log:', error);
     } else {
       setAccountingLog(data || []);
     }
@@ -203,7 +204,7 @@ export const AdminBillingDashboard: React.FC = () => {
       setSelectedPurchase(null);
       fetchAllData();
     } catch (error) {
-      console.error('Refund error:', error);
+      logger.error('Refund error:', error);
       alert(error instanceof Error ? error.message : 'Erreur lors du remboursement');
     } finally {
       setActionLoading(false);
@@ -251,7 +252,7 @@ export const AdminBillingDashboard: React.FC = () => {
       setSelectedPurchase(null);
       fetchAllData();
     } catch (error) {
-      console.error('Correction error:', error);
+      logger.error('Correction error:', error);
       alert(error instanceof Error ? error.message : 'Erreur lors de la correction');
     } finally {
       setActionLoading(false);

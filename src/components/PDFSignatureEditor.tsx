@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Download, X, Edit3, ZoomIn, ZoomOut, Move, AlignLeft, AlignRight, AlignCenter, Type } from 'lucide-react';
 import { SignaturePad } from './SignaturePad';
 import { jsPDF } from 'jspdf';
+import { logger } from '../lib/logger';
 
 interface SignaturePosition {
   x: number;
@@ -34,9 +35,9 @@ export const PDFSignatureEditor: React.FC<PDFSignatureEditorProps> = ({ onClose,
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('PDFSignatureEditor mounted');
+    logger.debug('PDFSignatureEditor mounted');
     return () => {
-      console.log('PDFSignatureEditor unmounted');
+      logger.debug('PDFSignatureEditor unmounted');
     };
   }, []);
 
