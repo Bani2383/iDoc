@@ -484,7 +484,14 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
                 <p className="text-blue-100 mb-6">
                   Documents illimités, signature électronique, IA juridique RegulaSmart
                 </p>
-                <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl hover:scale-105 transition-all">
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('navigate', {
+                      detail: { view: 'subscriptions' }
+                    }));
+                  }}
+                  className="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl hover:scale-105 transition-all"
+                >
                   Découvrir iDoc Pro
                 </button>
               </div>
@@ -494,9 +501,12 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
                 <p className="text-blue-100 mb-6">
                   Intégrez la génération de PDF dans vos applications via API RESTful
                 </p>
-                <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl hover:scale-105 transition-all">
+                <a
+                  href="mailto:api@id0c.com?subject=Demande d'accès API iDoc Connect&body=Bonjour,%0D%0A%0D%0AJe souhaite obtenir plus d'informations sur l'API iDoc Connect pour intégrer la génération de documents dans mon application.%0D%0A%0D%0AMerci"
+                  className="inline-block px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl hover:scale-105 transition-all"
+                >
                   Documentation API
-                </button>
+                </a>
               </div>
             </div>
           </div>

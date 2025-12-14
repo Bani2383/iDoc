@@ -72,6 +72,10 @@ function App() {
         setCurrentView('article-detail');
       } else if (view === 'improved') {
         setCurrentView('improved');
+      } else if (view === 'subscriptions') {
+        setCurrentView('subscriptions');
+      } else if (view === 'faq') {
+        setCurrentView('faq');
       }
     };
 
