@@ -46,6 +46,11 @@ const TrafficControlCenter = lazy(() => import('./components/TrafficControlCente
 const ABTestingSystem = lazy(() => import('./components/ABTestingSystem'));
 const EmailAutomation = lazy(() => import('./components/EmailAutomation'));
 const AutomatedReporting = lazy(() => import('./components/AutomatedReporting'));
+const StudyPermitLetterLanding = lazy(() => import('./components/StudyPermitLetterLanding').then(m => ({ default: m.StudyPermitLetterLanding })));
+const IRCCRefusalLetterLanding = lazy(() => import('./components/IRCCRefusalLetterLanding').then(m => ({ default: m.IRCCRefusalLetterLanding })));
+const BusinessAutomationLanding = lazy(() => import('./components/BusinessAutomationLanding').then(m => ({ default: m.BusinessAutomationLanding })));
+const TermsOfUse = lazy(() => import('./components/LegalPages').then(m => ({ default: m.TermsOfUse })));
+const PrivacyPolicy = lazy(() => import('./components/LegalPages').then(m => ({ default: m.PrivacyPolicy })));
 
 /**
  * Main application component
@@ -59,7 +64,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
 
@@ -283,6 +288,26 @@ function App() {
         ) : currentView === 'faq' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
             <FAQPage onGetStarted={handleGetStarted} />
+          </Suspense>
+        ) : currentView === 'study-permit-landing' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <StudyPermitLetterLanding onGetStarted={() => setShowGuestGenerator(true)} />
+          </Suspense>
+        ) : currentView === 'ircc-refusal-landing' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <IRCCRefusalLetterLanding onGetStarted={() => setShowGuestGenerator(true)} />
+          </Suspense>
+        ) : currentView === 'business-automation-landing' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <BusinessAutomationLanding onGetStarted={() => setShowAuthModal(true)} />
+          </Suspense>
+        ) : currentView === 'terms' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <TermsOfUse />
+          </Suspense>
+        ) : currentView === 'privacy' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
+            <PrivacyPolicy />
           </Suspense>
         ) : (
           <ClassicView
