@@ -87,7 +87,7 @@ export function PrivacyPolicy() {
               <li><strong>Limitation</strong> : limiter l'utilisation de vos données</li>
             </ul>
             <p className="mt-4">
-              Pour exercer vos droits : <a href="mailto:privacy@idoc.com" className="text-blue-600 hover:underline">privacy@idoc.com</a>
+              Pour exercer vos droits : <a href="mailto:privacy@id0c.com" className="text-blue-600 hover:underline">privacy@id0c.com</a>
             </p>
           </section>
 
@@ -135,7 +135,7 @@ export function PrivacyPolicy() {
             </h2>
             <p>
               Délégué à la protection des données :<br />
-              Email : <a href="mailto:dpo@idoc.com" className="text-blue-600 hover:underline">dpo@idoc.com</a><br />
+              Email : <a href="mailto:privacy@id0c.com" className="text-blue-600 hover:underline">privacy@id0c.com</a><br />
               Adresse : iDoc, [Votre adresse]
             </p>
           </section>
@@ -289,7 +289,7 @@ export function TermsOfService() {
             </h2>
             <p>
               Pour toute question concernant ces CGU :<br />
-              Email : <a href="mailto:legal@idoc.com" className="text-blue-600 hover:underline">legal@idoc.com</a>
+              Email : <a href="mailto:legal@id0c.com" className="text-blue-600 hover:underline">legal@id0c.com</a>
             </p>
           </section>
         </div>
@@ -410,7 +410,7 @@ export function TermsOfSale() {
             </h2>
             <p>
               Toute réclamation doit être adressée à :<br />
-              Email : <a href="mailto:support@idoc.com" className="text-blue-600 hover:underline">support@idoc.com</a><br />
+              Email : <a href="mailto:support@id0c.com" className="text-blue-600 hover:underline">support@id0c.com</a><br />
               Délai de réponse : 48h ouvrées
             </p>
           </section>
@@ -474,7 +474,7 @@ export function LegalNotice() {
               <strong>RCS</strong> : [Ville + numéro]<br />
               <strong>SIRET</strong> : [Numéro]<br />
               <strong>TVA intracommunautaire</strong> : [Numéro]<br />
-              <strong>Email</strong> : <a href="mailto:contact@idoc.com" className="text-blue-600 hover:underline">contact@idoc.com</a><br />
+              <strong>Email</strong> : <a href="mailto:contact@id0c.com" className="text-blue-600 hover:underline">contact@id0c.com</a><br />
               <strong>Téléphone</strong> : [Numéro]
             </p>
           </section>

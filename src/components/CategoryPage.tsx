@@ -114,7 +114,16 @@ export function CategoryPage({ categorySlug, onSelectTemplate }: CategoryPagePro
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Catégorie non trouvée</h1>
-          <a href="/" className="text-blue-600 hover:text-blue-700">Retour à l'accueil</a>
+          <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('navigate', {
+                detail: { view: 'improved' }
+              }));
+            }}
+            className="text-blue-600 hover:text-blue-700"
+          >
+            Retour à l'accueil
+          </button>
         </div>
       </div>
     );

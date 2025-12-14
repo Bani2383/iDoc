@@ -65,7 +65,7 @@ export function FAQPage({ onGetStarted }: FAQPageProps) {
                 {isMinimal ? 'ESSAYER MAINTENANT' : 'Essayer maintenant'}
               </button>
               <a
-                href="mailto:support@idoc.fr"
+                href="mailto:support@id0c.com"
                 className={isMinimal ? 'px-8 py-4 bg-white text-black text-xs tracking-[0.2em] hover:bg-gray-50 transition-colors border border-black flex items-center space-x-2' : 'px-8 py-4 bg-blue-800 text-white text-lg font-semibold rounded-xl hover:bg-blue-900 transition-all transform hover:scale-105 flex items-center space-x-2'}
                 style={isMinimal ? { fontFamily: 'serif' } : {}}
               >

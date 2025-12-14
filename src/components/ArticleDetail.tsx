@@ -177,13 +177,20 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
           <p className="text-gray-700 mb-6">
             Utilisez notre modèle professionnel pour créer ce document en quelques minutes.
           </p>
-          <a
-            href={`/templates/${article.related_template}`}
+          <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('navigate', {
+                detail: { view: 'improved' }
+              }));
+              setTimeout(() => {
+                document.getElementById('template-' + article.related_template)?.scrollIntoView({ behavior: 'smooth' });
+              }, 100);
+            }}
             className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
             Créer maintenant — 1,99€
             <ExternalLink className="w-4 h-4 ml-2" />
-          </a>
+          </button>
         </div>
       )}
 
@@ -194,10 +201,14 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
           </h3>
           <div className="grid md:grid-cols-3 gap-6">
             {relatedArticles.map(related => (
-              <a
+              <button
                 key={related.id}
-                href={`/articles/${related.slug}`}
-                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigate', {
+                    detail: { view: 'article', slug: related.slug }
+                  }));
+                }}
+                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200 text-left w-full"
               >
                 {related.featured_image_url && (
                   <img
@@ -217,7 +228,7 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
                     {related.excerpt}
                   </p>
                 </div>
-              </a>
+              </button>
             ))}
           </div>
         </div>
@@ -229,7 +240,7 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
           Notre équipe est disponible pour vous accompagner dans la création de vos documents.
         </p>
         <a
-          href="/contact"
+          href="mailto:contact@id0c.com"
           className="text-blue-600 hover:text-blue-700 font-medium"
         >
           Nous contacter →

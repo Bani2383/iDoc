@@ -620,11 +620,29 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
         <div className="max-w-6xl mx-auto px-4 text-center">
           <p className="text-sm">© 2025 iDoc. Tous droits réservés.</p>
           <div className="flex items-center justify-center space-x-6 mt-4 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Conditions</a>
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('navigate', {
+                  detail: { view: 'faq' }
+                }));
+              }}
+              className="hover:text-white transition-colors"
+            >
+              Conditions
+            </button>
             <span>•</span>
-            <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('navigate', {
+                  detail: { view: 'faq' }
+                }));
+              }}
+              className="hover:text-white transition-colors"
+            >
+              Confidentialité
+            </button>
             <span>•</span>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+            <a href="mailto:contact@id0c.com" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>

@@ -126,9 +126,16 @@ export function SEOTemplatePage({ templateCode, onCreateDocument }: SEOTemplateP
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Modèle non trouvé</h1>
-          <a href="/" className="text-blue-600 hover:text-blue-700">
+          <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('navigate', {
+                detail: { view: 'improved' }
+              }));
+            }}
+            className="text-blue-600 hover:text-blue-700"
+          >
             Retour à l'accueil
-          </a>
+          </button>
         </div>
       </div>
     );
@@ -147,11 +154,27 @@ export function SEOTemplatePage({ templateCode, onCreateDocument }: SEOTemplateP
         <div className="bg-gray-50 border-b">
           <div className="max-w-4xl mx-auto px-4 py-3">
             <nav className="flex items-center space-x-2 text-sm text-gray-600">
-              <a href="https://id0c.com" className="hover:text-blue-600">Accueil</a>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigate', {
+                    detail: { view: 'improved' }
+                  }));
+                }}
+                className="hover:text-blue-600"
+              >
+                Accueil
+              </button>
               <span>/</span>
-              <a href={`https://id0c.com/categorie/${template.category}`} className="hover:text-blue-600">
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('navigate', {
+                    detail: { view: 'improved' }
+                  }));
+                }}
+                className="hover:text-blue-600"
+              >
                 {template.category}
-              </a>
+              </button>
               <span>/</span>
               <span className="text-gray-900">{template.title}</span>
             </nav>
