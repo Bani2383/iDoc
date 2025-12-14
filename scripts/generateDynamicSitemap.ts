@@ -1,5 +1,9 @@
 // Dynamic sitemap generator for all content
 import { createClient } from '@supabase/supabase-js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
+import path from 'path';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
@@ -116,12 +120,13 @@ ${urlsXML}
 }
 
 // Exécuter si appelé directement
-if (require.main === module) {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+if (import.meta.url === `file://${process.argv[1]}`) {
   generateSitemap()
     .then(xml => {
       // Sauvegarder dans public/sitemap.xml
-      const fs = require('fs');
-      const path = require('path');
       const publicDir = path.join(__dirname, '../public');
       fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), xml);
       console.log('✅ Sitemap sauvegardé dans public/sitemap.xml');
