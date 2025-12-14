@@ -100,7 +100,6 @@ export function LoginStatsManager() {
         throw error;
       }
 
-      console.log('Login logs fetched:', data);
       setLogs(data || []);
     } catch (error) {
       console.error('Error in fetchLoginLogs:', error);

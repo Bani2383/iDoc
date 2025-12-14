@@ -28,14 +28,4 @@ export default defineConfig({
   esbuild: {
     drop: ['console', 'debugger'],
   },
-  server: {
-    proxy: {
-      '/supabase': {
-        target: 'https://ffujpjaaramwhtmzqhlx.supabase.co',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/supabase/, ''),
-        secure: true,
-      },
-    },
-  },
 });
