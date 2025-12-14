@@ -9,7 +9,7 @@ import { useState, startTransition } from 'react';
 import { Menu, X, LogIn } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 
-type ViewType = 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail';
+type ViewType = 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'generators' | 'generator-form' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy';
 
 interface AppHeaderProps {
   /** Current view state */
@@ -101,6 +101,18 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
               aria-label="Accéder au blog"
             >
               Blog
+            </button>
+            <button
+              onClick={() => handleViewChange('generators')}
+              className={`px-3 py-2 rounded-md text-sm font-medium ${
+                currentView === 'generators' || currentView === 'generator-form'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              aria-current={currentView === 'generators' || currentView === 'generator-form' ? 'page' : undefined}
+              aria-label="Accéder aux générateurs"
+            >
+              Générateurs
             </button>
             <button
               onClick={onShowAuth}
