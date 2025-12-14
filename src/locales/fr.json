@@ -153,5 +153,17 @@
     "template5Desc": "Baux habitation et meublés",
     "template6Title": "Accords commerciaux",
     "template6Desc": "Partenariats, NDA, confidentialité"
+  },
+  "checkout": {
+    "previewHeader": "Aperçu du document",
+    "priceLabel": "Téléchargement PDF",
+    "primaryButton": "Payer et télécharger",
+    "secondaryButton": "Modifier mes informations",
+    "trustLine": "Paiement sécurisé",
+    "legalLine": "Document généré automatiquement – ne constitue pas un avis juridique.",
+    "noGuaranteeLine": "Aucun document ne garantit une décision favorable d'IRCC ou d'une autre autorité.",
+    "helpTitle": "Besoin d'ajuster une section ?",
+    "helpText": "Vous pouvez modifier vos informations avant de payer afin d'assurer la cohérence avec votre dossier.",
+    "faqLinkText": "Voir la FAQ"
   }
 }

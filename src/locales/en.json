@@ -153,5 +153,17 @@
     "template5Desc": "Residential and furnished leases",
     "template6Title": "Business Agreements",
     "template6Desc": "Partnerships, NDA, confidentiality"
+  },
+  "checkout": {
+    "previewHeader": "Document preview",
+    "priceLabel": "PDF download",
+    "primaryButton": "Pay & download",
+    "secondaryButton": "Edit my information",
+    "trustLine": "Secure payment",
+    "legalLine": "Automatically generated document – not legal advice.",
+    "noGuaranteeLine": "No document guarantees approval by IRCC or any other authority.",
+    "helpTitle": "Need to adjust a section?",
+    "helpText": "You can edit your inputs before paying to ensure consistency with your application documents.",
+    "faqLinkText": "View FAQ"
   }
 }
