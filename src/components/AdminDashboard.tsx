@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker, Home, Menu, X, BookOpen } from 'lucide-react';
+import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker, Home, Menu, X, BookOpen, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,6 +14,7 @@ import { DossiersModule } from './DossiersModule';
 import { TemplateLabModule } from './TemplateLabModule';
 import { UserManagementHub } from './UserManagementHub';
 import AdminArticlesManager from './AdminArticlesManager';
+import PageVisitsHistory from './PageVisitsHistory';
 
 interface Stats {
   totalUsers: number;
@@ -38,7 +39,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles' | 'visits'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -161,6 +162,7 @@ export function AdminDashboard() {
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Système</p>
           </div>
           <NavButton tab="stats" icon={Activity} label="Statistiques" active={activeTab === 'stats'} />
+          <NavButton tab="visits" icon={Eye} label="Historique Visites" active={activeTab === 'visits'} />
           <NavButton tab="settings" icon={Sliders} label="Paramètres" active={activeTab === 'settings'} />
         </nav>
 
@@ -193,6 +195,8 @@ export function AdminDashboard() {
             <UserManagementHub />
           ) : activeTab === 'stats' ? (
             <LoginStatsManager />
+          ) : activeTab === 'visits' ? (
+            <PageVisitsHistory />
           ) : activeTab === 'settings' ? (
             <SiteSettingsManager />
           ) : activeTab === 'billing' ? (

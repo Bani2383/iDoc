@@ -14,6 +14,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { AppHeader } from './components/AppHeader';
 import { ClassicView } from './components/ClassicView';
 import DynamicFOMOSystem from './components/DynamicFOMOSystem';
+import { usePageTracking } from './hooks/usePageTracking';
 
 // Lazy loaded components for better performance
 const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
@@ -61,6 +62,15 @@ function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
+
+  usePageTracking(currentView, {
+    enabled: true,
+    trackAnonymous: true,
+    metadata: {
+      userRole: profile?.role || 'guest',
+      isAuthenticated: !!user
+    }
+  });
 
   useEffect(() => {
     const handleNavigate = (event: CustomEvent) => {
