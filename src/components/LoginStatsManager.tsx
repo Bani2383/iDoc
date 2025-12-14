@@ -69,8 +69,12 @@ export function LoginStatsManager() {
       let query = supabase
         .from('login_logs')
         .select(`
-          *,
-          user_profiles(email, full_name)
+          id,
+          user_id,
+          login_at,
+          ip_address,
+          user_agent,
+          user_profiles!inner(email, full_name)
         `)
         .order('login_at', { ascending: false })
         .limit(50);
@@ -91,10 +95,15 @@ export function LoginStatsManager() {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching login logs:', error);
+        throw error;
+      }
+
+      console.log('Login logs fetched:', data);
       setLogs(data || []);
     } catch (error) {
-      console.error('Error fetching login logs:', error);
+      console.error('Error in fetchLoginLogs:', error);
     } finally {
       setLoading(false);
     }
