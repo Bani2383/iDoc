@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Calendar, Eye, Tag, ArrowLeft, ExternalLink } from 'lucide-react';
 import DOMPurify from 'dompurify';
+import { SchemaMarkup, ArticleSchema } from './SchemaMarkup';
 
 interface Article {
   id: string;
@@ -106,6 +107,16 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
+      <SchemaMarkup
+        schema={ArticleSchema({
+          title: article.title,
+          description: article.meta_description || article.excerpt,
+          datePublished: article.published_at,
+          dateModified: article.published_at,
+          image: article.featured_image_url || undefined
+        })}
+      />
+
       <button
         onClick={() => {
           const event = new CustomEvent('navigate', { detail: { view: 'articles' } });

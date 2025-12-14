@@ -2,6 +2,7 @@ import { VisualExperienceSection } from './VisualExperienceSection';
 import { FAQSection } from './FAQSection';
 import { useTheme } from '../contexts/ThemeContext';
 import { MessageCircle, Mail } from 'lucide-react';
+import { SchemaMarkup, ImmigrationFAQSchema } from './SchemaMarkup';
 
 interface FAQPageProps {
   onGetStarted: () => void;
@@ -13,6 +14,8 @@ export function FAQPage({ onGetStarted }: FAQPageProps) {
 
   return (
     <div className={isMinimal ? 'min-h-screen bg-white' : 'min-h-screen bg-gradient-to-br from-slate-50 to-blue-50'}>
+      <SchemaMarkup schema={ImmigrationFAQSchema} />
+
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <div className="text-center mb-16">

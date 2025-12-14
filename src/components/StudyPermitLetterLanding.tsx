@@ -4,6 +4,7 @@
  */
 
 import { FileText, CheckCircle, Shield, Clock } from 'lucide-react';
+import { SchemaMarkup, HowToSchema } from './SchemaMarkup';
 
 interface StudyPermitLetterLandingProps {
   onGetStarted: () => void;
@@ -12,6 +13,31 @@ interface StudyPermitLetterLandingProps {
 export function StudyPermitLetterLanding({ onGetStarted }: StudyPermitLetterLandingProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <SchemaMarkup
+        schema={HowToSchema({
+          name: "Comment créer une lettre d'intention pour permis d'études",
+          description: "Guide étape par étape pour créer une lettre d'intention conforme aux standards IRCC",
+          steps: [
+            {
+              name: "Sélectionner le modèle",
+              text: "Choisissez le modèle de lettre d'intention pour permis d'études dans la plateforme iD0c"
+            },
+            {
+              name: "Remplir vos informations",
+              text: "Complétez les champs avec vos informations académiques, professionnelles et financières"
+            },
+            {
+              name: "Personnaliser le contenu",
+              text: "Adaptez le contenu selon votre parcours et vos objectifs d'études au Canada"
+            },
+            {
+              name: "Télécharger le PDF",
+              text: "Générez et téléchargez votre lettre d'intention professionnelle au format PDF"
+            }
+          ]
+        })}
+      />
+
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">

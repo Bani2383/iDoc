@@ -4,6 +4,7 @@
  */
 
 import { AlertTriangle, FileText, CheckCircle, Shield } from 'lucide-react';
+import { SchemaMarkup, HowToSchema } from './SchemaMarkup';
 
 interface IRCCRefusalLetterLandingProps {
   onGetStarted: () => void;
@@ -12,6 +13,31 @@ interface IRCCRefusalLetterLandingProps {
 export function IRCCRefusalLetterLanding({ onGetStarted }: IRCCRefusalLetterLandingProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-50 to-white">
+      <SchemaMarkup
+        schema={HowToSchema({
+          name: "Comment répondre à un refus IRCC avec une lettre explicative",
+          description: "Guide pour créer une lettre explicative structurée après un refus d'IRCC",
+          steps: [
+            {
+              name: "Analyser les motifs de refus",
+              text: "Lisez attentivement la lettre de refus d'IRCC pour identifier les motifs précis du rejet"
+            },
+            {
+              name: "Rassembler les preuves",
+              text: "Collectez tous les documents nécessaires pour répondre aux préoccupations soulevées"
+            },
+            {
+              name: "Structurer la réponse",
+              text: "Utilisez le modèle iD0c pour répondre point par point à chaque motif de refus"
+            },
+            {
+              name: "Générer le document",
+              text: "Créez votre lettre explicative professionnelle au format PDF prête à être soumise"
+            }
+          ]
+        })}
+      />
+
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
