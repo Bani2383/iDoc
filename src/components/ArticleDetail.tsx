@@ -165,9 +165,162 @@ export default function ArticleDetail({ slug }: ArticleDetailProps) {
       )}
 
       <div
-        className="prose prose-lg max-w-none mb-12"
+        className="article-content prose prose-lg max-w-none mb-12"
         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content_html) }}
       />
+
+      <style>{`
+        .article-content {
+          line-height: 1.8;
+          color: #374151;
+        }
+
+        .article-content p {
+          margin-bottom: 1.75rem;
+          font-size: 1.125rem;
+          line-height: 1.8;
+        }
+
+        .article-content h2 {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #111827;
+          margin-top: 3rem;
+          margin-bottom: 1.5rem;
+          line-height: 1.3;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #E5E7EB;
+        }
+
+        .article-content h3 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: #1F2937;
+          margin-top: 2.5rem;
+          margin-bottom: 1.25rem;
+          line-height: 1.4;
+        }
+
+        .article-content h4 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #374151;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+        }
+
+        .article-content ul,
+        .article-content ol {
+          margin-top: 1.5rem;
+          margin-bottom: 1.5rem;
+          padding-left: 1.75rem;
+        }
+
+        .article-content li {
+          margin-bottom: 0.75rem;
+          line-height: 1.75;
+        }
+
+        .article-content li p {
+          margin-bottom: 0.5rem;
+        }
+
+        .article-content a {
+          color: #2563EB;
+          text-decoration: underline;
+          font-weight: 500;
+          transition: color 0.2s;
+        }
+
+        .article-content a:hover {
+          color: #1D4ED8;
+        }
+
+        .article-content strong {
+          font-weight: 600;
+          color: #1F2937;
+        }
+
+        .article-content em {
+          font-style: italic;
+          color: #4B5563;
+        }
+
+        .article-content blockquote {
+          border-left: 4px solid #3B82F6;
+          padding-left: 1.5rem;
+          margin: 2rem 0;
+          font-style: italic;
+          color: #4B5563;
+          background: #F9FAFB;
+          padding-top: 1rem;
+          padding-bottom: 1rem;
+          border-radius: 0 0.5rem 0.5rem 0;
+        }
+
+        .article-content code {
+          background: #F3F4F6;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.25rem;
+          font-size: 0.9em;
+          color: #DC2626;
+          font-family: 'Courier New', monospace;
+        }
+
+        .article-content pre {
+          background: #1F2937;
+          color: #F9FAFB;
+          padding: 1.5rem;
+          border-radius: 0.5rem;
+          overflow-x: auto;
+          margin: 2rem 0;
+        }
+
+        .article-content pre code {
+          background: transparent;
+          color: inherit;
+          padding: 0;
+        }
+
+        .article-content hr {
+          margin: 3rem 0;
+          border: none;
+          border-top: 2px solid #E5E7EB;
+        }
+
+        .article-content table {
+          width: 100%;
+          margin: 2rem 0;
+          border-collapse: collapse;
+        }
+
+        .article-content table th {
+          background: #F3F4F6;
+          padding: 0.75rem;
+          text-align: left;
+          font-weight: 600;
+          border: 1px solid #E5E7EB;
+        }
+
+        .article-content table td {
+          padding: 0.75rem;
+          border: 1px solid #E5E7EB;
+        }
+
+        .article-content img {
+          border-radius: 0.5rem;
+          margin: 2rem 0;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .article-content > *:first-child {
+          margin-top: 0;
+        }
+
+        .article-content > *:last-child {
+          margin-bottom: 0;
+        }
+      `}</style>
 
       {article.related_template && (
         <div className="my-12 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
