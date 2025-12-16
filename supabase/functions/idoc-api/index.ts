@@ -1,10 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
-};
+import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
 interface GenerateDocumentRequest {
   template_id: string;
@@ -22,11 +17,10 @@ interface ApiKeyRecord {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return handleCorsPreflightRequest(req);
   }
+
+  const corsHeaders = getCorsHeaders(req.headers.get('origin'));
 
   try {
     const url = new URL(req.url);
@@ -49,10 +43,16 @@ Deno.serve(async (req: Request) => {
 
     const apiKey = authHeader.replace('Bearer ', '');
 
+    const encoder = new TextEncoder();
+    const data = encoder.encode(apiKey);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
     const { data: keyRecord, error: keyError } = await supabase
       .from('api_keys')
       .select('id, user_id, rate_limit, is_active, permissions')
-      .eq('key_hash', apiKey)
+      .eq('key_hash', keyHash)
       .eq('is_active', true)
       .maybeSingle();
 
@@ -158,7 +158,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('API Error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', message: String(error) }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

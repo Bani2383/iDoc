@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FileText, Lock, AlertCircle, HelpCircle, ArrowLeft, CreditCard } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import DOMPurify from 'dompurify';
 
 interface CheckoutPreviewProps {
   documentPreview: string;
@@ -42,7 +43,7 @@ export function CheckoutPreview({
 
             <div className="bg-slate-50 rounded-xl p-6 max-h-[600px] overflow-y-auto border border-slate-200">
               <div className="prose prose-sm max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: documentPreview }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(documentPreview) }} />
               </div>
             </div>
 
