@@ -15,7 +15,8 @@
     "search": "Rechercher",
     "filter": "Filtrer",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "error": "Erreur"
   },
   "nav": {
     "home": "Accueil",
@@ -25,7 +26,8 @@
     "login": "Connexion",
     "logout": "Déconnexion",
     "dashboard": "Tableau de bord",
-    "profile": "Profil"
+    "profile": "Profil",
+    "templates": "Modèles"
   },
   "hero": {
     "title": "Créez des Documents Professionnels en Secondes",
@@ -103,7 +105,8 @@
     "legal": "Légal",
     "privacy": "Politique de Confidentialité",
     "terms": "Conditions d'Utilisation",
-    "rights": "Tous droits réservés"
+    "rights": "Tous droits réservés",
+    "copyright": "© 2024 iDoc. Tous droits réservés."
   },
   "stats": {
     "title": "Ils nous font confiance",

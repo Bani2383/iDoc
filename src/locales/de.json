@@ -15,7 +15,8 @@
     "search": "Suchen",
     "filter": "Filtern",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "error": "Fehler"
   },
   "nav": {
     "home": "Startseite",
@@ -25,7 +26,8 @@
     "login": "Anmelden",
     "logout": "Abmelden",
     "dashboard": "Dashboard",
-    "profile": "Profil"
+    "profile": "Profil",
+    "templates": "Vorlagen"
   },
   "hero": {
     "title": "Erstellen Sie professionelle Dokumente in Sekunden",
@@ -97,6 +99,14 @@
     "legal": "Rechtliches",
     "privacy": "Datenschutzerklärung",
     "terms": "Nutzungsbedingungen",
-    "rights": "Alle Rechte vorbehalten"
+    "rights": "Alle Rechte vorbehalten",
+    "copyright": "© 2024 iDoc. Alle Rechte vorbehalten."
+  },
+  "stats": {
+    "totalVisitors": "Besucher",
+    "documentsGenerated": "Dokumente erstellt",
+    "activeUsers": "Aktive Benutzer",
+    "signaturesCreated": "Unterschriften",
+    "liveUpdate": "In Echtzeit aktualisiert"
   }
 }

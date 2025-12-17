@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "エラー"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "テンプレート"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© 2024 iDoc. 無断転載禁止。"
+  },
+  "stats": {
+    "totalVisitors": "訪問者",
+    "documentsGenerated": "作成されたドキュメント",
+    "activeUsers": "アクティブユーザー",
+    "signaturesCreated": "署名",
+    "liveUpdate": "リアルタイムで更新"
   }
 }

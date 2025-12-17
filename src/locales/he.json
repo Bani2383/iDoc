@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "שגיאה"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "תבניות"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© 2024 iDoc. כל הזכויות שמורות."
+  },
+  "stats": {
+    "totalVisitors": "מבקרים",
+    "documentsGenerated": "מסמכים שנוצרו",
+    "activeUsers": "משתמשים פעילים",
+    "signaturesCreated": "חתימות",
+    "liveUpdate": "עודכן בזמן אמת"
   }
 }

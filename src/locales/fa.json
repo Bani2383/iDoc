@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "خطا"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "قالب‌ها"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© ۲۰۲۴ iDoc. کلیه حقوق محفوظ است."
+  },
+  "stats": {
+    "totalVisitors": "بازدیدکنندگان",
+    "documentsGenerated": "اسناد ایجاد شده",
+    "activeUsers": "کاربران فعال",
+    "signaturesCreated": "امضاها",
+    "liveUpdate": "به‌روزرسانی لحظه‌ای"
   }
 }

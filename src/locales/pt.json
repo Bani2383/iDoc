@@ -1,11 +1,112 @@
 {
-  "common": {"appName": "iDoc", "loading": "Carregando...", "save": "Salvar", "cancel": "Cancelar", "delete": "Excluir", "edit": "Editar", "download": "Baixar", "upload": "Enviar", "close": "Fechar", "back": "Voltar", "next": "Próximo", "create": "Criar", "search": "Pesquisar", "filter": "Filtrar", "yes": "Sim", "no": "Não"},
-  "nav": {"home": "Início", "documents": "Documentos", "signature": "Assinatura", "faq": "FAQ e Demo", "login": "Entrar", "logout": "Sair", "dashboard": "Painel", "profile": "Perfil"},
-  "hero": {"title": "Crie Documentos Profissionais em Segundos", "subtitle": "Gerador gratuito de documentos PDF com assistência de IA. Contratos, cartas, formulários - gere e assine instantaneamente.", "cta": "Começar", "ctaDemo": "Ver Demo"},
-  "features": {"title": "Recursos Poderosos", "aiGeneration": "Geração IA", "aiGenerationDesc": "Gere documentos com inteligência artificial", "eSignature": "Assinatura Eletrônica", "eSignatureDesc": "Assine seus documentos eletronicamente", "instantDownload": "Download Instantâneo", "instantDownloadDesc": "Baixe seus PDFs imediatamente", "secure": "Seguro", "secureDesc": "Seus dados estão criptografados e protegidos"},
-  "auth": {"signIn": "Entrar", "signUp": "Cadastrar", "email": "E-mail", "password": "Senha", "confirmPassword": "Confirmar Senha", "forgotPassword": "Esqueceu a senha?", "noAccount": "Não tem conta?", "hasAccount": "Já tem uma conta?", "createAccount": "Criar Conta", "loginSuccess": "Login bem-sucedido!", "loginError": "Erro ao fazer login. Tente novamente.", "signupSuccess": "Conta criada com sucesso!", "signupError": "Erro ao criar conta."},
-  "documents": {"title": "Meus Documentos", "createNew": "Criar Novo Documento", "selectTemplate": "Selecionar Modelo", "noDocuments": "Nenhum documento ainda", "createdAt": "Criado em", "viewDocument": "Ver Documento", "deleteDocument": "Excluir Documento", "confirmDelete": "Tem certeza que deseja excluir este documento?"},
-  "templates": {"workContract": "Contrato de Trabalho", "motivationLetter": "Carta de Motivação", "convention": "Convenção", "adminForm": "Formulário Administrativo", "certificate": "Certificado", "invoice": "Fatura", "quote": "Orçamento", "resignation": "Carta de Demissão"},
-  "signature": {"title": "Assinatura Eletrônica", "draw": "Desenhar", "type": "Digitar", "upload": "Enviar", "clear": "Limpar", "signHere": "Assine Aqui", "saveSignature": "Salvar Assinatura", "signatureSuccess": "Assinatura salva com sucesso!"},
-  "footer": {"about": "Sobre", "features": "Recursos", "pricing": "Preços", "contact": "Contato", "legal": "Legal", "privacy": "Política de Privacidade", "terms": "Termos de Uso", "rights": "Todos os direitos reservados"}
+  "common": {
+    "appName": "iDoc",
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "download": "Baixar",
+    "upload": "Enviar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "yes": "Sim",
+    "no": "Não",
+    "error": "Erro"
+  },
+  "nav": {
+    "home": "Início",
+    "documents": "Documentos",
+    "signature": "Assinatura",
+    "faq": "FAQ e Demo",
+    "login": "Entrar",
+    "logout": "Sair",
+    "dashboard": "Painel",
+    "profile": "Perfil",
+    "templates": "Modelos"
+  },
+  "hero": {
+    "title": "Crie Documentos Profissionais em Segundos",
+    "subtitle": "Gerador gratuito de documentos PDF com assistência de IA. Contratos, cartas, formulários - gere e assine instantaneamente.",
+    "cta": "Começar",
+    "ctaDemo": "Ver Demo"
+  },
+  "features": {
+    "title": "Recursos Poderosos",
+    "aiGeneration": "Geração IA",
+    "aiGenerationDesc": "Gere documentos com inteligência artificial",
+    "eSignature": "Assinatura Eletrônica",
+    "eSignatureDesc": "Assine seus documentos eletronicamente",
+    "instantDownload": "Download Instantâneo",
+    "instantDownloadDesc": "Baixe seus PDFs imediatamente",
+    "secure": "Seguro",
+    "secureDesc": "Seus dados estão criptografados e protegidos"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signUp": "Cadastrar",
+    "email": "E-mail",
+    "password": "Senha",
+    "confirmPassword": "Confirmar Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "noAccount": "Não tem conta?",
+    "hasAccount": "Já tem uma conta?",
+    "createAccount": "Criar Conta",
+    "loginSuccess": "Login bem-sucedido!",
+    "loginError": "Erro ao fazer login. Tente novamente.",
+    "signupSuccess": "Conta criada com sucesso!",
+    "signupError": "Erro ao criar conta."
+  },
+  "documents": {
+    "title": "Meus Documentos",
+    "createNew": "Criar Novo Documento",
+    "selectTemplate": "Selecionar Modelo",
+    "noDocuments": "Nenhum documento ainda",
+    "createdAt": "Criado em",
+    "viewDocument": "Ver Documento",
+    "deleteDocument": "Excluir Documento",
+    "confirmDelete": "Tem certeza que deseja excluir este documento?"
+  },
+  "templates": {
+    "workContract": "Contrato de Trabalho",
+    "motivationLetter": "Carta de Motivação",
+    "convention": "Convenção",
+    "adminForm": "Formulário Administrativo",
+    "certificate": "Certificado",
+    "invoice": "Fatura",
+    "quote": "Orçamento",
+    "resignation": "Carta de Demissão"
+  },
+  "signature": {
+    "title": "Assinatura Eletrônica",
+    "draw": "Desenhar",
+    "type": "Digitar",
+    "upload": "Enviar",
+    "clear": "Limpar",
+    "signHere": "Assine Aqui",
+    "saveSignature": "Salvar Assinatura",
+    "signatureSuccess": "Assinatura salva com sucesso!"
+  },
+  "footer": {
+    "about": "Sobre",
+    "features": "Recursos",
+    "pricing": "Preços",
+    "contact": "Contato",
+    "legal": "Legal",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Uso",
+    "rights": "Todos os direitos reservados",
+    "copyright": "© 2024 iDoc. Todos os direitos reservados."
+  },
+  "stats": {
+    "totalVisitors": "Visitantes",
+    "documentsGenerated": "Documentos Criados",
+    "activeUsers": "Usuários Ativos",
+    "signaturesCreated": "Assinaturas",
+    "liveUpdate": "Atualizado em tempo real"
+  }
 }

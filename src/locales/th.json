@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "ข้อผิดพลาด"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "เทมเพลต"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© 2024 iDoc. สงวนลิขสิทธิ์."
+  },
+  "stats": {
+    "totalVisitors": "ผู้เยี่ยมชม",
+    "documentsGenerated": "เอกสารที่สร้าง",
+    "activeUsers": "ผู้ใช้ที่ใช้งานอยู่",
+    "signaturesCreated": "ลายเซ็น",
+    "liveUpdate": "อัปเดตแบบเรียลไทม์"
   }
 }

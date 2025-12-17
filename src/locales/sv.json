@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "Fel"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "Mallar"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© 2024 iDoc. Alla rättigheter förbehållna."
+  },
+  "stats": {
+    "totalVisitors": "Besökare",
+    "documentsGenerated": "Dokument skapade",
+    "activeUsers": "Aktiva användare",
+    "signaturesCreated": "Signaturer",
+    "liveUpdate": "Uppdaterad i realtid"
   }
 }

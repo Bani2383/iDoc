@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "Błąd"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "Szablony"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© 2024 iDoc. Wszelkie prawa zastrzeżone."
+  },
+  "stats": {
+    "totalVisitors": "Odwiedzający",
+    "documentsGenerated": "Utworzone dokumenty",
+    "activeUsers": "Aktywni użytkownicy",
+    "signaturesCreated": "Podpisy",
+    "liveUpdate": "Aktualizowane w czasie rzeczywistym"
   }
 }

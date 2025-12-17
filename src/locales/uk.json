@@ -15,7 +15,8 @@
     "search": "Search",
     "filter": "Filter",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "error": "Помилка"
   },
   "nav": {
     "home": "Home",
@@ -25,7 +26,8 @@
     "login": "Login",
     "logout": "Logout",
     "dashboard": "Dashboard",
-    "profile": "Profile"
+    "profile": "Profile",
+    "templates": "Шаблони"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
@@ -97,6 +99,14 @@
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Use",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "copyright": "© 2024 iDoc. Усі права захищені."
+  },
+  "stats": {
+    "totalVisitors": "Відвідувачі",
+    "documentsGenerated": "Створені документи",
+    "activeUsers": "Активні користувачі",
+    "signaturesCreated": "Підписи",
+    "liveUpdate": "Оновлюється в реальному часі"
   }
 }
