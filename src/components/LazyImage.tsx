@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 
 interface LazyImageProps {
@@ -12,7 +12,7 @@ interface LazyImageProps {
   onError?: () => void;
 }
 
-export function LazyImage({
+export const LazyImage = memo(function LazyImage({
   src,
   alt,
   className = '',
@@ -100,10 +100,9 @@ export function LazyImage({
       />
     </div>
   );
-}
+});
 
-// Optimized image component with automatic format conversion
-export function OptimizedImage({
+export const OptimizedImage = memo(function OptimizedImage({
   src,
   alt,
   className = '',
@@ -133,10 +132,9 @@ export function OptimizedImage({
       height={height}
     />
   );
-}
+});
 
-// Background image with lazy loading
-export function LazyBackgroundImage({
+export const LazyBackgroundImage = memo(function LazyBackgroundImage({
   src,
   children,
   className = '',
@@ -189,4 +187,4 @@ export function LazyBackgroundImage({
       {children}
     </div>
   );
-}
+});

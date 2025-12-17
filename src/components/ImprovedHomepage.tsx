@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useCallback, memo } from 'react';
 import EnhancedSearchBar from './EnhancedSearchBar';
 import SmartFillStudio from './SmartFillStudio';
 import AnimatedTemplateShowcase from './AnimatedTemplateShowcase';
@@ -44,12 +44,7 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
 
-  useEffect(() => {
-    fetchTemplates();
-    fetchArticles();
-  }, []);
-
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('document_templates')
@@ -78,9 +73,9 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
     } finally {
       setLoadingTemplates(false);
     }
-  };
+  }, []);
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('articles')
@@ -94,14 +89,19 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
     } catch (err) {
       console.error('Error fetching articles:', err);
     }
-  };
+  }, []);
 
-  const handleTemplateSelect = (template: Template) => {
+  useEffect(() => {
+    fetchTemplates();
+    fetchArticles();
+  }, [fetchTemplates, fetchArticles]);
+
+  const handleTemplateSelect = useCallback((template: Template) => {
     setSelectedTemplate(template);
     setShowSmartFill(true);
-  };
+  }, []);
 
-  const handleSmartFillComplete = async (data: Record<string, string>) => {
+  const handleSmartFillComplete = useCallback(async (data: Record<string, string>) => {
     if (!selectedTemplate) {
       console.error('No template selected');
       return;
@@ -189,12 +189,12 @@ const ImprovedHomepage: React.FC<ImprovedHomepageProps> = ({ onLogin, onSignPDF 
     } finally {
       setGeneratingPDF(false);
     }
-  };
+  }, [selectedTemplate, user]);
 
-  const handleSmartFillCancel = () => {
+  const handleSmartFillCancel = useCallback(() => {
     setShowSmartFill(false);
     setSelectedTemplate(null);
-  };
+  }, []);
 
   if (generatingPDF) {
     return (

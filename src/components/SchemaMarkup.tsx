@@ -1,17 +1,17 @@
-import React from 'react';
+import { memo } from 'react';
 
 interface SchemaMarkupProps {
   schema: Record<string, any>;
 }
 
-export function SchemaMarkup({ schema }: SchemaMarkupProps) {
+export const SchemaMarkup = memo(function SchemaMarkup({ schema }: SchemaMarkupProps) {
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />
   );
-}
+});
 
 export const ImmigrationFAQSchema = {
   "@context": "https://schema.org",

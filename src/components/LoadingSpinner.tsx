@@ -1,22 +1,10 @@
-/**
- * LoadingSpinner Component
- *
- * @description Displays a centered loading spinner with optional text
- * @component
- */
+import { memo } from 'react';
 
 interface LoadingSpinnerProps {
-  /** The text to display below the spinner */
   text?: string;
 }
 
-/**
- * A reusable loading spinner component with animation
- *
- * @param {LoadingSpinnerProps} props - Component props
- * @returns {JSX.Element} Loading spinner UI
- */
-export function LoadingSpinner({ text = 'Chargement...' }: LoadingSpinnerProps) {
+export const LoadingSpinner = memo(function LoadingSpinner({ text = 'Chargement...' }: LoadingSpinnerProps) {
   return (
     <div
       className="min-h-screen bg-white flex items-center justify-center"
@@ -33,4 +21,4 @@ export function LoadingSpinner({ text = 'Chargement...' }: LoadingSpinnerProps) 
       </div>
     </div>
   );
-}
+});

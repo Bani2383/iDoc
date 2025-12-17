@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { Users, FileText, PenTool, TrendingUp, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -14,7 +14,7 @@ interface LiveActivity {
   location: string;
 }
 
-export function StatsCounter() {
+export const StatsCounter = memo(function StatsCounter() {
   const { t } = useLanguage();
   const [stats, setStats] = useState<Statistic[]>([]);
   const [animatedValues, setAnimatedValues] = useState<Record<string, number>>({});
@@ -62,7 +62,7 @@ export function StatsCounter() {
     }
   }, [recentActivity]);
 
-  const generateLiveActivity = () => {
+  const generateLiveActivity = useCallback(() => {
     const locations = ['Montréal, QC', 'Toronto, ON', 'Vancouver, BC', 'Paris, FR', 'Québec, QC', 'Lyon, FR'];
     const documents = ['Contrat de Location', 'Bail Commercial', 'Contrat de Travail', 'NDA', 'Facture', 'Reçu'];
 
@@ -77,17 +77,17 @@ export function StatsCounter() {
     }
 
     setRecentActivity(activities.sort((a, b) => b.timestamp - a.timestamp));
-  };
+  }, []);
 
-  const getTimeAgo = (timestamp: number) => {
+  const getTimeAgo = useCallback((timestamp: number) => {
     const seconds = Math.floor((Date.now() - timestamp) / 1000);
     if (seconds < 60) return 'À l\'instant';
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `Il y a ${minutes} min`;
     return `Il y a ${Math.floor(minutes / 60)}h`;
-  };
+  }, []);
 
-  const animateValue = (key: string, end: number) => {
+  const animateValue = useCallback((key: string, end: number) => {
     const duration = 2000;
     const start = 0;
     const startTime = Date.now();
@@ -108,13 +108,13 @@ export function StatsCounter() {
     };
 
     requestAnimationFrame(animate);
-  };
+  }, []);
 
-  const formatNumber = (num: number): string => {
+  const formatNumber = useCallback((num: number): string => {
     return num.toLocaleString('fr-FR');
-  };
+  }, []);
 
-  const getStatConfig = (metricName: string) => {
+  const getStatConfig = useCallback((metricName: string) => {
     switch (metricName) {
       case 'total_visitors':
         return {
@@ -152,7 +152,12 @@ export function StatsCounter() {
           bgColor: 'bg-gray-50',
         };
     }
-  };
+  }, [t]);
+
+  const currentActivity = useMemo(() =>
+    recentActivity[currentActivityIndex],
+    [recentActivity, currentActivityIndex]
+  );
 
   if (stats.length === 0) {
     return null;
@@ -205,15 +210,15 @@ export function StatsCounter() {
                 <Zap className="w-5 h-5 text-green-600" />
                 <div className="flex-1">
                   <p className="text-gray-900 font-semibold">
-                    {recentActivity[currentActivityIndex].message}
+                    {currentActivity?.message}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {recentActivity[currentActivityIndex].location}
+                    {currentActivity?.location}
                   </p>
                 </div>
               </div>
               <span className="text-gray-500 text-sm font-medium whitespace-nowrap ml-4">
-                {getTimeAgo(recentActivity[currentActivityIndex].timestamp)}
+                {currentActivity && getTimeAgo(currentActivity.timestamp)}
               </span>
             </div>
           </div>
@@ -228,4 +233,4 @@ export function StatsCounter() {
       </div>
     </div>
   );
-}
+});

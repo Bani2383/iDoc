@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, TrendingUp, Users, Globe, Sparkles } from 'lucide-react';
+import { useState, useEffect, memo, useCallback } from 'react';
+import { FileText, TrendingUp, Globe, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface StatCard {
@@ -10,17 +10,11 @@ interface StatCard {
   gradient: string;
 }
 
-const TemplateStats: React.FC = () => {
+const TemplateStats = memo(function TemplateStats() {
   const [stats, setStats] = useState<StatCard[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-    const interval = setInterval(loadStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const { data: templates, error } = await supabase
         .from('document_templates')
@@ -70,7 +64,13 @@ const TemplateStats: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+    const interval = setInterval(loadStats, 30000);
+    return () => clearInterval(interval);
+  }, [loadStats]);
 
   if (loading) {
     return null;
@@ -167,6 +167,6 @@ const TemplateStats: React.FC = () => {
       `}</style>
     </section>
   );
-};
+});
 
 export default TemplateStats;
