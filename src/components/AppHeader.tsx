@@ -8,6 +8,7 @@
 import { useState, startTransition } from 'react';
 import { Menu, X, LogIn } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type ViewType = 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'generators' | 'generator-form' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy';
 
@@ -28,6 +29,7 @@ interface AppHeaderProps {
  */
 export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const handleViewChange = (view: ViewType) => {
     startTransition(() => onViewChange(view));
@@ -66,39 +68,34 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
               onClick={() => handleViewChange('landing')}
               className={navButtonClass}
               aria-current={currentView === 'landing' ? 'page' : undefined}
-              aria-label="Accéder à la page d'accueil"
             >
-              Accueil
+              {t('nav.home')}
             </button>
             <button
               onClick={() => handleViewChange('classic')}
               className={navButtonClass}
               aria-current={currentView === 'classic' ? 'page' : undefined}
-              aria-label="Accéder aux documents"
             >
-              Documents
+              {t('nav.documents')}
             </button>
             <button
               onClick={() => handleViewChange('signature')}
               className={navButtonClass}
               aria-current={currentView === 'signature' ? 'page' : undefined}
-              aria-label="Accéder à la signature de PDF"
             >
-              Signer un PDF
+              {t('nav.signature')}
             </button>
             <button
               onClick={() => handleViewChange('faq')}
               className={navButtonClass}
               aria-current={currentView === 'faq' ? 'page' : undefined}
-              aria-label="Accéder à la FAQ et démo"
             >
-              FAQ & Démo
+              {t('nav.faq')}
             </button>
             <button
               onClick={() => handleViewChange('articles')}
               className={navButtonClass}
               aria-current={currentView === 'articles' ? 'page' : undefined}
-              aria-label="Accéder au blog"
             >
               Blog
             </button>
@@ -110,17 +107,15 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
               aria-current={currentView === 'generators' || currentView === 'generator-form' ? 'page' : undefined}
-              aria-label="Accéder aux générateurs"
             >
-              Générateurs
+              {t('nav.templates')}
             </button>
             <button
               onClick={onShowAuth}
               className={`${navButtonClass} flex items-center space-x-2`}
-              aria-label="Se connecter"
             >
               <LogIn className="w-4 h-4" aria-hidden="true" />
-              <span>Connexion</span>
+              <span>{t('nav.login')}</span>
             </button>
             <LanguageSelector />
           </nav>
@@ -153,35 +148,30 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
               <button
                 onClick={() => handleViewChange('landing')}
                 className={`${navButtonClass} py-2 text-left`}
-                aria-label="Accéder à la page d'accueil"
               >
-                Accueil
+                {t('nav.home')}
               </button>
               <button
                 onClick={() => handleViewChange('classic')}
                 className={`${navButtonClass} py-2 text-left`}
-                aria-label="Accéder aux documents"
               >
-                Documents
+                {t('nav.documents')}
               </button>
               <button
                 onClick={() => handleViewChange('signature')}
                 className={`${navButtonClass} py-2 text-left`}
-                aria-label="Accéder à la signature de PDF"
               >
-                Signer un PDF
+                {t('nav.signature')}
               </button>
               <button
                 onClick={() => handleViewChange('faq')}
                 className={`${navButtonClass} py-2 text-left`}
-                aria-label="Accéder à la FAQ et démo"
               >
-                FAQ & Démo
+                {t('nav.faq')}
               </button>
               <button
                 onClick={() => handleViewChange('articles')}
                 className={`${navButtonClass} py-2 text-left`}
-                aria-label="Accéder au blog"
               >
                 Blog
               </button>
@@ -191,10 +181,9 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
                   setMobileMenuOpen(false);
                 }}
                 className={`${navButtonClass} py-2 flex items-center space-x-2`}
-                aria-label="Se connecter"
               >
                 <LogIn className="w-4 h-4" aria-hidden="true" />
-                <span>Connexion</span>
+                <span>{t('nav.login')}</span>
               </button>
             </nav>
           </div>
