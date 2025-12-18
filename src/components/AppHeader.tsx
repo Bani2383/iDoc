@@ -108,7 +108,7 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
               }`}
               aria-current={currentView === 'generators' || currentView === 'generator-form' ? 'page' : undefined}
             >
-              {t('nav.templates')}
+              {t('nav.generators')}
             </button>
             <button
               onClick={onShowAuth}
@@ -174,6 +174,12 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
                 className={`${navButtonClass} py-2 text-left`}
               >
                 Blog
+              </button>
+              <button
+                onClick={() => handleViewChange('generators')}
+                className={`${navButtonClass} py-2 text-left`}
+              >
+                {t('nav.generators')}
               </button>
               <button
                 onClick={() => {

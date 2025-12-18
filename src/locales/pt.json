@@ -27,7 +27,8 @@
     "logout": "Sair",
     "dashboard": "Painel",
     "profile": "Perfil",
-    "templates": "Modelos"
+    "templates": "Modelos",
+    "generators": "Geradores"
   },
   "hero": {
     "title": "Crie Documentos Profissionais em Segundos",

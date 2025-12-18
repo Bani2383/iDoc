@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Šablony"
+    "templates": "Šablony",
+    "generators": "Generátory"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

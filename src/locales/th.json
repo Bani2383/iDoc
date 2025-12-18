@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "เทมเพลต"
+    "templates": "เทมเพลต",
+    "generators": "เครื่องกำเนิด"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

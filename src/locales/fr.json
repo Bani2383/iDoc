@@ -27,7 +27,8 @@
     "logout": "Déconnexion",
     "dashboard": "Tableau de bord",
     "profile": "Profil",
-    "templates": "Modèles"
+    "templates": "Modèles",
+    "generators": "Générateurs"
   },
   "hero": {
     "title": "Créez des Documents Professionnels en Secondes",

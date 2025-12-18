@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Sjablonen"
+    "templates": "Sjablonen",
+    "generators": "Generatoren"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

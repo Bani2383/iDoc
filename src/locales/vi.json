@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Mẫu"
+    "templates": "Mẫu",
+    "generators": "Máy tạo"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

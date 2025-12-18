@@ -27,7 +27,8 @@
     "logout": "Cerrar Sesión",
     "dashboard": "Panel",
     "profile": "Perfil",
-    "templates": "Plantillas"
+    "templates": "Plantillas",
+    "generators": "Generadores"
   },
   "hero": {
     "title": "Crea Documentos Profesionales en Segundos",

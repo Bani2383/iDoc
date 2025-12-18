@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Templat"
+    "templates": "Templat",
+    "generators": "Penjana"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

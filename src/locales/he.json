@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "תבניות"
+    "templates": "תבניות",
+    "generators": "מחוללים"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

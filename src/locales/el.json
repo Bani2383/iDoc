@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Πρότυπα"
+    "templates": "Πρότυπα",
+    "generators": "Γεννήτριες"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

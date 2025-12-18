@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Mallit"
+    "templates": "Mallit",
+    "generators": "Generaattorit"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

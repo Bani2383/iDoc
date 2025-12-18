@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "قالب‌ها"
+    "templates": "قالب‌ها",
+    "generators": "مولدها"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

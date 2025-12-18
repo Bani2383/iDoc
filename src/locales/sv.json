@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "Mallar"
+    "templates": "Mallar",
+    "generators": "Generatorer"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",

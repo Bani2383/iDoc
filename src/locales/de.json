@@ -27,7 +27,8 @@
     "logout": "Abmelden",
     "dashboard": "Dashboard",
     "profile": "Profil",
-    "templates": "Vorlagen"
+    "templates": "Vorlagen",
+    "generators": "Generatoren"
   },
   "hero": {
     "title": "Erstellen Sie professionelle Dokumente in Sekunden",

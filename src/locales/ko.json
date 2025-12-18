@@ -27,7 +27,8 @@
     "logout": "Logout",
     "dashboard": "Dashboard",
     "profile": "Profile",
-    "templates": "템플릿"
+    "templates": "템플릿",
+    "generators": "생성기"
   },
   "hero": {
     "title": "Create Professional Documents in Seconds",
