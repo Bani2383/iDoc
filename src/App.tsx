@@ -53,6 +53,7 @@ const TermsOfUse = lazy(() => import('./components/LegalPages').then(m => ({ def
 const PrivacyPolicy = lazy(() => import('./components/LegalPages').then(m => ({ default: m.PrivacyPolicy })));
 const GeneratorBrowser = lazy(() => import('./components/GeneratorBrowser').then(m => ({ default: m.GeneratorBrowser })));
 const GeneratorForm = lazy(() => import('./components/GeneratorForm').then(m => ({ default: m.GeneratorForm })));
+const GuidedTemplateFlow = lazy(() => import('./components/GuidedTemplateFlow').then(m => ({ default: m.GuidedTemplateFlow })));
 
 /**
  * Main application component
@@ -66,7 +67,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
   const [selectedGeneratorId, setSelectedGeneratorId] = useState<string | null>(null);
@@ -96,6 +97,8 @@ function App() {
         setCurrentView('faq');
       } else if (view === 'generators') {
         setCurrentView('generators');
+      } else if (view === 'guided-templates') {
+        setCurrentView('guided-templates');
       }
     };
 
@@ -331,6 +334,12 @@ function App() {
                 setSelectedGeneratorId(null);
                 setCurrentView('generators');
               }}
+            />
+          </Suspense>
+        ) : currentView === 'guided-templates' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement des modèles guidés..." />}>
+            <GuidedTemplateFlow
+              onClose={() => setCurrentView('improved')}
             />
           </Suspense>
         ) : (

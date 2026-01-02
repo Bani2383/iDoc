@@ -10,7 +10,7 @@ import { Menu, X, LogIn } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { useLanguage } from '../contexts/LanguageContext';
 
-type ViewType = 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'generators' | 'generator-form' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy';
+type ViewType = 'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'generators' | 'generator-form' | 'guided-templates' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy';
 
 interface AppHeaderProps {
   /** Current view state */
@@ -111,6 +111,18 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
               {t('nav.generators')}
             </button>
             <button
+              onClick={() => handleViewChange('guided-templates')}
+              className={`px-3 py-2 rounded-md text-sm font-medium relative ${
+                currentView === 'guided-templates'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                  : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 border border-blue-200'
+              }`}
+              aria-current={currentView === 'guided-templates' ? 'page' : undefined}
+            >
+              Modèles guidés
+              <span className="ml-1 px-1.5 py-0.5 text-xs bg-green-500 text-white rounded-full">NEW</span>
+            </button>
+            <button
               onClick={onShowAuth}
               className={`${navButtonClass} flex items-center space-x-2`}
             >
@@ -180,6 +192,13 @@ export function AppHeader({ currentView, onViewChange, onShowAuth }: AppHeaderPr
                 className={`${navButtonClass} py-2 text-left`}
               >
                 {t('nav.generators')}
+              </button>
+              <button
+                onClick={() => handleViewChange('guided-templates')}
+                className={`${navButtonClass} py-2 text-left flex items-center gap-2`}
+              >
+                Modèles guidés
+                <span className="px-2 py-0.5 text-xs bg-green-500 text-white rounded-full">NEW</span>
               </button>
               <button
                 onClick={() => {
