@@ -1,19 +1,11 @@
-/**
- * CORS Configuration for Edge Functions
- *
- * Production: Only allow requests from id0c.com
- * Development: Allow localhost for local testing
- */
-
 const ALLOWED_ORIGINS = [
   'https://id0c.com',
   'https://www.id0c.com',
-  'http://localhost:5173', // Vite dev server
-  'http://localhost:3000', // Alternative dev port
+  'http://localhost:5173',
+  'http://localhost:3000',
 ];
 
 export function getCorsHeaders(origin?: string | null): Record<string, string> {
-  // Check if origin is in allowed list
   const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
     ? origin
     : ALLOWED_ORIGINS[0];

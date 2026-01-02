@@ -1,36 +1,17 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
 import { getCorsHeaders, handleCorsPreflightRequest } from '../_shared/cors.ts';
 
-interface LintRequest {
+interface PublishRequest {
   template_id: string;
-  inputs: Record<string, any>;
-  use_cache?: boolean;
+  force?: boolean;
 }
 
-interface LintResult {
+interface PublishResult {
   ok: boolean;
-  templateId: string;
-  varsUsed: string[];
-  unknownVars: string[];
-  hasPlaceholders: boolean;
-  sections?: {
-    sectionCode: string;
-    varsUsed: string[];
-    unknownVars: string[];
-  }[];
-  metadata?: {
-    requiredVariables: string[];
-    optionalVariables: string[];
-  };
-  cacheUsed?: boolean;
-}
-
-function uniq(arr: string[]): string[] {
-  return Array.from(new Set(arr));
-}
-
-function getValue(obj: Record<string, any>, path: string): any {
-  return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), obj);
+  published: boolean;
+  blocked?: boolean;
+  blockers?: string[];
+  warnings?: string[];
 }
 
 function extractVariables(content: string): string[] {
@@ -39,7 +20,6 @@ function extractVariables(content: string): string[] {
 
   for (const match of matches) {
     const inner = match.replace(/{{|}}/g, '').trim();
-
     if (inner.startsWith('#') || inner.startsWith('/')) continue;
 
     const tokens = inner.split(/\s+/).filter(Boolean);
@@ -58,20 +38,7 @@ function extractVariables(content: string): string[] {
     }
   }
 
-  return uniq(variables);
-}
-
-function findUnknownVariables(varsUsed: string[], data: Record<string, any>): string[] {
-  const unknown: string[] = [];
-
-  for (const varPath of varsUsed) {
-    const value = getValue(data, varPath);
-    if (value === undefined) {
-      unknown.push(varPath);
-    }
-  }
-
-  return uniq(unknown);
+  return Array.from(new Set(variables));
 }
 
 function hasPlaceholderText(content: string): boolean {
@@ -96,7 +63,6 @@ async function assertAdmin(req: Request, supabase: any): Promise<void> {
   }
 
   const token = authHeader.replace('Bearer ', '');
-
   const { data: { user }, error } = await supabase.auth.getUser(token);
 
   if (error || !user) {
@@ -138,8 +104,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const body: LintRequest = await req.json();
-    const { template_id, inputs, use_cache = true } = body;
+    const body: PublishRequest = await req.json();
+    const { template_id, force = false } = body;
 
     if (!template_id) {
       return new Response(
@@ -153,7 +119,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: template, error: templateError } = await supabase
       .from('idoc_guided_templates')
-      .select('template_code, template_content, required_variables, optional_variables, vars_used_cache, vars_cache_updated_at, updated_at')
+      .select('id, template_code, template_content, published, required_variables')
       .eq('id', template_id)
       .maybeSingle();
 
@@ -167,93 +133,68 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const data = { inputs };
-
-    const cacheValid = use_cache &&
-      template.vars_used_cache &&
-      template.vars_cache_updated_at &&
-      template.updated_at &&
-      new Date(template.vars_cache_updated_at) >= new Date(template.updated_at);
-
-    let varsUsed: string[];
-    let cacheUsed = false;
-
-    if (cacheValid) {
-      varsUsed = Array.isArray(template.vars_used_cache) ? template.vars_used_cache : [];
-      cacheUsed = true;
-    } else {
-      let mainContent = '';
-      if (typeof template.template_content === 'string') {
-        mainContent = template.template_content;
-      } else if (template.template_content && typeof template.template_content === 'object') {
-        mainContent = JSON.stringify(template.template_content);
-      }
-
-      varsUsed = extractVariables(mainContent);
-
-      supabase
-        .from('idoc_guided_templates')
-        .update({
-          vars_used_cache: varsUsed,
-          vars_cache_updated_at: new Date().toISOString(),
-        })
-        .eq('id', template_id)
-        .then(() => console.log(`Cache updated for template ${template_id}`))
-        .catch(err => console.error('Cache update failed:', err));
-    }
-
-    const unknownVars = findUnknownVariables(varsUsed, data);
-
     let mainContent = '';
     if (typeof template.template_content === 'string') {
       mainContent = template.template_content;
     } else if (template.template_content && typeof template.template_content === 'object') {
       mainContent = JSON.stringify(template.template_content);
     }
+
+    const varsUsed = extractVariables(mainContent);
     const hasPlaceholders = hasPlaceholderText(mainContent);
 
-    const { data: sections, error: sectionsError } = await supabase
-      .from('idoc_template_section_mapping')
-      .select(`
-        section_id,
-        idoc_template_sections(section_code, content)
-      `)
-      .eq('template_id', template_id);
+    const unknownVars = varsUsed.filter(varName =>
+      varName.includes('TODO') ||
+      varName.includes('FIXME') ||
+      varName.includes('XXX') ||
+      varName.includes('undefined')
+    );
 
-    const sectionAnalysis: LintResult['sections'] = [];
+    const blockers: string[] = [];
+    const warnings: string[] = [];
 
-    if (!sectionsError && sections) {
-      for (const mapping of sections) {
-        const section = (mapping as any).idoc_template_sections;
-        if (section && section.content) {
-          const sectionContent = typeof section.content === 'string'
-            ? section.content
-            : JSON.stringify(section.content);
-
-          const sectionVarsUsed = extractVariables(sectionContent);
-          const sectionUnknownVars = findUnknownVariables(sectionVarsUsed, data);
-
-          sectionAnalysis.push({
-            sectionCode: section.section_code,
-            varsUsed: sectionVarsUsed,
-            unknownVars: sectionUnknownVars,
-          });
-        }
-      }
+    if (unknownVars.length > 0) {
+      blockers.push(`Template contains ${unknownVars.length} suspicious variable(s): ${unknownVars.join(', ')}`);
     }
 
-    const result: LintResult = {
+    if (hasPlaceholders) {
+      blockers.push('Template contains placeholder text (TODO, FIXME, etc.)');
+    }
+
+    if (!template.required_variables || template.required_variables.length === 0) {
+      warnings.push('No required variables defined');
+    }
+
+    if (blockers.length > 0 && !force) {
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          published: false,
+          blocked: true,
+          blockers,
+          warnings,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    const { error: updateError } = await supabase
+      .from('idoc_guided_templates')
+      .update({ published: true })
+      .eq('id', template_id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    const result: PublishResult = {
       ok: true,
-      templateId: template.template_code,
-      varsUsed,
-      unknownVars,
-      hasPlaceholders,
-      sections: sectionAnalysis,
-      metadata: {
-        requiredVariables: template.required_variables || [],
-        optionalVariables: template.optional_variables || [],
-      },
-      cacheUsed,
+      published: true,
+      blocked: false,
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
 
     return new Response(JSON.stringify(result), {
@@ -261,7 +202,7 @@ Deno.serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {
-    console.error('Lint Error:', error);
+    console.error('Publish Error:', error);
 
     const status = error.message?.includes('Admin') ? 403 : 500;
 
