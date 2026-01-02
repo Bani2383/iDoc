@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Search, Play, CheckCircle, XCircle, AlertTriangle, FileText, Download, Zap, Square, CheckSquare, Shuffle, RefreshCw } from 'lucide-react';
+import { Code, Search, Play, CheckCircle, XCircle, AlertTriangle, FileText, Download, Zap, Square, CheckSquare, Shuffle, RefreshCw, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -25,6 +25,26 @@ interface LintResult {
   score: number;
 }
 
+interface PreviewResult {
+  template_id: string;
+  template_code: string;
+  changes_proposed: {
+    placeholders_to_remove: string[];
+    variables_to_add: Array<{
+      name: string;
+      type: string;
+      label: { en: string; fr: string };
+    }>;
+    status_change: { from: string; to: string };
+  };
+  before: {
+    hasPlaceholders: boolean;
+    unknownVars: string[];
+    status: string;
+  };
+  issues_count: number;
+}
+
 export const UnifiedTemplateLabLinter: React.FC = () => {
   const { profile } = useAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -37,8 +57,10 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'selection' | 'results'>('selection');
+  const [viewMode, setViewMode] = useState<'selection' | 'results' | 'preview'>('selection');
   const [randomCount, setRandomCount] = useState(10);
+  const [previewResults, setPreviewResults] = useState<PreviewResult[]>([]);
+  const [previewing, setPreviewing] = useState(false);
 
   useEffect(() => {
     if (profile?.role === 'admin') {
@@ -228,11 +250,11 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
 
   const autoFixSelected = async () => {
     if (selectedIds.size === 0) {
-      alert('Selectionnez au moins un template');
+      alert('Veuillez sélectionner au moins un template à valider');
       return;
     }
 
-    if (!confirm(`Auto-corriger ${selectedIds.size} template(s)?\n\nCeci va:\n- Supprimer les placeholders TODO/FIXME\n- Ajouter les variables manquantes\n- Mettre a jour le statut`)) {
+    if (!confirm(`Validation automatique de ${selectedIds.size} template(s)\n\nActions de correction:\n• Suppression des placeholders (TODO, FIXME)\n• Ajout des variables manquantes aux métadonnées\n• Mise à jour du statut de validation\n\nConfirmer l'application de ces corrections?`)) {
       return;
     }
 
@@ -331,9 +353,100 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     }
 
     setLinting(false);
-    alert(`Auto-correction terminee!\n\n✅ Corriges: ${fixed}\n❌ Echecs: ${failed}`);
+    alert(`Validation automatique terminée\n\n✓ Templates validés et corrigés: ${fixed}\n✗ Échecs de validation: ${failed}\n\nLes templates ont été mis à jour dans la base de données.`);
 
     await fetchAllTemplates();
+  };
+
+  const previewValidation = async () => {
+    if (selectedIds.size === 0) {
+      alert('Veuillez sélectionner au moins un template à prévisualiser');
+      return;
+    }
+
+    setPreviewing(true);
+    setViewMode('preview');
+    const previews: PreviewResult[] = [];
+
+    for (const templateId of Array.from(selectedIds)) {
+      const template = templates.find(t => t.id === templateId);
+      if (!template || template.source !== 'idoc_guided_templates') {
+        continue;
+      }
+
+      try {
+        const { data: currentTemplate } = await supabase
+          .from('idoc_guided_templates')
+          .select('*')
+          .eq('id', templateId)
+          .maybeSingle();
+
+        if (!currentTemplate) {
+          continue;
+        }
+
+        const placeholdersToRemove: string[] = [];
+        const variablesToAdd: Array<{ name: string; type: string; label: { en: string; fr: string } }> = [];
+
+        let contentStr = getContentString(currentTemplate.template_content);
+
+        const placeholderPatterns = [
+          { pattern: /\[TODO\]/gi, name: '[TODO]' },
+          { pattern: /\[FIXME\]/gi, name: '[FIXME]' },
+          { pattern: /\[XXX\]/gi, name: '[XXX]' },
+          { pattern: /TODO:/gi, name: 'TODO:' },
+          { pattern: /FIXME:/gi, name: 'FIXME:' },
+        ];
+
+        for (const { pattern, name } of placeholderPatterns) {
+          const matches = contentStr.match(pattern);
+          if (matches && matches.length > 0) {
+            placeholdersToRemove.push(`${name} (${matches.length}x)`);
+          }
+        }
+
+        const result = lintTemplate({ ...template, content_template: contentStr });
+
+        const updatedOptional = currentTemplate.optional_variables || { fields: [] };
+        const existingNames = (updatedOptional.fields || []).map((f: any) => f.name || f);
+
+        for (const varName of result.unknownVars) {
+          if (!existingNames.includes(varName)) {
+            variablesToAdd.push({
+              name: varName,
+              type: 'text',
+              label: { en: varName, fr: varName }
+            });
+          }
+        }
+
+        const issuesCount = placeholdersToRemove.length + variablesToAdd.length;
+        const statusWillChange = issuesCount > 0;
+
+        previews.push({
+          template_id: templateId,
+          template_code: currentTemplate.template_code,
+          changes_proposed: {
+            placeholders_to_remove: placeholdersToRemove,
+            variables_to_add: variablesToAdd,
+            status_change: statusWillChange
+              ? { from: currentTemplate.status || 'draft', to: 'verified' }
+              : { from: currentTemplate.status || 'draft', to: currentTemplate.status || 'draft' }
+          },
+          before: {
+            hasPlaceholders: placeholdersToRemove.length > 0,
+            unknownVars: result.unknownVars,
+            status: currentTemplate.status || 'draft'
+          },
+          issues_count: issuesCount
+        });
+      } catch (error) {
+        console.error('Preview error:', error);
+      }
+    }
+
+    setPreviewResults(previews);
+    setPreviewing(false);
   };
 
   const getContentString = (content: any): string => {
@@ -452,8 +565,8 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                 <Zap className="w-8 h-8" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Template Lab & Linter</h1>
-                <p className="text-blue-100 mt-1">Sélectionnez et analysez vos documents</p>
+                <h1 className="text-3xl font-bold">Centre de Validation des Templates</h1>
+                <p className="text-blue-100 mt-1">Validation et conformité des documents administratifs</p>
               </div>
             </div>
             <button
@@ -586,7 +699,7 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
 
                 <button
                   onClick={handleLintSelected}
-                  disabled={linting || selectedIds.size === 0}
+                  disabled={linting || previewing || selectedIds.size === 0}
                   className="ml-auto bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
                 >
                   {linting ? (
@@ -603,9 +716,29 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                 </button>
 
                 <button
+                  onClick={previewValidation}
+                  disabled={linting || previewing || selectedIds.size === 0}
+                  className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                  title="Prévisualiser les corrections sans les appliquer"
+                >
+                  {previewing ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Prévisualisation...
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-5 h-5" />
+                      PRÉVISUALISER {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+                    </>
+                  )}
+                </button>
+
+                <button
                   onClick={autoFixSelected}
-                  disabled={linting || selectedIds.size === 0}
+                  disabled={linting || previewing || selectedIds.size === 0}
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                  title="Appliquer les corrections automatiquement"
                 >
                   {linting ? (
                     <>
@@ -615,7 +748,7 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                   ) : (
                     <>
                       <Zap className="w-5 h-5" />
-                      AUTO-CORRIGER {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+                      VALIDER ET CORRIGER {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
                     </>
                   )}
                 </button>
@@ -684,6 +817,152 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                 <p className="text-gray-600">Essayez de modifier vos filtres</p>
               </div>
             )}
+          </>
+        ) : viewMode === 'preview' ? (
+          <>
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Prévisualisation des Corrections</h2>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setViewMode('selection');
+                      setPreviewResults([]);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={() => {
+                      setViewMode('selection');
+                      autoFixSelected();
+                    }}
+                    disabled={previewResults.filter(p => p.issues_count > 0).length === 0}
+                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-bold"
+                  >
+                    <Zap className="w-5 h-5" />
+                    Appliquer les Corrections
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Templates Analysés</p>
+                  <p className="text-3xl font-bold text-gray-900">{previewResults.length}</p>
+                </div>
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <p className="text-sm text-yellow-600 mb-1">Corrections Requises</p>
+                  <p className="text-3xl font-bold text-yellow-600">
+                    {previewResults.filter(p => p.issues_count > 0).length}
+                  </p>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <p className="text-sm text-green-600 mb-1">Templates Conformes</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {previewResults.filter(p => p.issues_count === 0).length}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-900">
+                  <strong>Mode Prévisualisation:</strong> Aucune modification ne sera appliquée.
+                  Consultez les corrections proposées ci-dessous, puis cliquez sur "Appliquer les Corrections"
+                  pour valider et mettre à jour les templates.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {previewResults.map((preview) => (
+                <div key={preview.template_id} className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">{preview.template_code}</h3>
+                      <span className="text-sm text-gray-500">ID: {preview.template_id.substring(0, 12)}...</span>
+                    </div>
+                    <div className="text-right">
+                      {preview.issues_count === 0 ? (
+                        <div className="flex items-center gap-2 text-green-600">
+                          <CheckCircle className="w-6 h-6" />
+                          <span className="text-lg font-bold">CONFORME</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-yellow-600">
+                          <AlertTriangle className="w-6 h-6" />
+                          <span className="text-lg font-bold">{preview.issues_count} CORRECTIONS</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {preview.issues_count > 0 && (
+                    <div className="space-y-4">
+                      {preview.changes_proposed.placeholders_to_remove.length > 0 && (
+                        <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                          <h4 className="text-sm font-bold text-red-900 mb-3">
+                            Placeholders à Supprimer ({preview.changes_proposed.placeholders_to_remove.length})
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {preview.changes_proposed.placeholders_to_remove.map((ph, idx) => (
+                              <code key={idx} className="px-3 py-1 bg-red-100 text-red-800 text-xs font-mono rounded">
+                                {ph}
+                              </code>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preview.changes_proposed.variables_to_add.length > 0 && (
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="text-sm font-bold text-blue-900 mb-3">
+                            Variables à Ajouter ({preview.changes_proposed.variables_to_add.length})
+                          </h4>
+                          <div className="space-y-2">
+                            {preview.changes_proposed.variables_to_add.map((v, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-sm">
+                                <code className="px-2 py-1 bg-blue-100 text-blue-800 font-mono rounded">
+                                  {v.name}
+                                </code>
+                                <span className="text-gray-500">→</span>
+                                <span className="text-gray-700">Type: {v.type}</span>
+                                <span className="text-gray-500">•</span>
+                                <span className="text-gray-700">Label: {v.label.fr}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {preview.changes_proposed.status_change.from !== preview.changes_proposed.status_change.to && (
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <h4 className="text-sm font-bold text-green-900 mb-2">Changement de Statut</h4>
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded font-medium">
+                              {preview.changes_proposed.status_change.from}
+                            </span>
+                            <span className="text-gray-500">→</span>
+                            <span className="px-3 py-1 bg-green-100 text-green-800 rounded font-medium">
+                              {preview.changes_proposed.status_change.to}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {preview.issues_count === 0 && (
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-800">
+                        ✓ Ce template est conforme. Aucune correction n'est nécessaire.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </>
         ) : (
           <>

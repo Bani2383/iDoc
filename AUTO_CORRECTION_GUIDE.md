@@ -1,14 +1,26 @@
-# Guide d'Auto-Correction des Templates
+# Guide du Centre de Validation des Templates
 
 ## Vue d'ensemble
 
-Le systeme d'auto-correction detecte et corrige automatiquement les problemes dans vos templates iDoc.
+Le Centre de Validation des Templates offre un système professionnel de validation et de correction automatique pour assurer la conformité de vos templates iDoc.
 
-## Acces
+## Accès
 
-**Admin Dashboard > Lab & Linter Unifie**
+**Admin Dashboard > Centre de Validation des Templates**
 
-## Fonctionnalites d'Auto-Correction
+## Fonctionnalités
+
+### Mode Prévisualisation (Dry-Run)
+
+**NOUVEAU**: Prévisualisez les corrections avant de les appliquer!
+
+Le mode prévisualisation vous permet de:
+- Voir toutes les corrections proposées
+- Examiner les changements template par template
+- Approuver ou annuler avant application
+- **Aucune modification en base de données**
+
+### Fonctionnalités de Validation Automatique
 
 ### 1. Suppression des Placeholders
 
@@ -40,25 +52,37 @@ Apres correction:
 
 ## Mode d'Emploi
 
-### Etape 1: Selectionner les Templates
+### Étape 1: Sélectionner les Templates
 
-**Option A: Selection Manuelle**
+**Option A: Sélection Manuelle**
 ```
 1. Cocher les cartes des templates
-2. OU cliquer sur [Tout Selectionner]
+2. OU cliquer sur [Tout Sélectionner]
 ```
 
-**Option B: Selection Aleatoire**
+**Option B: Sélection Aléatoire**
 ```
 1. Entrer le nombre: [10]
-2. Cliquer [Selection Aleatoire]
+2. Cliquer [Sélection Aléatoire]
 ```
 
-### Etape 2: Auto-Corriger
+### Étape 2: Choisir le Mode de Validation
 
+**Option A: Prévisualisation (Recommandé)**
 ```
-1. Cliquer [AUTO-CORRIGER (N)]
-2. Confirmer l'operation
+1. Cliquer [PRÉVISUALISER (N)]
+2. Examiner les corrections proposées
+3. Vérifier template par template:
+   - Placeholders à supprimer
+   - Variables à ajouter
+   - Changements de statut
+4. Cliquer [Appliquer les Corrections] ou [Annuler]
+```
+
+**Option B: Validation Directe**
+```
+1. Cliquer [VALIDER ET CORRIGER (N)]
+2. Confirmer l'opération
 3. Attendre le traitement
 4. Voir le rapport final
 ```

@@ -142,7 +142,7 @@ export function AdminDashboard() {
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Contenu</p>
           </div>
           <NavButton tab="templates" icon={FileText} label="Modèles" active={activeTab === 'templates'} />
-          <NavButton tab="template-lab" icon={Code} label="Lab & Linter Unifié" active={activeTab === 'template-lab'} />
+          <NavButton tab="template-lab" icon={Code} label="Centre de Validation des Templates" active={activeTab === 'template-lab'} />
           <NavButton tab="articles" icon={BookOpen} label="Articles / Blog" active={activeTab === 'articles'} />
 
           <div className="pt-4 pb-2">
