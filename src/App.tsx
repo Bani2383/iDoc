@@ -54,6 +54,7 @@ const GeneratorBrowser = lazy(() => import('./components/GeneratorBrowser').then
 const GeneratorForm = lazy(() => import('./components/GeneratorForm').then(m => ({ default: m.GeneratorForm })));
 const GuidedTemplateFlow = lazy(() => import('./components/GuidedTemplateFlow').then(m => ({ default: m.GuidedTemplateFlow })));
 const IdocWizard = lazy(() => import('./components/IdocWizard').then(m => ({ default: m.IdocWizard })));
+const SeoModelPage = lazy(() => import('./components/SeoModelPage'));
 
 /**
  * Main application component
@@ -67,10 +68,11 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates' | 'idoc-wizard'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates' | 'idoc-wizard' | 'seo-model'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
   const [selectedGeneratorId, setSelectedGeneratorId] = useState<string | null>(null);
+  const [seoModelSlug, setSeoModelSlug] = useState<string | null>(null);
 
   usePageTracking(currentView, {
     enabled: true,
@@ -89,6 +91,9 @@ function App() {
       } else if (view === 'article' && slug) {
         setArticleSlug(slug);
         setCurrentView('article-detail');
+      } else if (view === 'seo-model' && slug) {
+        setSeoModelSlug(slug);
+        setCurrentView('seo-model');
       } else if (view === 'improved') {
         setCurrentView('improved');
       } else if (view === 'subscriptions') {
@@ -104,6 +109,15 @@ function App() {
 
     window.addEventListener('navigate', handleNavigate as EventListener);
     return () => window.removeEventListener('navigate', handleNavigate as EventListener);
+  }, []);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith('/modele/')) {
+      const slug = path.replace('/modele/', '');
+      setSeoModelSlug(slug);
+      setCurrentView('seo-model');
+    }
   }, []);
 
   /**
@@ -348,6 +362,10 @@ function App() {
               }}
               onCancel={() => setCurrentView('improved')}
             />
+          </Suspense>
+        ) : currentView === 'seo-model' && seoModelSlug ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement du modèle..." />}>
+            <SeoModelPage slug={seoModelSlug} />
           </Suspense>
         ) : (
           <ClassicView

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { getSeoPageBySlug, getSeoPagesBySilo } from '../idoc/seo/slugs';
-import SchemaMarkup from './SchemaMarkup';
+import { SchemaMarkup } from './SchemaMarkup';
 
 interface SeoModelPageProps {
   slug: string;
