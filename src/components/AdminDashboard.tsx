@@ -11,7 +11,7 @@ import { AdminBillingDashboard } from './AdminBillingDashboard';
 import { AdminAccountingPanel } from './AdminAccountingPanel';
 import { AdminInvoicesPanel } from './AdminInvoicesPanel';
 import { DossiersModule } from './DossiersModule';
-import { UnifiedTemplateLab } from './UnifiedTemplateLab';
+import { UnifiedTemplateLabLinter } from './UnifiedTemplateLabLinter';
 import { UserManagementHub } from './UserManagementHub';
 import AdminArticlesManager from './AdminArticlesManager';
 import PageVisitsHistory from './PageVisitsHistory';
@@ -142,7 +142,7 @@ export function AdminDashboard() {
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Contenu</p>
           </div>
           <NavButton tab="templates" icon={FileText} label="Modèles" active={activeTab === 'templates'} />
-          <NavButton tab="template-lab" icon={Beaker} label="Lab & Linter" active={activeTab === 'template-lab'} />
+          <NavButton tab="template-lab" icon={Code} label="Lab & Linter Unifié" active={activeTab === 'template-lab'} />
           <NavButton tab="articles" icon={BookOpen} label="Articles / Blog" active={activeTab === 'articles'} />
 
           <div className="pt-4 pb-2">
@@ -208,7 +208,7 @@ export function AdminDashboard() {
           ) : activeTab === 'dossiers' ? (
             <DossiersModule />
           ) : activeTab === 'template-lab' ? (
-            <UnifiedTemplateLab />
+            <UnifiedTemplateLabLinter />
           ) : activeTab === 'articles' ? (
             <AdminArticlesManager />
           ) : (
