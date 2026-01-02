@@ -31,11 +31,11 @@ function uniq(arr: string[]): string[] {
 }
 
 function extractVariables(content: string): string[] {
-  const matches = content.match(/{\{\s*[^}]+\s*}}/g) || [];
+  const matches = content.match(/\{\{\s*[^}]+\s*\}\}/g) || [];
   const variables: string[] = [];
 
   for (const match of matches) {
-    const inner = match.replace(/{{|}}/g, '').trim();
+    const inner = match.replace(/\{\{|\}\}/g, '').trim();
     if (inner.startsWith('#') || inner.startsWith('/')) continue;
 
     const tokens = inner.split(/\s+/).filter(Boolean);
@@ -47,7 +47,7 @@ function extractVariables(content: string): string[] {
 
     for (const token of tokens) {
       if (token.includes('.') || /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(token)) {
-        if (!['if', 'each', 'with', 'unless', 'eq', 'ne', 'gt', 'lt', 'and', 'or', 'not'].includes(token)) {
+        if (!['if', 'each', 'with', 'unless', 'eq', 'ne', 'gt', 'lt', 'and', 'or', 'not', 'boolFR', 'this'].includes(token)) {
           variables.push(token);
         }
       }
@@ -238,6 +238,7 @@ Deno.serve(async (req: Request) => {
   } catch (error: any) {
     console.error('Batch Lint Error:', error);
 
+    const corsHeaders = getCorsHeaders(req.headers.get('origin'));
     const status = error.message?.includes('Admin') ? 403 : 500;
 
     return new Response(
