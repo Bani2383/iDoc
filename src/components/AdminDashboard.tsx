@@ -3,7 +3,6 @@ import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, L
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { TemplateManager } from './TemplateManager';
 import { LoginStatsManager } from './LoginStatsManager';
 import { SiteSettingsManager } from './SiteSettingsManager';
 import PRDExportButton from './PRDExportButton';
@@ -11,9 +10,8 @@ import { AdminBillingDashboard } from './AdminBillingDashboard';
 import { AdminAccountingPanel } from './AdminAccountingPanel';
 import { AdminInvoicesPanel } from './AdminInvoicesPanel';
 import { DossiersModule } from './DossiersModule';
-import { UnifiedTemplateLabLinter } from './UnifiedTemplateLabLinter';
 import { UserManagementHub } from './UserManagementHub';
-import AdminArticlesManager from './AdminArticlesManager';
+import { CentreValidation } from './CentreValidation';
 import PageVisitsHistory from './PageVisitsHistory';
 
 interface Stats {
@@ -39,7 +37,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles' | 'visits'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'validation' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'visits'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -141,9 +139,7 @@ export function AdminDashboard() {
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Contenu</p>
           </div>
-          <NavButton tab="templates" icon={FileText} label="Modèles" active={activeTab === 'templates'} />
-          <NavButton tab="template-lab" icon={Code} label="Centre de Validation des Templates" active={activeTab === 'template-lab'} />
-          <NavButton tab="articles" icon={BookOpen} label="Articles / Blog" active={activeTab === 'articles'} />
+          <NavButton tab="validation" icon={Code} label="Centre de Validation" active={activeTab === 'validation'} />
 
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</p>
@@ -189,8 +185,8 @@ export function AdminDashboard() {
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {activeTab === 'templates' ? (
-            <TemplateManager />
+          {activeTab === 'validation' ? (
+            <CentreValidation />
           ) : activeTab === 'users' ? (
             <UserManagementHub />
           ) : activeTab === 'stats' ? (
@@ -207,10 +203,6 @@ export function AdminDashboard() {
             <AdminInvoicesPanel />
           ) : activeTab === 'dossiers' ? (
             <DossiersModule />
-          ) : activeTab === 'template-lab' ? (
-            <UnifiedTemplateLabLinter />
-          ) : activeTab === 'articles' ? (
-            <AdminArticlesManager />
           ) : (
             <>
               <div className="mb-8">
