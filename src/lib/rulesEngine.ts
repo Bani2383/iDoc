@@ -406,69 +406,86 @@ export class RulesEngine {
   }
 
   /**
-   * Intelligently maps free text input to document type and subtype
+   * Intelligently maps free text input to document type and subtype (Enhanced NLP)
    */
   static interpretFreeText(text: string): Partial<GuidedTemplateInputs> {
-    const lowerText = text.toLowerCase().trim();
+    const normalized = (text || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    // Visa visiteur
-    if (lowerText.includes('visa visiteur') || lowerText.includes('tourist visa')) {
+    const hasAny = (keywords: string[]) => keywords.some(k => normalized.includes(k));
+
+    // Visa visiteur (high confidence)
+    if (hasAny(['visa visiteur', 'visitor visa', 'tourist visa', 'visa tourisme', 'voyage touristique'])) {
       return { document_type: 'VISA_VISITEUR_UNIVERSEL' };
     }
 
     // Invitation
-    if (lowerText.includes('invitation') || lowerText.includes('lettre d\'invitation')) {
+    if (hasAny(['invitation', 'lettre d invitation', 'host letter', 'inviter', 'heberger'])) {
       return { document_type: 'INVITATION' };
     }
 
     // Réponse à une lettre
-    if (lowerText.includes('répondre') || lowerText.includes('réponse à') || lowerText.includes('document manquant')) {
+    if (hasAny(['repondre', 'reponse', 'document manquant', 'clarification', 'additional documents', 'fairness'])) {
       return { document_type: 'REPONSE_LETTRE' };
     }
 
-    // Refus
-    if (lowerText.includes('refus')) {
-      return {
-        document_type: 'LETTRE_EXPLICATIVE_GENERIQUE',
-        sous_type_lettre: 'REFUS'
-      };
+    // IRCC / Immigration Canada
+    if (hasAny(['ircc', 'express entry', 'entree express', 'cec', 'experience canadienne', 'immigration canada'])) {
+      return { document_type: 'IMMIGRATION_LETTRE', autorite: 'IRCC' };
     }
 
-    // Fonds
-    if (lowerText.includes('fonds') || lowerText.includes('insuffisant') || lowerText.includes('argent')) {
-      return {
-        document_type: 'LETTRE_EXPLICATIVE_GENERIQUE',
-        sous_type_lettre: 'FONDS'
-      };
+    // CAQ / Québec
+    if (hasAny(['caq', 'mifi', 'quebec', 'intention de refus', 'etudes quebec'])) {
+      return { document_type: 'IMMIGRATION_LETTRE', autorite: 'CAQ' };
     }
 
-    // Attaches
-    if (lowerText.includes('attache') || lowerText.includes('lien') || lowerText.includes('retour')) {
-      return {
-        document_type: 'LETTRE_EXPLICATIVE_GENERIQUE',
-        sous_type_lettre: 'ATTACHES'
-      };
+    // Refus (high priority)
+    if (hasAny(['refus', 'refuse', 'refused', 'denial', 'rejected', 'rejet'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'REFUS' };
     }
 
-    // IRCC / CAQ
-    if (lowerText.includes('ircc') || lowerText.includes('immigration canada')) {
-      return {
-        document_type: 'IMMIGRATION_LETTRE',
-        autorite: 'IRCC'
-      };
+    // Fonds / Finances
+    if (hasAny(['fonds', 'argent', 'finances', 'bank', 'financial', 'proof of funds', 'ressources', 'insuffisant'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'FONDS' };
     }
 
-    if (lowerText.includes('caq') || lowerText.includes('québec')) {
-      return {
-        document_type: 'IMMIGRATION_LETTRE',
-        autorite: 'CAQ'
-      };
+    // Attaches / Liens / Retour
+    if (hasAny(['attaches', 'liens', 'ties', 'return', 'retour', 'quitter', 'intention de quitter'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'ATTACHES' };
+    }
+
+    // Emploi / Travail
+    if (hasAny(['emploi', 'travail', 'job', 'work', 'employment', 'employeur', 'contrat'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'ACTIVITE_PRO' };
+    }
+
+    // Historique voyage
+    if (hasAny(['voyage', 'travel history', 'historique', 'visas precedents'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'HISTORIQUE_VOYAGE' };
+    }
+
+    // Erreur / Omission
+    if (hasAny(['erreur', 'mistake', 'omission', 'incorrect', 'correction'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'ERREUR' };
+    }
+
+    // Hébergement
+    if (hasAny(['hebergement', 'hotel', 'logement', 'adresse'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'HEBERGEMENT' };
+    }
+
+    // Assurance
+    if (hasAny(['assurance', 'insurance', 'medical coverage'])) {
+      return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'ASSURANCE' };
     }
 
     // Default: generic letter
-    return {
-      document_type: 'LETTRE_EXPLICATIVE_GENERIQUE'
-    };
+    return { document_type: 'LETTRE_EXPLICATIVE_GENERIQUE', sous_type_lettre: 'OBJET_SEJOUR' };
   }
 
   /**
