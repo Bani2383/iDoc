@@ -226,6 +226,122 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     setLinting(false);
   };
 
+  const autoFixSelected = async () => {
+    if (selectedIds.size === 0) {
+      alert('Selectionnez au moins un template');
+      return;
+    }
+
+    if (!confirm(`Auto-corriger ${selectedIds.size} template(s)?\n\nCeci va:\n- Supprimer les placeholders TODO/FIXME\n- Ajouter les variables manquantes\n- Mettre a jour le statut`)) {
+      return;
+    }
+
+    setLinting(true);
+    let fixed = 0;
+    let failed = 0;
+
+    for (const templateId of Array.from(selectedIds)) {
+      const template = templates.find(t => t.id === templateId);
+      if (!template || template.source !== 'idoc_guided_templates') {
+        failed++;
+        continue;
+      }
+
+      try {
+        const { data: currentTemplate } = await supabase
+          .from('idoc_guided_templates')
+          .select('*')
+          .eq('id', templateId)
+          .maybeSingle();
+
+        if (!currentTemplate) {
+          failed++;
+          continue;
+        }
+
+        let updatedContent = currentTemplate.template_content;
+        let updatedRequired = currentTemplate.required_variables || { fields: [] };
+        let updatedOptional = currentTemplate.optional_variables || { fields: [] };
+        let changesMade = false;
+
+        if (typeof updatedContent === 'string') {
+          const cleanedContent = updatedContent
+            .replace(/\[TODO\]/gi, '')
+            .replace(/\[FIXME\]/gi, '')
+            .replace(/\[XXX\]/gi, '')
+            .replace(/TODO:/gi, '')
+            .replace(/FIXME:/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          if (cleanedContent !== updatedContent) {
+            updatedContent = cleanedContent;
+            changesMade = true;
+          }
+        }
+
+        const result = lintTemplate({ ...template, content_template: getContentString(updatedContent) });
+
+        if (result.unknownVars.length > 0) {
+          if (!updatedOptional.fields) {
+            updatedOptional.fields = [];
+          }
+
+          const existingNames = updatedOptional.fields.map((f: any) => f.name || f);
+
+          for (const varName of result.unknownVars) {
+            if (!existingNames.includes(varName)) {
+              updatedOptional.fields.push({
+                name: varName,
+                type: 'text',
+                label: { en: varName, fr: varName },
+                required: false,
+                placeholder: { en: `Enter ${varName}`, fr: `Saisissez ${varName}` }
+              });
+              changesMade = true;
+            }
+          }
+        }
+
+        if (changesMade) {
+          const { error } = await supabase
+            .from('idoc_guided_templates')
+            .update({
+              template_content: updatedContent,
+              optional_variables: updatedOptional,
+              status: 'verified',
+              last_verified_at: new Date().toISOString(),
+              verification_required: false
+            })
+            .eq('id', templateId);
+
+          if (error) {
+            console.error('Auto-fix error:', error);
+            failed++;
+          } else {
+            fixed++;
+          }
+        } else {
+          fixed++;
+        }
+      } catch (error) {
+        console.error('Auto-fix exception:', error);
+        failed++;
+      }
+    }
+
+    setLinting(false);
+    alert(`Auto-correction terminee!\n\n✅ Corriges: ${fixed}\n❌ Echecs: ${failed}`);
+
+    await fetchAllTemplates();
+  };
+
+  const getContentString = (content: any): string => {
+    if (typeof content === 'string') return content;
+    if (typeof content === 'object') return JSON.stringify(content);
+    return '';
+  };
+
   const toggleSelectTemplate = (templateId: string) => {
     const newSelected = new Set(selectedIds);
     if (newSelected.has(templateId)) {
@@ -482,6 +598,24 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                     <>
                       <Play className="w-5 h-5" />
                       ANALYSER {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={autoFixSelected}
+                  disabled={linting || selectedIds.size === 0}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                >
+                  {linting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Correction...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-5 h-5" />
+                      AUTO-CORRIGER {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
                     </>
                   )}
                 </button>
