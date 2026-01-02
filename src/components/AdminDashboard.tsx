@@ -11,11 +11,10 @@ import { AdminBillingDashboard } from './AdminBillingDashboard';
 import { AdminAccountingPanel } from './AdminAccountingPanel';
 import { AdminInvoicesPanel } from './AdminInvoicesPanel';
 import { DossiersModule } from './DossiersModule';
-import { TemplateLabModule } from './TemplateLabModule';
+import { UnifiedTemplateLab } from './UnifiedTemplateLab';
 import { UserManagementHub } from './UserManagementHub';
 import AdminArticlesManager from './AdminArticlesManager';
 import PageVisitsHistory from './PageVisitsHistory';
-import AdminIdocLinter from './AdminIdocLinter';
 
 interface Stats {
   totalUsers: number;
@@ -40,7 +39,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles' | 'visits' | 'idoc-linter'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles' | 'visits'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -143,7 +142,7 @@ export function AdminDashboard() {
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Contenu</p>
           </div>
           <NavButton tab="templates" icon={FileText} label="Modèles" active={activeTab === 'templates'} />
-          <NavButton tab="template-lab" icon={Beaker} label="Lab des Modèles" active={activeTab === 'template-lab'} />
+          <NavButton tab="template-lab" icon={Beaker} label="Lab & Linter" active={activeTab === 'template-lab'} />
           <NavButton tab="articles" icon={BookOpen} label="Articles / Blog" active={activeTab === 'articles'} />
 
           <div className="pt-4 pb-2">
@@ -158,11 +157,6 @@ export function AdminDashboard() {
           <NavButton tab="billing" icon={DollarSign} label="Facturation" active={activeTab === 'billing'} />
           <NavButton tab="accounting" icon={Calculator} label="Comptabilité" active={activeTab === 'accounting'} />
           <NavButton tab="invoices" icon={Receipt} label="Factures" active={activeTab === 'invoices'} />
-
-          <div className="pt-4 pb-2">
-            <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Développement</p>
-          </div>
-          <NavButton tab="idoc-linter" icon={Code} label="iDoc Linter" active={activeTab === 'idoc-linter'} />
 
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Système</p>
@@ -214,11 +208,9 @@ export function AdminDashboard() {
           ) : activeTab === 'dossiers' ? (
             <DossiersModule />
           ) : activeTab === 'template-lab' ? (
-            <TemplateLabModule />
+            <UnifiedTemplateLab />
           ) : activeTab === 'articles' ? (
             <AdminArticlesManager />
-          ) : activeTab === 'idoc-linter' ? (
-            <AdminIdocLinter />
           ) : (
             <>
               <div className="mb-8">

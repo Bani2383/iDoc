@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Beaker, CheckCircle, XCircle, Play, FileText, Clock, Award } from 'lucide-react';
+import { Beaker, CheckCircle, XCircle, Play, FileText, Clock, Award, Code } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { TemplateLinter } from './TemplateLinter';
 
 interface TemplateDetail {
   id: string;
@@ -20,6 +21,7 @@ export const TemplateLabDetail: React.FC<{ templateId: string; onBack: () => voi
   const [testValues, setTestValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState('');
+  const [activeTab, setActiveTab] = useState<'test' | 'lint' | 'history'>('test');
 
   useEffect(() => {
     fetchTemplateDetail();
@@ -203,9 +205,49 @@ export const TemplateLabDetail: React.FC<{ templateId: string; onBack: () => voi
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Formulaire de test */}
-        <div className="bg-white rounded-lg shadow p-6">
+      {/* Onglets */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div className="flex border-b">
+          <button
+            onClick={() => setActiveTab('test')}
+            className={`flex-1 px-6 py-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'test'
+                ? 'border-b-2 border-purple-600 text-purple-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Play className="w-5 h-5" />
+            Test & Preview
+          </button>
+          <button
+            onClick={() => setActiveTab('lint')}
+            className={`flex-1 px-6 py-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'lint'
+                ? 'border-b-2 border-purple-600 text-purple-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Code className="w-5 h-5" />
+            Lint & Validate
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 px-6 py-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'history'
+                ? 'border-b-2 border-purple-600 text-purple-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Clock className="w-5 h-5" />
+            History
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'test' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Formulaire de test */}
+          <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Beaker className="w-5 h-5 text-purple-600" />
             <h2 className="text-xl font-bold">Test du Modèle</h2>
@@ -280,9 +322,20 @@ export const TemplateLabDetail: React.FC<{ templateId: string; onBack: () => voi
           )}
         </div>
       </div>
+      )}
 
-      {/* Historique */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      {activeTab === 'lint' && (
+        <div>
+          <TemplateLinter
+            templateId={templateId}
+            templateContent={template?.content_template || ''}
+            schemaFields={fields}
+          />
+        </div>
+      )}
+
+      {activeTab === 'history' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tests */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center space-x-2 mb-4">
@@ -330,6 +383,7 @@ export const TemplateLabDetail: React.FC<{ templateId: string; onBack: () => voi
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
