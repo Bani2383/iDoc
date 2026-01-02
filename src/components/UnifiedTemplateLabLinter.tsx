@@ -57,10 +57,13 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'selection' | 'results' | 'preview'>('selection');
+  const [viewMode, setViewMode] = useState<'selection' | 'results' | 'preview' | 'edit'>('selection');
   const [randomCount, setRandomCount] = useState(10);
   const [previewResults, setPreviewResults] = useState<PreviewResult[]>([]);
   const [previewing, setPreviewing] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [editedContent, setEditedContent] = useState<string>('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (profile?.role === 'admin') {
@@ -265,55 +268,125 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     for (const templateId of Array.from(selectedIds)) {
       const template = templates.find(t => t.id === templateId);
       if (!template || template.source !== 'idoc_guided_templates') {
+        console.log(`Skipping template ${templateId} - not idoc_guided_templates`);
         failed++;
         continue;
       }
 
       try {
-        const { data: currentTemplate } = await supabase
+        const { data: currentTemplate, error: fetchError } = await supabase
           .from('idoc_guided_templates')
           .select('*')
           .eq('id', templateId)
           .maybeSingle();
 
-        if (!currentTemplate) {
+        if (fetchError) {
+          console.error('Error fetching template:', fetchError);
           failed++;
           continue;
         }
 
+        if (!currentTemplate) {
+          console.log(`Template ${templateId} not found`);
+          failed++;
+          continue;
+        }
+
+        console.log(`Processing template ${currentTemplate.template_code}`);
+
         let updatedContent = currentTemplate.template_content;
-        let updatedRequired = currentTemplate.required_variables || { fields: [] };
         let updatedOptional = currentTemplate.optional_variables || { fields: [] };
         let changesMade = false;
 
-        if (typeof updatedContent === 'string') {
-          const cleanedContent = updatedContent
-            .replace(/\[TODO\]/gi, '')
-            .replace(/\[FIXME\]/gi, '')
-            .replace(/\[XXX\]/gi, '')
-            .replace(/TODO:/gi, '')
-            .replace(/FIXME:/gi, '')
-            .replace(/\s+/g, ' ')
-            .trim();
+        // Nettoyer le contenu des placeholders
+        const contentStr = getContentString(updatedContent);
+        const cleanedContent = contentStr
+          .replace(/\[TODO\]/gi, '')
+          .replace(/\[FIXME\]/gi, '')
+          .replace(/\[XXX\]/gi, '')
+          .replace(/TODO:/gi, '')
+          .replace(/FIXME:/gi, '')
+          .replace(/\s+/g, ' ')
+          .trim();
 
-          if (cleanedContent !== updatedContent) {
+        if (cleanedContent !== contentStr) {
+          // Si le contenu original était un objet, on doit le reconstruire
+          if (typeof currentTemplate.template_content === 'object' && currentTemplate.template_content !== null) {
+            if (Array.isArray(currentTemplate.template_content)) {
+              updatedContent = currentTemplate.template_content.map((section: any) => {
+                if (typeof section === 'string') {
+                  return section
+                    .replace(/\[TODO\]/gi, '')
+                    .replace(/\[FIXME\]/gi, '')
+                    .replace(/\[XXX\]/gi, '')
+                    .replace(/TODO:/gi, '')
+                    .replace(/FIXME:/gi, '');
+                }
+                if (section.content) {
+                  return {
+                    ...section,
+                    content: section.content
+                      .replace(/\[TODO\]/gi, '')
+                      .replace(/\[FIXME\]/gi, '')
+                      .replace(/\[XXX\]/gi, '')
+                      .replace(/TODO:/gi, '')
+                      .replace(/FIXME:/gi, '')
+                  };
+                }
+                return section;
+              });
+            } else if (currentTemplate.template_content.fr || currentTemplate.template_content.en) {
+              updatedContent = {
+                ...currentTemplate.template_content,
+                fr: (currentTemplate.template_content.fr || '')
+                  .replace(/\[TODO\]/gi, '')
+                  .replace(/\[FIXME\]/gi, '')
+                  .replace(/\[XXX\]/gi, '')
+                  .replace(/TODO:/gi, '')
+                  .replace(/FIXME:/gi, ''),
+                en: (currentTemplate.template_content.en || '')
+                  .replace(/\[TODO\]/gi, '')
+                  .replace(/\[FIXME\]/gi, '')
+                  .replace(/\[XXX\]/gi, '')
+                  .replace(/TODO:/gi, '')
+                  .replace(/FIXME:/gi, '')
+              };
+            }
+          } else {
             updatedContent = cleanedContent;
-            changesMade = true;
           }
+          changesMade = true;
+          console.log(`Removed placeholders from ${currentTemplate.template_code}`);
         }
 
-        const result = lintTemplate({ ...template, content_template: getContentString(updatedContent) });
+        // Analyser les variables manquantes
+        const templateForLint: Template = {
+          id: currentTemplate.id,
+          name: currentTemplate.template_code,
+          title: currentTemplate.template_code,
+          category: currentTemplate.category || 'other',
+          content_template: cleanedContent,
+          schema_json: {
+            fields: [
+              ...((currentTemplate.required_variables as any)?.fields || []),
+              ...((currentTemplate.optional_variables as any)?.fields || [])
+            ]
+          },
+          source: 'idoc_guided_templates'
+        };
+
+        const result = lintTemplate(templateForLint);
 
         if (result.unknownVars.length > 0) {
-          if (!updatedOptional.fields) {
-            updatedOptional.fields = [];
+          if (!(updatedOptional as any).fields) {
+            (updatedOptional as any).fields = [];
           }
 
-          const existingNames = updatedOptional.fields.map((f: any) => f.name || f);
+          const existingNames = ((updatedOptional as any).fields || []).map((f: any) => f.name || f);
 
           for (const varName of result.unknownVars) {
             if (!existingNames.includes(varName)) {
-              updatedOptional.fields.push({
+              (updatedOptional as any).fields.push({
                 name: varName,
                 type: 'text',
                 label: { en: varName, fr: varName },
@@ -323,6 +396,7 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
               changesMade = true;
             }
           }
+          console.log(`Added ${result.unknownVars.length} missing variables to ${currentTemplate.template_code}`);
         }
 
         if (changesMade) {
@@ -338,12 +412,14 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
             .eq('id', templateId);
 
           if (error) {
-            console.error('Auto-fix error:', error);
+            console.error('Auto-fix error for', currentTemplate.template_code, error);
             failed++;
           } else {
+            console.log(`Successfully fixed ${currentTemplate.template_code}`);
             fixed++;
           }
         } else {
+          console.log(`No changes needed for ${currentTemplate.template_code}`);
           fixed++;
         }
       } catch (error) {
@@ -371,25 +447,36 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     for (const templateId of Array.from(selectedIds)) {
       const template = templates.find(t => t.id === templateId);
       if (!template || template.source !== 'idoc_guided_templates') {
+        console.log(`Skipping template ${templateId} - not idoc_guided_templates`);
         continue;
       }
 
       try {
-        const { data: currentTemplate } = await supabase
+        const { data: currentTemplate, error: fetchError } = await supabase
           .from('idoc_guided_templates')
           .select('*')
           .eq('id', templateId)
           .maybeSingle();
 
+        if (fetchError) {
+          console.error('Error fetching template:', fetchError);
+          continue;
+        }
+
         if (!currentTemplate) {
+          console.log(`Template ${templateId} not found in database`);
           continue;
         }
 
         const placeholdersToRemove: string[] = [];
         const variablesToAdd: Array<{ name: string; type: string; label: { en: string; fr: string } }> = [];
 
+        // Extraire le contenu en string
         let contentStr = getContentString(currentTemplate.template_content);
 
+        console.log(`Analyzing template ${currentTemplate.template_code}, content length: ${contentStr.length}`);
+
+        // Détecter les placeholders
         const placeholderPatterns = [
           { pattern: /\[TODO\]/gi, name: '[TODO]' },
           { pattern: /\[FIXME\]/gi, name: '[FIXME]' },
@@ -405,10 +492,31 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           }
         }
 
-        const result = lintTemplate({ ...template, content_template: contentStr });
+        // Créer un objet template compatible avec lintTemplate
+        const templateForLint: Template = {
+          id: currentTemplate.id,
+          name: currentTemplate.template_code,
+          title: currentTemplate.template_code,
+          category: currentTemplate.category || 'other',
+          content_template: contentStr,
+          schema_json: {
+            fields: [
+              ...((currentTemplate.required_variables as any)?.fields || []),
+              ...((currentTemplate.optional_variables as any)?.fields || [])
+            ]
+          },
+          source: 'idoc_guided_templates'
+        };
+
+        const result = lintTemplate(templateForLint);
+
+        console.log(`Lint result for ${currentTemplate.template_code}:`, {
+          unknownVars: result.unknownVars.length,
+          hasPlaceholders: result.hasPlaceholders
+        });
 
         const updatedOptional = currentTemplate.optional_variables || { fields: [] };
-        const existingNames = (updatedOptional.fields || []).map((f: any) => f.name || f);
+        const existingNames = ((updatedOptional as any).fields || []).map((f: any) => f.name || f);
 
         for (const varName of result.unknownVars) {
           if (!existingNames.includes(varName)) {
@@ -440,18 +548,117 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           },
           issues_count: issuesCount
         });
+
+        console.log(`Added preview for ${currentTemplate.template_code}, issues: ${issuesCount}`);
       } catch (error) {
-        console.error('Preview error:', error);
+        console.error('Preview error for template', templateId, error);
       }
     }
 
+    console.log(`Preview complete: ${previews.length} templates analyzed`);
     setPreviewResults(previews);
     setPreviewing(false);
   };
 
+  const openTemplateEditor = async (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (!template) return;
+
+    try {
+      if (template.source === 'idoc_guided_templates') {
+        const { data, error } = await supabase
+          .from('idoc_guided_templates')
+          .select('*')
+          .eq('id', templateId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching template:', error);
+          alert('Erreur lors du chargement du template');
+          return;
+        }
+
+        if (data) {
+          setEditingTemplate(data);
+          setEditedContent(getContentString(data.template_content));
+          setViewMode('edit');
+        }
+      } else {
+        alert('Seuls les templates iDoc peuvent être édités dans cette interface');
+      }
+    } catch (error) {
+      console.error('Error opening editor:', error);
+      alert('Erreur lors de l\'ouverture de l\'éditeur');
+    }
+  };
+
+  const saveTemplateEdit = async () => {
+    if (!editingTemplate) return;
+
+    if (!confirm('Êtes-vous sûr de vouloir sauvegarder ces modifications?')) {
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      let updatedContent = editedContent;
+
+      // Si le contenu original était un objet, essayer de le préserver
+      if (typeof editingTemplate.template_content === 'object' && editingTemplate.template_content !== null) {
+        if (editingTemplate.template_content.fr || editingTemplate.template_content.en) {
+          updatedContent = {
+            ...editingTemplate.template_content,
+            fr: editedContent,
+            en: editedContent
+          };
+        }
+      }
+
+      const { error } = await supabase
+        .from('idoc_guided_templates')
+        .update({
+          template_content: updatedContent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingTemplate.id);
+
+      if (error) {
+        console.error('Error saving template:', error);
+        alert('Erreur lors de la sauvegarde: ' + error.message);
+      } else {
+        alert('Template sauvegardé avec succès!');
+        setViewMode('selection');
+        setEditingTemplate(null);
+        setEditedContent('');
+        await fetchAllTemplates();
+      }
+    } catch (error) {
+      console.error('Save exception:', error);
+      alert('Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const getContentString = (content: any): string => {
     if (typeof content === 'string') return content;
-    if (typeof content === 'object') return JSON.stringify(content);
+    if (typeof content === 'object') {
+      // Pour les objets avec fr/en
+      if (content.fr || content.en) {
+        return content.fr || content.en || '';
+      }
+      // Pour les tableaux de sections
+      if (Array.isArray(content)) {
+        return content.map((section: any) => {
+          if (typeof section === 'string') return section;
+          if (section.content) return section.content;
+          if (section.template) return section.template;
+          return '';
+        }).join('\n\n');
+      }
+      return JSON.stringify(content);
+    }
     return '';
   };
 
@@ -765,9 +972,8 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                 return (
                   <div
                     key={template.id}
-                    onClick={() => toggleSelectTemplate(template.id)}
                     className={`
-                      cursor-pointer rounded-lg p-4 border-2 transition-all hover:shadow-lg
+                      rounded-lg p-4 border-2 transition-all
                       ${isSelected
                         ? 'bg-blue-50 border-blue-500 shadow-md'
                         : 'bg-white border-gray-200 hover:border-blue-300'
@@ -775,7 +981,10 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                     `}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="pt-1">
+                      <div
+                        className="pt-1 cursor-pointer"
+                        onClick={() => toggleSelectTemplate(template.id)}
+                      >
                         {isSelected ? (
                           <CheckSquare className="w-6 h-6 text-blue-600" />
                         ) : (
@@ -800,9 +1009,21 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 font-mono truncate">
+                        <p className="text-xs text-gray-500 font-mono truncate mb-3">
                           ID: {template.id.substring(0, 12)}...
                         </p>
+                        {template.source === 'idoc_guided_templates' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openTemplateEditor(template.id);
+                            }}
+                            className="w-full px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center justify-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Voir / Éditer
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -962,6 +1183,132 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                   )}
                 </div>
               ))}
+            </div>
+          </>
+        ) : viewMode === 'edit' && editingTemplate ? (
+          <>
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Éditeur de Template</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {editingTemplate.template_code} - ID: {editingTemplate.id.substring(0, 12)}...
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setViewMode('selection');
+                      setEditingTemplate(null);
+                      setEditedContent('');
+                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={saveTemplateEdit}
+                    disabled={saving || !editedContent}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-bold flex items-center gap-2"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Sauvegarde...
+                      </>
+                    ) : (
+                      'Sauvegarder'
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-yellow-900">
+                  <strong>Attention:</strong> Vous modifiez directement le contenu du template.
+                  Les changements seront appliqués immédiatement en base de données.
+                  Assurez-vous de ne pas supprimer de variables nécessaires.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Informations du Template
+                  </label>
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <span className="text-xs text-gray-600">Code:</span>
+                      <p className="font-mono text-sm">{editingTemplate.template_code}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-600">Catégorie:</span>
+                      <p className="text-sm">{editingTemplate.category || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-600">Statut:</span>
+                      <p className="text-sm">{editingTemplate.status || 'draft'}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-600">Dernière vérification:</span>
+                      <p className="text-sm">
+                        {editingTemplate.last_verified_at
+                          ? new Date(editingTemplate.last_verified_at).toLocaleDateString('fr-FR')
+                          : 'Jamais'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Variables Disponibles
+                  </label>
+                  <div className="p-4 bg-gray-50 rounded-lg max-h-40 overflow-y-auto">
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-600 mb-2">Variables Requises:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {((editingTemplate.required_variables as any)?.fields || []).map((field: any, idx: number) => (
+                          <code key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                            {'{{'}{field.name || field}{'}}'}
+                          </code>
+                        ))}
+                        {((editingTemplate.required_variables as any)?.fields || []).length === 0 && (
+                          <span className="text-xs text-gray-500">Aucune</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2">Variables Optionnelles:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {((editingTemplate.optional_variables as any)?.fields || []).map((field: any, idx: number) => (
+                          <code key={idx} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                            {'{{'}{field.name || field}{'}}'}
+                          </code>
+                        ))}
+                        {((editingTemplate.optional_variables as any)?.fields || []).length === 0 && (
+                          <span className="text-xs text-gray-500">Aucune</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Contenu du Template
+                  </label>
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    className="w-full h-[500px] px-4 py-3 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Contenu du template..."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Caractères: {editedContent.length} | Lignes: {editedContent.split('\n').length}
+                  </p>
+                </div>
+              </div>
             </div>
           </>
         ) : (
