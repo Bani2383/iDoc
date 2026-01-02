@@ -41,7 +41,6 @@ const GamificationWidget = lazy(() => import('./components/GamificationWidget'))
 const CommercialChatbot = lazy(() => import('./components/CommercialChatbot'));
 const LiveFOMONotifications = lazy(() => import('./components/LiveFOMONotifications'));
 const ExitIntentOffer = lazy(() => import('./components/ExitIntentOffer'));
-const UpsellModal = lazy(() => import('./components/UpsellModal'));
 const TrafficControlCenter = lazy(() => import('./components/TrafficControlCenter'));
 const ABTestingSystem = lazy(() => import('./components/ABTestingSystem'));
 const EmailAutomation = lazy(() => import('./components/EmailAutomation'));
@@ -49,7 +48,7 @@ const AutomatedReporting = lazy(() => import('./components/AutomatedReporting'))
 const StudyPermitLetterLanding = lazy(() => import('./components/StudyPermitLetterLanding').then(m => ({ default: m.StudyPermitLetterLanding })));
 const IRCCRefusalLetterLanding = lazy(() => import('./components/IRCCRefusalLetterLanding').then(m => ({ default: m.IRCCRefusalLetterLanding })));
 const BusinessAutomationLanding = lazy(() => import('./components/BusinessAutomationLanding').then(m => ({ default: m.BusinessAutomationLanding })));
-const TermsOfUse = lazy(() => import('./components/LegalPages').then(m => ({ default: m.TermsOfUse })));
+const TermsOfSale = lazy(() => import('./components/LegalPages').then(m => ({ default: m.TermsOfSale })));
 const PrivacyPolicy = lazy(() => import('./components/LegalPages').then(m => ({ default: m.PrivacyPolicy })));
 const GeneratorBrowser = lazy(() => import('./components/GeneratorBrowser').then(m => ({ default: m.GeneratorBrowser })));
 const GeneratorForm = lazy(() => import('./components/GeneratorForm').then(m => ({ default: m.GeneratorForm })));
@@ -178,10 +177,7 @@ function App() {
   if (showFlowDemo) {
     return (
       <Suspense fallback={<LoadingSpinner text="Chargement de la démo..." />}>
-        <GuestFlowDemo
-          onBack={() => setShowFlowDemo(false)}
-          onLogin={() => setShowAuthModal(true)}
-        />
+        <GuestFlowDemo />
       </Suspense>
     );
   }
@@ -311,7 +307,7 @@ function App() {
           </Suspense>
         ) : currentView === 'terms' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
-            <TermsOfUse />
+            <TermsOfSale />
           </Suspense>
         ) : currentView === 'privacy' ? (
           <Suspense fallback={<LoadingSpinner text="Chargement..." />}>
