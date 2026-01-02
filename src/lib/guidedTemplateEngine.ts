@@ -13,7 +13,7 @@ export interface FieldValidator {
 
 export interface ConditionalRule {
   field: string;
-  operator: 'equals' | 'notEquals' | 'contains' | 'notContains' | 'in' | 'notIn';
+  operator: 'equals' | 'notEquals' | 'contains' | 'notContains' | 'in' | 'notIn' | 'gt' | 'gte' | 'lt' | 'lte';
   value: any;
 }
 
@@ -114,6 +114,14 @@ export class GuidedTemplateEngine {
         return Array.isArray(rule.value) && rule.value.includes(fieldValue);
       case 'notIn':
         return Array.isArray(rule.value) && !rule.value.includes(fieldValue);
+      case 'gt':
+        return Number(fieldValue) > Number(rule.value);
+      case 'gte':
+        return Number(fieldValue) >= Number(rule.value);
+      case 'lt':
+        return Number(fieldValue) < Number(rule.value);
+      case 'lte':
+        return Number(fieldValue) <= Number(rule.value);
       default:
         return false;
     }
