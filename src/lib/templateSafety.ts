@@ -48,6 +48,7 @@ export const isEligibleForProduction = (template: any): boolean => {
 export interface TemplateError {
   template_id: string;
   template_code?: string;
+  template_source?: 'idoc_guided_templates' | 'document_templates';
   environment: 'production' | 'staging' | 'development';
   action: string;
   error_message: string;
@@ -68,10 +69,51 @@ export const logTemplateError = async (error: TemplateError): Promise<void> => {
     severity: error.environment === 'production' ? 'CRITICAL' : 'WARNING'
   });
 
-  // Try to persist to database (non-blocking)
+  // Persist to database
   try {
-    // We could store in a dedicated table if needed
-    // For now, just console logging is sufficient
+    const eventType = error.action as any;
+
+    await supabase
+      .from('template_health_log')
+      .insert({
+        template_id: error.template_id,
+        template_source: error.template_source || 'idoc_guided_templates',
+        event_type: eventType,
+        environment: error.environment,
+        details: {
+          context: error.context || {},
+          timestamp: error.timestamp
+        },
+        error_message: error.error_message
+      });
+
+    // Also log to fallbacks table if it's a render failure
+    if (error.action === 'render_failed_exception' || error.action === 'fallback_used') {
+      await supabase
+        .from('template_render_fallbacks')
+        .insert({
+          template_id: error.template_id,
+          template_source: error.template_source || 'idoc_guided_templates',
+          template_code: error.template_code,
+          error_message: error.error_message,
+          error_stack: error.error_stack,
+          environment: error.environment
+        });
+
+      // Increment fallback count
+      const tableName = error.template_source || 'idoc_guided_templates';
+      await supabase.rpc('increment_fallback_count', {
+        p_template_id: error.template_id,
+        p_table_name: tableName
+      }).catch(() => {
+        // If RPC doesn't exist, manually increment
+        supabase
+          .from(tableName as any)
+          .update({ fallback_count: supabase.rpc('coalesce', { fallback_count: 0 }) })
+          .eq('id', error.template_id)
+          .catch(console.error);
+      });
+    }
   } catch (e) {
     console.error('Failed to persist template error log:', e);
   }

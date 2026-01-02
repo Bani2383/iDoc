@@ -12,6 +12,7 @@ import { AdminInvoicesPanel } from './AdminInvoicesPanel';
 import { DossiersModule } from './DossiersModule';
 import { UserManagementHub } from './UserManagementHub';
 import { CentreValidation } from './CentreValidation';
+import { TemplateHealthDashboard } from './TemplateHealthDashboard';
 import PageVisitsHistory from './PageVisitsHistory';
 
 interface Stats {
@@ -37,7 +38,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'validation' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'visits'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'validation' | 'health' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'visits'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -140,6 +141,7 @@ export function AdminDashboard() {
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Contenu</p>
           </div>
           <NavButton tab="validation" icon={Code} label="Centre de Validation" active={activeTab === 'validation'} />
+          <NavButton tab="health" icon={Activity} label="Santé des Templates" active={activeTab === 'health'} />
 
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</p>
@@ -187,6 +189,8 @@ export function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {activeTab === 'validation' ? (
             <CentreValidation />
+          ) : activeTab === 'health' ? (
+            <TemplateHealthDashboard />
           ) : activeTab === 'users' ? (
             <UserManagementHub />
           ) : activeTab === 'stats' ? (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Shield, BookOpen, DollarSign, Edit2, Save, X, Search, Filter } from 'lucide-react';
+import { FileText, Shield, BookOpen, DollarSign, Edit2, Save, X, Search, Filter, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { UnifiedTemplateLabLinter } from './UnifiedTemplateLabLinter';
@@ -20,6 +20,12 @@ interface Template {
   price_cad: number;
   price_eur: number;
   is_free: boolean;
+  eligible_for_production?: boolean;
+  smoke_test_passed?: boolean;
+  last_smoke_test_at?: string;
+  quarantined?: boolean;
+  quarantine_reason?: string;
+  fallback_count?: number;
   source: 'document_templates' | 'idoc_guided_templates';
 }
 
@@ -45,11 +51,11 @@ export const CentreValidation: React.FC = () => {
       const [idocRes, docRes] = await Promise.all([
         supabase
           .from('idoc_guided_templates')
-          .select('id, template_code, category, status, verification_required, last_verified_at, price_usd, price_cad, price_eur, is_free')
+          .select('id, template_code, category, status, verification_required, last_verified_at, price_usd, price_cad, price_eur, is_free, eligible_for_production, smoke_test_passed, last_smoke_test_at, quarantined, quarantine_reason, fallback_count')
           .order('created_at', { ascending: false }),
         supabase
           .from('document_templates')
-          .select('id, name, category, price_usd, price_cad, price_eur, is_free')
+          .select('id, name, category, price_usd, price_cad, price_eur, is_free, eligible_for_production, smoke_test_passed, last_smoke_test_at, quarantined, quarantine_reason, fallback_count')
           .order('created_at', { ascending: false })
       ]);
 
@@ -215,7 +221,7 @@ export const CentreValidation: React.FC = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-5 gap-4 mb-6">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="text-2xl font-bold text-gray-900">{templates.length}</div>
                     <div className="text-sm text-gray-600">Total modèles</div>
@@ -232,11 +238,17 @@ export const CentreValidation: React.FC = () => {
                     </div>
                     <div className="text-sm text-gray-600">Payants</div>
                   </div>
-                  <div className="bg-purple-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {templates.filter(t => t.status === 'verified').length}
+                  <div className="bg-emerald-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-emerald-600">
+                      {templates.filter(t => t.eligible_for_production).length}
                     </div>
-                    <div className="text-sm text-gray-600">Vérifiés</div>
+                    <div className="text-sm text-gray-600">Production</div>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-red-600">
+                      {templates.filter(t => t.quarantined).length}
+                    </div>
+                    <div className="text-sm text-gray-600">Quarantaine</div>
                   </div>
                 </div>
 
@@ -279,12 +291,36 @@ export const CentreValidation: React.FC = () => {
                                   Vérifié
                                 </span>
                               )}
+                              {template.eligible_for_production ? (
+                                <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded flex items-center gap-1">
+                                  <Shield className="w-3 h-3" />
+                                  Production
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
+                                  Non Production
+                                </span>
+                              )}
+                              {template.quarantined && (
+                                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded flex items-center gap-1">
+                                  <XCircle className="w-3 h-3" />
+                                  Quarantaine
+                                </span>
+                              )}
+                              {template.fallback_count && template.fallback_count > 0 && (
+                                <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-semibold rounded">
+                                  {template.fallback_count} Fallbacks
+                                </span>
+                              )}
                             </div>
                             <div className="text-sm text-gray-600 flex items-center gap-4">
                               <span>Catégorie: {template.category || 'Non définie'}</span>
                               <span>Source: {template.source === 'idoc_guided_templates' ? 'iDoc Guidé' : 'Document Standard'}</span>
                               {template.last_verified_at && (
                                 <span>Vérifié le: {new Date(template.last_verified_at).toLocaleDateString('fr-FR')}</span>
+                              )}
+                              {template.quarantine_reason && (
+                                <span className="text-red-600 font-medium">⚠️ {template.quarantine_reason}</span>
                               )}
                             </div>
                           </div>
