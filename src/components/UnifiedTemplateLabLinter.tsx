@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Search, Play, CheckCircle, XCircle, AlertTriangle, FileText, Download, Zap } from 'lucide-react';
+import { Code, Search, Play, CheckCircle, XCircle, AlertTriangle, FileText, Download, Zap, Square, CheckSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -36,6 +36,7 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
   const [lintResults, setLintResults] = useState<LintResult[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (profile?.role === 'admin') {
@@ -48,7 +49,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     try {
       const allTemplates: Template[] = [];
 
-      // Fetch from document_templates
       const { data: docTemplates, error: docError } = await supabase
         .from('document_templates')
         .select('id, name, title, category, content_template, schema_json, review_status')
@@ -58,7 +58,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
         allTemplates.push(...docTemplates.map(t => ({ ...t, source: 'document_templates' as const })));
       }
 
-      // Fetch from idoc_guided_templates
       const { data: idocTemplates, error: idocError } = await supabase
         .from('idoc_guided_templates')
         .select('id, template_code, title_translations, category, sections, metadata')
@@ -96,24 +95,20 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     let hasPlaceholders = false;
     const missingFields: string[] = [];
 
-    // Detect placeholders
     const placeholderRegex = /\[TODO\]|\[FIXME\]|\[XXX\]|TODO:|FIXME:/gi;
     if (placeholderRegex.test(content)) {
       hasPlaceholders = true;
     }
 
-    // Extract variables
     const varRegex = /\{\{([^}]+)\}\}/g;
     let match;
 
     while ((match = varRegex.exec(content)) !== null) {
       const varName = match[1].trim();
 
-      // Skip Handlebars control structures
       if (varName.startsWith('#') || varName.startsWith('/')) continue;
       if (varName === 'this') continue;
 
-      // Skip known helpers
       const helperMatch = varName.match(/^(\w+)\s+(.+)/);
       if (helperMatch) {
         const helper = helperMatch[1];
@@ -125,7 +120,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
         varsUsed.push(varName);
       }
 
-      // Check if variable is defined in schema
       const fields = template.schema_json?.fields || [];
       const fieldNames = fields.map((f: any) => f.name);
 
@@ -136,7 +130,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
       }
     }
 
-    // Check for missing required fields
     const requiredFields = (template.schema_json?.fields || [])
       .filter((f: any) => f.required)
       .map((f: any) => f.name);
@@ -147,7 +140,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
       }
     });
 
-    // Calculate score
     const totalIssues = unknownVars.length + (hasPlaceholders ? 5 : 0) + missingFields.length;
     const score = Math.max(0, 100 - (totalIssues * 10));
 
@@ -163,12 +155,14 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     };
   };
 
-  const handleLintAll = async () => {
+  const handleLintSelected = async () => {
+    if (selectedIds.size === 0) return;
+
     setLinting(true);
     setShowResults(true);
 
     const results: LintResult[] = [];
-    const templatesToLint = filteredTemplates;
+    const templatesToLint = templates.filter(t => selectedIds.has(t.id));
 
     for (const template of templatesToLint) {
       const result = lintTemplate(template);
@@ -184,6 +178,24 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     setLintResults([result]);
     setSelectedTemplate(template);
     setShowResults(true);
+  };
+
+  const toggleSelectTemplate = (templateId: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(templateId)) {
+      newSelected.delete(templateId);
+    } else {
+      newSelected.add(templateId);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredTemplates.length && filteredTemplates.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredTemplates.map(t => t.id)));
+    }
   };
 
   const exportResults = () => {
@@ -222,6 +234,7 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     total: filteredTemplates.length,
     document_templates: filteredTemplates.filter(t => t.source === 'document_templates').length,
     idoc_guided_templates: filteredTemplates.filter(t => t.source === 'idoc_guided_templates').length,
+    selected: selectedIds.size,
   };
 
   const lintStats = {
@@ -232,6 +245,9 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
       ? Math.round(lintResults.reduce((sum, r) => sum + r.score, 0) / lintResults.length)
       : 0
   };
+
+  const allSelected = filteredTemplates.length > 0 && selectedIds.size === filteredTemplates.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < filteredTemplates.length;
 
   if (profile?.role !== 'admin') {
     return (
@@ -257,7 +273,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-4">
@@ -266,21 +281,25 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold">Template Lab & Linter Unifié</h1>
-              <p className="text-blue-100 mt-1">Test, validation et certification de tous vos templates</p>
+              <p className="text-blue-100 mt-1">Sélectionnez et analysez vos templates</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <div className="bg-white/10 backdrop-blur rounded-lg p-4">
               <p className="text-blue-100 text-sm mb-1">Total Templates</p>
               <p className="text-3xl font-bold">{stats.total}</p>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <p className="text-blue-100 text-sm mb-1">Document Templates</p>
+              <p className="text-blue-100 text-sm mb-1">Sélectionnés</p>
+              <p className="text-3xl font-bold text-yellow-300">{stats.selected}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-lg p-4">
+              <p className="text-blue-100 text-sm mb-1">Document</p>
               <p className="text-3xl font-bold">{stats.document_templates}</p>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-lg p-4">
-              <p className="text-blue-100 text-sm mb-1">iDoc Templates</p>
+              <p className="text-blue-100 text-sm mb-1">iDoc</p>
               <p className="text-3xl font-bold">{stats.idoc_guided_templates}</p>
             </div>
           </div>
@@ -288,7 +307,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters & Actions */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="relative">
@@ -324,19 +342,19 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
             </select>
 
             <button
-              onClick={handleLintAll}
-              disabled={linting || filteredTemplates.length === 0}
+              onClick={handleLintSelected}
+              disabled={linting || selectedIds.size === 0}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {linting ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Analyse en cours...
+                  Analyse...
                 </>
               ) : (
                 <>
                   <Play className="w-5 h-5" />
-                  Analyser Tous ({filteredTemplates.length})
+                  Analyser ({selectedIds.size})
                 </>
               )}
             </button>
@@ -373,13 +391,20 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           )}
         </div>
 
-        {/* Results */}
         {showResults && lintResults.length > 0 ? (
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left">
+                      <button
+                        onClick={toggleSelectAll}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        {allSelected ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                      </button>
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Template</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -392,8 +417,20 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                 <tbody className="divide-y divide-gray-200">
                   {lintResults.map((result) => {
                     const template = templates.find(t => t.id === result.templateId);
+                    if (!template) return null;
                     return (
                       <tr key={result.templateId} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => toggleSelectTemplate(template.id)}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            {selectedIds.has(template.id) ?
+                              <CheckSquare className="w-5 h-5 text-blue-600" /> :
+                              <Square className="w-5 h-5" />
+                            }
+                          </button>
+                        </td>
                         <td className="px-6 py-4">
                           <div>
                             <p className="font-medium text-gray-900">{result.templateName}</p>
@@ -493,6 +530,21 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left">
+                      <button
+                        onClick={toggleSelectAll}
+                        className="text-gray-500 hover:text-gray-700"
+                        title={allSelected ? "Tout désélectionner" : "Tout sélectionner"}
+                      >
+                        {allSelected ? (
+                          <CheckSquare className="w-5 h-5 text-blue-600" />
+                        ) : someSelected ? (
+                          <CheckSquare className="w-5 h-5 text-blue-400" />
+                        ) : (
+                          <Square className="w-5 h-5" />
+                        )}
+                      </button>
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Template</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
@@ -502,7 +554,21 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredTemplates.map((template) => (
-                    <tr key={template.id} className="hover:bg-gray-50">
+                    <tr
+                      key={template.id}
+                      className={`hover:bg-gray-50 ${selectedIds.has(template.id) ? 'bg-blue-50' : ''}`}
+                    >
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => toggleSelectTemplate(template.id)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          {selectedIds.has(template.id) ?
+                            <CheckSquare className="w-5 h-5 text-blue-600" /> :
+                            <Square className="w-5 h-5" />
+                          }
+                        </button>
+                      </td>
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-medium text-gray-900">{template.title || template.name}</p>
@@ -547,7 +613,6 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           </div>
         )}
 
-        {/* Detailed View */}
         {selectedTemplate && lintResults.length === 1 && (
           <div className="mt-6 bg-white rounded-lg shadow-lg p-6">
             <button
