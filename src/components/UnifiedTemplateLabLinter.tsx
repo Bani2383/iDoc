@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Code, Search, Play, CheckCircle, XCircle, AlertTriangle, FileText, Download, Zap, Square, CheckSquare, Shuffle, RefreshCw, Eye } from 'lucide-react';
+import { Code, Search, Play, CheckCircle, XCircle, AlertTriangle, FileText, Download, Zap, Square, CheckSquare, Shuffle, RefreshCw, Eye, Shield, ShieldAlert } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { runRenderSmokeTest, isEligibleForProduction, type SmokeTestResult } from '../lib/templateSafety';
 
 interface Template {
   id: string;
@@ -12,6 +13,9 @@ interface Template {
   schema_json: any;
   review_status?: string;
   source: 'document_templates' | 'idoc_guided_templates';
+  status?: string;
+  verification_required?: boolean;
+  last_verified_at?: string;
 }
 
 interface LintResult {
@@ -41,7 +45,10 @@ interface PreviewResult {
     hasPlaceholders: boolean;
     unknownVars: string[];
     status: string;
+    eligible_for_production: boolean;
   };
+  smoke_test: SmokeTestResult;
+  will_be_eligible: boolean;
   issues_count: number;
 }
 
@@ -298,7 +305,7 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
         let updatedOptional = currentTemplate.optional_variables || { fields: [] };
         let changesMade = false;
 
-        // Nettoyer le contenu des placeholders
+        // Nettoyer le contenu des placeholders (SAFE ONLY corrections)
         const contentStr = getContentString(updatedContent);
         const cleanedContent = contentStr
           .replace(/\[TODO\]/gi, '')
@@ -306,6 +313,8 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           .replace(/\[XXX\]/gi, '')
           .replace(/TODO:/gi, '')
           .replace(/FIXME:/gi, '')
+          .replace(/\{\{TODO\}\}/gi, '')
+          .replace(/\{\{FIXME\}\}/gi, '')
           .replace(/\s+/g, ' ')
           .trim();
 
@@ -399,23 +408,62 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           console.log(`Added ${result.unknownVars.length} missing variables to ${currentTemplate.template_code}`);
         }
 
-        if (changesMade) {
+        // Run smoke test to verify template can be rendered safely
+        const templateForSmokeTest = {
+          ...currentTemplate,
+          template_content: updatedContent,
+          optional_variables: updatedOptional
+        };
+
+        const smokeTest = runRenderSmokeTest(templateForSmokeTest);
+
+        console.log(`Smoke test for ${currentTemplate.template_code}:`, smokeTest);
+
+        // Determine new status based on smoke test
+        let newStatus = currentTemplate.status || 'draft';
+        let verificationRequired = true;
+
+        if (smokeTest.success && !smokeTest.warnings.length && changesMade) {
+          // All checks passed, safe to mark as verified
+          newStatus = 'verified';
+          verificationRequired = false;
+        } else if (smokeTest.success && smokeTest.warnings.length > 0) {
+          // Passed but has warnings - needs review
+          newStatus = 'draft';
+          verificationRequired = true;
+          console.warn(`Template ${currentTemplate.template_code} has warnings:`, smokeTest.warnings);
+        } else if (!smokeTest.success) {
+          // Failed smoke test - do not verify
+          newStatus = 'draft';
+          verificationRequired = true;
+          console.error(`Template ${currentTemplate.template_code} failed smoke test:`, smokeTest.error);
+        }
+
+        if (changesMade || newStatus !== currentTemplate.status) {
+          const updateData: any = {
+            template_content: updatedContent,
+            optional_variables: updatedOptional,
+            status: newStatus,
+            verification_required: verificationRequired,
+            updated_at: new Date().toISOString()
+          };
+
+          // Only set last_verified_at if we're marking as verified
+          if (newStatus === 'verified' && !verificationRequired) {
+            updateData.last_verified_at = new Date().toISOString();
+          }
+
           const { error } = await supabase
             .from('idoc_guided_templates')
-            .update({
-              template_content: updatedContent,
-              optional_variables: updatedOptional,
-              status: 'verified',
-              last_verified_at: new Date().toISOString(),
-              verification_required: false
-            })
+            .update(updateData)
             .eq('id', templateId);
 
           if (error) {
             console.error('Auto-fix error for', currentTemplate.template_code, error);
             failed++;
           } else {
-            console.log(`Successfully fixed ${currentTemplate.template_code}`);
+            const statusMsg = newStatus === 'verified' ? '✓ VERIFIED' : `⚠ ${newStatus.toUpperCase()}`;
+            console.log(`Successfully processed ${currentTemplate.template_code}: ${statusMsg}`);
             fixed++;
           }
         } else {
@@ -476,13 +524,15 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
 
         console.log(`Analyzing template ${currentTemplate.template_code}, content length: ${contentStr.length}`);
 
-        // Détecter les placeholders
+        // Détecter les placeholders (SAFE ONLY corrections)
         const placeholderPatterns = [
           { pattern: /\[TODO\]/gi, name: '[TODO]' },
           { pattern: /\[FIXME\]/gi, name: '[FIXME]' },
           { pattern: /\[XXX\]/gi, name: '[XXX]' },
           { pattern: /TODO:/gi, name: 'TODO:' },
           { pattern: /FIXME:/gi, name: 'FIXME:' },
+          { pattern: /\{\{TODO\}\}/gi, name: '{{TODO}}' },
+          { pattern: /\{\{FIXME\}\}/gi, name: '{{FIXME}}' },
         ];
 
         for (const { pattern, name } of placeholderPatterns) {
@@ -505,7 +555,9 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
               ...((currentTemplate.optional_variables as any)?.fields || [])
             ]
           },
-          source: 'idoc_guided_templates'
+          source: 'idoc_guided_templates',
+          status: currentTemplate.status,
+          verification_required: currentTemplate.verification_required
         };
 
         const result = lintTemplate(templateForLint);
@@ -528,8 +580,39 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           }
         }
 
+        // Run smoke test on the template as it would be after fixes
+        const templateAfterFixes = {
+          ...currentTemplate,
+          template_content: contentStr,
+          optional_variables: {
+            ...currentTemplate.optional_variables,
+            fields: [
+              ...((currentTemplate.optional_variables as any)?.fields || []),
+              ...variablesToAdd.map(v => ({
+                name: v.name,
+                type: v.type,
+                label: v.label,
+                required: false
+              }))
+            ]
+          }
+        };
+
+        const smokeTest = runRenderSmokeTest(templateAfterFixes);
+
+        console.log(`Smoke test for ${currentTemplate.template_code}:`, smokeTest);
+
         const issuesCount = placeholdersToRemove.length + variablesToAdd.length;
-        const statusWillChange = issuesCount > 0;
+
+        // Determine if template will be eligible for production after fixes
+        const willBeVerified = smokeTest.success && !smokeTest.warnings.length && issuesCount > 0;
+        const willBeEligible = willBeVerified;
+
+        const statusChange = willBeVerified
+          ? { from: currentTemplate.status || 'draft', to: 'verified' }
+          : { from: currentTemplate.status || 'draft', to: currentTemplate.status || 'draft' };
+
+        const isCurrentlyEligible = isEligibleForProduction(currentTemplate);
 
         previews.push({
           template_id: templateId,
@@ -537,15 +620,16 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
           changes_proposed: {
             placeholders_to_remove: placeholdersToRemove,
             variables_to_add: variablesToAdd,
-            status_change: statusWillChange
-              ? { from: currentTemplate.status || 'draft', to: 'verified' }
-              : { from: currentTemplate.status || 'draft', to: currentTemplate.status || 'draft' }
+            status_change: statusChange
           },
           before: {
             hasPlaceholders: placeholdersToRemove.length > 0,
             unknownVars: result.unknownVars,
-            status: currentTemplate.status || 'draft'
+            status: currentTemplate.status || 'draft',
+            eligible_for_production: isCurrentlyEligible
           },
+          smoke_test: smokeTest,
+          will_be_eligible: willBeEligible,
           issues_count: issuesCount
         });
 
@@ -1171,13 +1255,90 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* Smoke Test Results */}
+                      <div className={`p-4 rounded-lg border ${
+                        preview.smoke_test.success
+                          ? preview.smoke_test.warnings.length > 0
+                            ? 'bg-yellow-50 border-yellow-200'
+                            : 'bg-green-50 border-green-200'
+                          : 'bg-red-50 border-red-200'
+                      }`}>
+                        <h4 className={`text-sm font-bold mb-2 ${
+                          preview.smoke_test.success
+                            ? preview.smoke_test.warnings.length > 0
+                              ? 'text-yellow-900'
+                              : 'text-green-900'
+                            : 'text-red-900'
+                        }`}>
+                          Test de Rendu (Smoke Test)
+                        </h4>
+                        {preview.smoke_test.success ? (
+                          <>
+                            <p className="text-sm text-green-800 mb-2">✓ Le template peut être rendu en toute sécurité</p>
+                            {preview.smoke_test.warnings.length > 0 && (
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold text-yellow-900 mb-1">Avertissements:</p>
+                                <ul className="text-xs text-yellow-800 space-y-1 ml-4 list-disc">
+                                  {preview.smoke_test.warnings.map((w, idx) => (
+                                    <li key={idx}>{w}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div>
+                            <p className="text-sm text-red-800 mb-2">✗ Échec du test de rendu</p>
+                            <p className="text-xs text-red-700 bg-red-100 p-2 rounded font-mono">
+                              {preview.smoke_test.error}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Production Eligibility */}
+                      <div className={`p-4 rounded-lg border ${
+                        preview.will_be_eligible
+                          ? 'bg-blue-50 border-blue-200'
+                          : 'bg-gray-50 border-gray-200'
+                      }`}>
+                        <h4 className="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
+                          {preview.will_be_eligible ? (
+                            <Shield className="w-4 h-4 text-blue-600" />
+                          ) : (
+                            <ShieldAlert className="w-4 h-4 text-gray-600" />
+                          )}
+                          Éligibilité Production
+                        </h4>
+                        <div className="flex items-center gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-600">Actuellement: </span>
+                            {preview.before.eligible_for_production ? (
+                              <span className="text-green-600 font-semibold">✓ Éligible</span>
+                            ) : (
+                              <span className="text-red-600 font-semibold">✗ Non éligible</span>
+                            )}
+                          </div>
+                          <span className="text-gray-400">→</span>
+                          <div>
+                            <span className="text-gray-600">Après correction: </span>
+                            {preview.will_be_eligible ? (
+                              <span className="text-green-600 font-semibold">✓ Éligible</span>
+                            ) : (
+                              <span className="text-gray-600 font-semibold">✗ Non éligible</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {preview.issues_count === 0 && (
                     <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-sm text-green-800">
-                        ✓ Ce template est conforme. Aucune correction n'est nécessaire.
+                      <p className="text-sm text-green-800 flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        ✓ Ce template est conforme et {preview.before.eligible_for_production ? 'éligible pour la production' : 'en attente de vérification'}.
                       </p>
                     </div>
                   )}
