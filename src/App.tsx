@@ -53,6 +53,7 @@ const PrivacyPolicy = lazy(() => import('./components/LegalPages').then(m => ({ 
 const GeneratorBrowser = lazy(() => import('./components/GeneratorBrowser').then(m => ({ default: m.GeneratorBrowser })));
 const GeneratorForm = lazy(() => import('./components/GeneratorForm').then(m => ({ default: m.GeneratorForm })));
 const GuidedTemplateFlow = lazy(() => import('./components/GuidedTemplateFlow').then(m => ({ default: m.GuidedTemplateFlow })));
+const IdocWizard = lazy(() => import('./components/IdocWizard').then(m => ({ default: m.IdocWizard })));
 
 /**
  * Main application component
@@ -66,7 +67,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates' | 'idoc-wizard'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
   const [selectedGeneratorId, setSelectedGeneratorId] = useState<string | null>(null);
@@ -336,6 +337,16 @@ function App() {
           <Suspense fallback={<LoadingSpinner text="Chargement des modèles guidés..." />}>
             <GuidedTemplateFlow
               onClose={() => setCurrentView('improved')}
+            />
+          </Suspense>
+        ) : currentView === 'idoc-wizard' ? (
+          <Suspense fallback={<LoadingSpinner text="Chargement du générateur iDoc..." />}>
+            <IdocWizard
+              onComplete={(inputs) => {
+                console.log('iDoc wizard completed:', inputs);
+                setCurrentView('improved');
+              }}
+              onCancel={() => setCurrentView('improved')}
             />
           </Suspense>
         ) : (
