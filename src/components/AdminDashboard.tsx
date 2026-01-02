@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker, Home, Menu, X, BookOpen, Eye } from 'lucide-react';
+import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker, Home, Menu, X, BookOpen, Eye, Code } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,6 +15,7 @@ import { TemplateLabModule } from './TemplateLabModule';
 import { UserManagementHub } from './UserManagementHub';
 import AdminArticlesManager from './AdminArticlesManager';
 import PageVisitsHistory from './PageVisitsHistory';
+import AdminIdocLinter from './AdminIdocLinter';
 
 interface Stats {
   totalUsers: number;
@@ -39,7 +40,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles' | 'visits'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'templates' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'template-lab' | 'articles' | 'visits' | 'idoc-linter'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -159,6 +160,11 @@ export function AdminDashboard() {
           <NavButton tab="invoices" icon={Receipt} label="Factures" active={activeTab === 'invoices'} />
 
           <div className="pt-4 pb-2">
+            <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Développement</p>
+          </div>
+          <NavButton tab="idoc-linter" icon={Code} label="iDoc Linter" active={activeTab === 'idoc-linter'} />
+
+          <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Système</p>
           </div>
           <NavButton tab="stats" icon={Activity} label="Statistiques" active={activeTab === 'stats'} />
@@ -211,6 +217,8 @@ export function AdminDashboard() {
             <TemplateLabModule />
           ) : activeTab === 'articles' ? (
             <AdminArticlesManager />
+          ) : activeTab === 'idoc-linter' ? (
+            <AdminIdocLinter />
           ) : (
             <>
               <div className="mb-8">
