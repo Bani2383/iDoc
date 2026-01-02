@@ -53,28 +53,57 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
 
       const { data: docTemplates, error: docError } = await supabase
         .from('document_templates')
-        .select('id, name, title, category, content_template, schema_json, review_status')
+        .select('id, name, name_en, category, template_content, template_content_en, template_variables, review_status')
         .order('created_at', { ascending: false });
 
-      if (!docError && docTemplates) {
-        allTemplates.push(...docTemplates.map(t => ({ ...t, source: 'document_templates' as const })));
+      if (docError) {
+        console.error('Error fetching document_templates:', docError);
+      } else if (docTemplates) {
+        allTemplates.push(...docTemplates.map(t => ({
+          id: t.id,
+          name: t.name,
+          title: t.name_en || t.name,
+          category: t.category || 'other',
+          content_template: t.template_content || '',
+          schema_json: t.template_variables || {},
+          review_status: t.review_status,
+          source: 'document_templates' as const
+        })));
       }
 
       const { data: idocTemplates, error: idocError } = await supabase
         .from('idoc_guided_templates')
-        .select('id, template_code, title_translations, category, sections, metadata')
+        .select('id, template_code, title, category, template_content, required_variables, optional_variables')
         .order('created_at', { ascending: false });
 
-      if (!idocError && idocTemplates) {
-        allTemplates.push(...idocTemplates.map(t => ({
-          id: t.id,
-          name: t.template_code,
-          title: typeof t.title_translations === 'object' ? (t.title_translations as any).en || (t.title_translations as any).fr : t.template_code,
-          category: t.category || 'other',
-          content_template: extractContentFromSections(t.sections),
-          schema_json: t.metadata,
-          source: 'idoc_guided_templates' as const
-        })));
+      if (idocError) {
+        console.error('Error fetching idoc_guided_templates:', idocError);
+      } else if (idocTemplates) {
+        const mappedIdoc = idocTemplates.map(t => {
+          const titleObj = t.title || {};
+          const titleText = (typeof titleObj === 'object' ? (titleObj as any).en || (titleObj as any).fr : null) || t.template_code;
+
+          const contentObj = t.template_content || {};
+          const contentText = extractContentFromTemplateContent(contentObj);
+
+          const allVars = {
+            fields: [
+              ...((t.required_variables as any)?.fields || []),
+              ...((t.optional_variables as any)?.fields || [])
+            ]
+          };
+
+          return {
+            id: t.id,
+            name: t.template_code,
+            title: titleText,
+            category: t.category || 'other',
+            content_template: contentText,
+            schema_json: allVars,
+            source: 'idoc_guided_templates' as const
+          };
+        });
+        allTemplates.push(...mappedIdoc);
       }
 
       setTemplates(allTemplates);
@@ -85,9 +114,31 @@ export const UnifiedTemplateLabLinter: React.FC = () => {
     }
   };
 
-  const extractContentFromSections = (sections: any): string => {
-    if (!sections || !Array.isArray(sections)) return '';
-    return sections.map((s: any) => s.content_template || '').join('\n\n');
+  const extractContentFromTemplateContent = (templateContent: any): string => {
+    if (!templateContent) return '';
+
+    if (typeof templateContent === 'string') {
+      return templateContent;
+    }
+
+    if (typeof templateContent === 'object') {
+      if (templateContent.fr || templateContent.en) {
+        return templateContent.fr || templateContent.en || '';
+      }
+
+      if (Array.isArray(templateContent)) {
+        return templateContent.map((section: any) => {
+          if (typeof section === 'string') return section;
+          if (section.content) return section.content;
+          if (section.template) return section.template;
+          return '';
+        }).join('\n\n');
+      }
+
+      return JSON.stringify(templateContent);
+    }
+
+    return '';
   };
 
   const lintTemplate = (template: Template): LintResult => {
