@@ -26,6 +26,8 @@ interface Template {
   quarantined?: boolean;
   quarantine_reason?: string;
   fallback_count?: number;
+  trust_level?: 'LOW' | 'MEDIUM' | 'HIGH';
+  preview_required?: boolean;
   source: 'document_templates' | 'idoc_guided_templates';
 }
 
@@ -51,11 +53,11 @@ export const CentreValidation: React.FC = () => {
       const [idocRes, docRes] = await Promise.all([
         supabase
           .from('idoc_guided_templates')
-          .select('id, template_code, category, status, verification_required, last_verified_at, price_usd, price_cad, price_eur, is_free, eligible_for_production, smoke_test_passed, last_smoke_test_at, quarantined, quarantine_reason, fallback_count')
+          .select('id, template_code, category, status, verification_required, last_verified_at, price_usd, price_cad, price_eur, is_free, eligible_for_production, smoke_test_passed, last_smoke_test_at, quarantined, quarantine_reason, fallback_count, trust_level, preview_required')
           .order('created_at', { ascending: false }),
         supabase
           .from('document_templates')
-          .select('id, name, category, price_usd, price_cad, price_eur, is_free, eligible_for_production, smoke_test_passed, last_smoke_test_at, quarantined, quarantine_reason, fallback_count')
+          .select('id, name, category, price_usd, price_cad, price_eur, is_free, eligible_for_production, smoke_test_passed, last_smoke_test_at, quarantined, quarantine_reason, fallback_count, trust_level, preview_required')
           .order('created_at', { ascending: false })
       ]);
 

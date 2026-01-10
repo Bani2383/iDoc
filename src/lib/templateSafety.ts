@@ -113,9 +113,58 @@ export const logTemplateError = async (error: TemplateError): Promise<void> => {
           .eq('id', error.template_id)
           .catch(console.error);
       });
+
+      // Create alert for fallback in production
+      if (error.environment === 'production') {
+        await createTemplateAlert({
+          alert_type: 'fallback_used',
+          severity: 'high',
+          template_id: error.template_id,
+          template_source: error.template_source || 'idoc_guided_templates',
+          template_code: error.template_code,
+          environment: error.environment,
+          title: 'Fallback utilisé en production',
+          message: `Le template ${error.template_code || 'inconnu'} a utilisé le fallback de sécurité en production.`,
+          details: {
+            error_message: error.error_message,
+            context: error.context,
+          }
+        });
+      }
     }
   } catch (e) {
     console.error('Failed to persist template error log:', e);
+  }
+};
+
+/**
+ * Create a template alert
+ */
+export const createTemplateAlert = async (params: {
+  alert_type: 'fallback_used' | 'template_quarantined' | 'kill_switch_activated' | 'shadow_test_failed' | 'high_trust_modification';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  template_id?: string;
+  template_source?: 'idoc_guided_templates' | 'document_templates';
+  template_code?: string;
+  environment: 'production' | 'staging' | 'development';
+  title: string;
+  message: string;
+  details?: any;
+}): Promise<void> => {
+  try {
+    await supabase.rpc('create_template_alert', {
+      p_alert_type: params.alert_type,
+      p_severity: params.severity,
+      p_template_id: params.template_id,
+      p_template_source: params.template_source,
+      p_template_code: params.template_code,
+      p_environment: params.environment,
+      p_title: params.title,
+      p_message: params.message,
+      p_details: params.details || {}
+    });
+  } catch (error) {
+    console.error('Failed to create alert:', error);
   }
 };
 

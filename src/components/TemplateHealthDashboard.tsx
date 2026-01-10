@@ -42,6 +42,8 @@ export const TemplateHealthDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [killSwitch, setKillSwitch] = useState(false);
+  const [readOnlyMode, setReadOnlyMode] = useState(false);
+  const [unacknowledgedAlerts, setUnacknowledgedAlerts] = useState(0);
 
   useEffect(() => {
     loadHealthMetrics();
@@ -51,7 +53,7 @@ export const TemplateHealthDashboard: React.FC = () => {
 
   const loadHealthMetrics = async () => {
     try {
-      const [idocData, killSwitchData, fallbacks24h, fallbacks7d] = await Promise.all([
+      const [idocData, killSwitchData, readOnlyData, fallbacks24h, fallbacks7d, alertsCount] = await Promise.all([
         supabase
           .from('idoc_guided_templates')
           .select('id, template_code, status, eligible_for_production, quarantined, fallback_count, quarantine_reason')
@@ -62,17 +64,27 @@ export const TemplateHealthDashboard: React.FC = () => {
           .eq('key', 'template_kill_switch')
           .single(),
         supabase
+          .from('system_settings')
+          .select('value')
+          .eq('key', 'read_only_emergency_mode')
+          .single(),
+        supabase
           .from('template_render_fallbacks')
           .select('id', { count: 'exact' })
           .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
         supabase
           .from('template_render_fallbacks')
           .select('id', { count: 'exact' })
-          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase
+          .from('template_alerts')
+          .select('id', { count: 'exact' })
+          .eq('acknowledged', false)
       ]);
 
       const templates = idocData.data || [];
       const killSwitchEnabled = killSwitchData.data?.value?.enabled || false;
+      const readOnlyEnabled = readOnlyData.data?.value?.enabled || false;
 
       const newMetrics: HealthMetrics = {
         totalTemplates: templates.length,
@@ -94,8 +106,10 @@ export const TemplateHealthDashboard: React.FC = () => {
 
       setMetrics(newMetrics);
       setKillSwitch(killSwitchEnabled);
+      setReadOnlyMode(readOnlyEnabled);
+      setUnacknowledgedAlerts(alertsCount.count || 0);
 
-      const status = calculateSystemStatus(newMetrics, killSwitchEnabled);
+      const status = calculateSystemStatus(newMetrics, killSwitchEnabled, readOnlyEnabled);
       setSystemStatus(status);
     } catch (error) {
       console.error('Error loading health metrics:', error);
@@ -104,12 +118,20 @@ export const TemplateHealthDashboard: React.FC = () => {
     }
   };
 
-  const calculateSystemStatus = (m: HealthMetrics, killSwitchOn: boolean): SystemStatus => {
+  const calculateSystemStatus = (m: HealthMetrics, killSwitchOn: boolean, readOnlyOn: boolean): SystemStatus => {
     if (killSwitchOn) {
       return {
         color: 'red',
         label: 'Kill Switch Activé',
         message: 'Tous les templates utilisent le fallback de sécurité'
+      };
+    }
+
+    if (readOnlyOn) {
+      return {
+        color: 'orange',
+        label: 'Mode Stabilité Activé',
+        message: 'Modifications temporairement désactivées - Lecture seule'
       };
     }
 
@@ -164,6 +186,40 @@ export const TemplateHealthDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error toggling kill switch:', error);
       alert('Erreur lors de la modification du kill switch');
+    }
+  };
+
+  const toggleReadOnlyMode = async () => {
+    if (!profile || profile.role !== 'admin') return;
+
+    try {
+      const newState = !readOnlyMode;
+
+      if (newState && !confirm('Activer le mode stabilité? Toutes les modifications seront bloquées.')) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from('system_settings')
+        .update({
+          value: {
+            enabled: newState,
+            reason: newState ? 'Mode stabilité activé manuellement' : '',
+            enabled_at: newState ? new Date().toISOString() : null,
+            enabled_by: newState ? profile.id : null
+          },
+          updated_by: profile.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('key', 'read_only_emergency_mode');
+
+      if (error) throw error;
+
+      setReadOnlyMode(newState);
+      loadHealthMetrics();
+    } catch (error) {
+      console.error('Error toggling read-only mode:', error);
+      alert('Erreur lors de la modification du mode lecture seule');
     }
   };
 
@@ -267,6 +323,63 @@ export const TemplateHealthDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Read-Only Emergency Mode */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-orange-600" />
+              Mode Stabilité (Read-Only)
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Bloque toutes les modifications pour stabiliser le système
+            </p>
+          </div>
+          <button
+            onClick={toggleReadOnlyMode}
+            className={`
+              px-6 py-3 rounded-lg font-semibold transition-colors
+              ${readOnlyMode
+                ? 'bg-orange-600 text-white hover:bg-orange-700'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }
+            `}
+          >
+            {readOnlyMode ? 'ACTIVÉ' : 'DÉSACTIVÉ'}
+          </button>
+        </div>
+        {readOnlyMode && (
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded">
+            <p className="text-sm text-orange-800">
+              🔒 Mode stabilité activé. Toutes les modifications (édition templates, publications, corrections automatiques) sont temporairement bloquées. L'accès en lecture reste possible.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Alerts Summary */}
+      {unacknowledgedAlerts > 0 && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-red-600" />
+            <div className="flex-1">
+              <p className="text-sm font-bold text-red-900">
+                {unacknowledgedAlerts} alerte{unacknowledgedAlerts > 1 ? 's' : ''} non acquittée{unacknowledgedAlerts > 1 ? 's' : ''}
+              </p>
+              <p className="text-sm text-red-700 mt-1">
+                Des événements critiques nécessitent votre attention
+              </p>
+            </div>
+            <a
+              href="#alerts"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm"
+            >
+              Voir les Alertes
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
