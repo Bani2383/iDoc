@@ -77,15 +77,13 @@ Deno.serve(async (req: Request) => {
 
     const formattedMessage = `${emoji} **${notification.severity}** - ${notification.alert_type}\n\n${notification.message}${templateInfo}`;
 
-    // Send Email
+    // Send Email via send-email edge function
     if (settings.email_enabled && settings.email_recipients?.length > 0) {
       try {
-        // In production, use a proper email service (SendGrid, Mailgun, etc.)
-        // For now, we'll use a mock implementation
         const emailPayload = {
           to: settings.email_recipients,
           subject: `[iDoc Alert] ${notification.severity} - ${notification.alert_type}`,
-          body: `
+          html: `
 <!DOCTYPE html>
 <html>
 <head>
@@ -127,18 +125,33 @@ Deno.serve(async (req: Request) => {
 </body>
 </html>
           `,
-          timestamp: new Date().toISOString()
+          from: 'iDoc Alerts <alerts@id0c.com>'
         };
 
-        // Log the email (in production, actually send it)
-        console.log('Email would be sent:', emailPayload);
-        results.email_sent = true;
+        // Call send-email edge function
+        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify(emailPayload)
+        });
 
-        // Update alert record
-        await supabase
-          .from('template_alerts')
-          .update({ sent_email: true })
-          .eq('id', notification.alert_id);
+        if (emailResponse.ok) {
+          const emailResult = await emailResponse.json();
+          results.email_sent = true;
+          console.log('Email sent successfully:', emailResult);
+
+          // Update alert record
+          await supabase
+            .from('template_alerts')
+            .update({ sent_email: true })
+            .eq('id', notification.alert_id);
+        } else {
+          const errorText = await emailResponse.text();
+          throw new Error(`Email send failed: ${errorText}`);
+        }
 
       } catch (error) {
         console.error('Email sending failed:', error);
