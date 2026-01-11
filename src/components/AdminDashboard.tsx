@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker, Home, Menu, X, BookOpen, Eye, Code, Bell } from 'lucide-react';
+import { Users, FileText, DollarSign, TrendingUp, Settings, Activity, Sliders, LogOut, Calculator, Receipt, UserCog, Folder, UserCheck, Beaker, Home, Menu, X, BookOpen, Eye, Code, Bell, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,6 +15,8 @@ import { CentreValidation } from './CentreValidation';
 import { TemplateHealthDashboard } from './TemplateHealthDashboard';
 import { AlertsPanel } from './AlertsPanel';
 import PageVisitsHistory from './PageVisitsHistory';
+import ShadowModeManager from './ShadowModeManager';
+import AlertNotificationSettings from './AlertNotificationSettings';
 
 interface Stats {
   totalUsers: number;
@@ -39,7 +41,7 @@ export function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const { theme } = useTheme();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'validation' | 'health' | 'alerts' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'visits'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'validation' | 'health' | 'alerts' | 'shadow' | 'notifications' | 'users' | 'stats' | 'settings' | 'billing' | 'accounting' | 'invoices' | 'dossiers' | 'visits'>('dashboard');
   const [stats, setStats] = useState<Stats>({
     totalUsers: 0,
     totalDocuments: 0,
@@ -144,6 +146,8 @@ export function AdminDashboard() {
           <NavButton tab="validation" icon={Code} label="Centre de Validation" active={activeTab === 'validation'} />
           <NavButton tab="health" icon={Activity} label="Santé des Templates" active={activeTab === 'health'} />
           <NavButton tab="alerts" icon={Bell} label="Alertes" active={activeTab === 'alerts'} />
+          <NavButton tab="shadow" icon={Beaker} label="Shadow Mode" active={activeTab === 'shadow'} />
+          <NavButton tab="notifications" icon={Mail} label="Notifications" active={activeTab === 'notifications'} />
 
           <div className="pt-4 pb-2">
             <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Gestion</p>
@@ -195,6 +199,10 @@ export function AdminDashboard() {
             <TemplateHealthDashboard />
           ) : activeTab === 'alerts' ? (
             <AlertsPanel />
+          ) : activeTab === 'shadow' ? (
+            <ShadowModeManager />
+          ) : activeTab === 'notifications' ? (
+            <AlertNotificationSettings />
           ) : activeTab === 'users' ? (
             <UserManagementHub />
           ) : activeTab === 'stats' ? (
