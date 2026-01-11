@@ -6,6 +6,18 @@
 
 ---
 
+## 🚨 PROBLÈME AVEC BOLT ?
+
+**Vous ne trouvez pas comment configurer DNS sur Bolt ?**
+
+👉 **LISEZ CECI EN PREMIER**: `LIRE_EN_PREMIER.md`
+
+ou **SUIVEZ DIRECTEMENT**: `GUIDE_SIMPLE_SANS_BOLT.md`
+
+Bolt n'est pas un registrar. Vous pouvez configurer DNS sans passer par Bolt !
+
+---
+
 ## ⚡ DÉMARRAGE RAPIDE (Choix 1)
 
 ```bash
@@ -92,6 +104,7 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 | Méthode | Durée | Difficulté | Fichier |
 |---------|-------|------------|---------|
+| **Sans Bolt (NOUVEAU)** | 42 min | Facile | `GUIDE_SIMPLE_SANS_BOLT.md` |
 | **Script guidé** | 36 min | Facile | `./scripts/setup-vercel-dns.sh` |
 | **Guide simplifié** | 36 min | Facile | `ACTIONS_MANUELLES_3_CLICS.md` |
 | **Référence rapide** | 20 min | Moyen | `DNS_RECORDS_REFERENCE.md` |
@@ -122,7 +135,10 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 📁 Racine projet/
 │
 ├── 🚀 START_HERE.md                      ← VOUS ÊTES ICI
-├── 📋 ACTIONS_MANUELLES_3_CLICS.md       ← Guide simplifié
+├── 🚨 LIRE_EN_PREMIER.md                 ← Si problème avec Bolt
+├── ✅ GUIDE_SIMPLE_SANS_BOLT.md          ← Guide sans Bolt (NOUVEAU)
+├── 🔍 OU_EST_MON_DNS.md                  ← Trouver votre registrar
+├── 📋 ACTIONS_MANUELLES_3_CLICS.md       ← Guide avec Bolt
 ├── 📖 DNS_RECORDS_REFERENCE.md           ← Tous les DNS records
 ├── 📚 MIGRATION_DNS_COMPLETE.md          ← Documentation complète
 │
@@ -136,9 +152,21 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 ## 🎉 PRÊT À COMMENCER ?
 
-Lancez la commande de votre choix ci-dessus !
+### Recommandation selon votre situation:
 
-**Recommandation**: Utilisez le script guidé pour la première fois
+**Vous ne trouvez pas Bolt DNS ?**
+```bash
+# Lisez ce guide en premier
+cat GUIDE_SIMPLE_SANS_BOLT.md
+```
+
+**Vous pouvez accéder à vos DNS actuels ?**
+```bash
+# Suivez ce guide simplifié
+cat GUIDE_SIMPLE_SANS_BOLT.md
+```
+
+**Vous voulez un script automatique ?**
 ```bash
 ./scripts/setup-vercel-dns.sh
 ```
