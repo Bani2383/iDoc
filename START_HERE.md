@@ -10,11 +10,13 @@
 
 **Vous ne trouvez pas comment configurer DNS sur Bolt ?**
 
-👉 **LISEZ CECI EN PREMIER**: `LIRE_EN_PREMIER.md`
+👉 **VOTRE DOMAINE EST CHEZ NAME.COM !**
 
-ou **SUIVEZ DIRECTEMENT**: `GUIDE_SIMPLE_SANS_BOLT.md`
+**SUIVEZ CE GUIDE SPÉCIFIQUE**: `CONFIGURATION_NAME_COM.md`
 
-Bolt n'est pas un registrar. Vous pouvez configurer DNS sans passer par Bolt !
+Ou lisez d'abord: `LIRE_EN_PREMIER.md`
+
+Bolt n'est pas un registrar. Configurez DNS directement sur Name.com !
 
 ---
 
@@ -104,7 +106,8 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 | Méthode | Durée | Difficulté | Fichier |
 |---------|-------|------------|---------|
-| **Sans Bolt (NOUVEAU)** | 42 min | Facile | `GUIDE_SIMPLE_SANS_BOLT.md` |
+| **Name.com (RECOMMANDÉ)** | 47 min | Facile | `CONFIGURATION_NAME_COM.md` |
+| **Sans Bolt (Générique)** | 42 min | Facile | `GUIDE_SIMPLE_SANS_BOLT.md` |
 | **Script guidé** | 36 min | Facile | `./scripts/setup-vercel-dns.sh` |
 | **Guide simplifié** | 36 min | Facile | `ACTIONS_MANUELLES_3_CLICS.md` |
 | **Référence rapide** | 20 min | Moyen | `DNS_RECORDS_REFERENCE.md` |
@@ -136,8 +139,9 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 │
 ├── 🚀 START_HERE.md                      ← VOUS ÊTES ICI
 ├── 🚨 LIRE_EN_PREMIER.md                 ← Si problème avec Bolt
-├── ✅ GUIDE_SIMPLE_SANS_BOLT.md          ← Guide sans Bolt (NOUVEAU)
-├── 🔍 OU_EST_MON_DNS.md                  ← Trouver votre registrar
+├── ⭐ CONFIGURATION_NAME_COM.md          ← Guide Name.com (RECOMMANDÉ)
+├── ✅ GUIDE_SIMPLE_SANS_BOLT.md          ← Guide générique
+├── 🔍 OU_EST_MON_DNS.md                  ← Identifier registrar
 ├── 📋 ACTIONS_MANUELLES_3_CLICS.md       ← Guide avec Bolt
 ├── 📖 DNS_RECORDS_REFERENCE.md           ← Tous les DNS records
 ├── 📚 MIGRATION_DNS_COMPLETE.md          ← Documentation complète
@@ -154,15 +158,15 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 ### Recommandation selon votre situation:
 
-**Vous ne trouvez pas Bolt DNS ?**
+**Votre domaine est chez Name.com (cas actuel) ?**
 ```bash
-# Lisez ce guide en premier
-cat GUIDE_SIMPLE_SANS_BOLT.md
+# Guide complet spécifique Name.com
+cat CONFIGURATION_NAME_COM.md
 ```
 
-**Vous pouvez accéder à vos DNS actuels ?**
+**Vous préférez un guide générique ?**
 ```bash
-# Suivez ce guide simplifié
+# Guide sans référence à Bolt
 cat GUIDE_SIMPLE_SANS_BOLT.md
 ```
 

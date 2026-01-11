@@ -10,13 +10,30 @@ Vous ne trouvez pas comment configurer les nameservers sur Bolt.
 
 Bolt est une plateforme de développement web. Votre domaine id0c.com est enregistré ailleurs.
 
+## ✅ VOTRE DOMAINE EST CHEZ NAME.COM
+
+Selon le WHOIS, **id0c.com est enregistré chez Name.com, Inc.**
+
 ---
 
-## ✅ LA SOLUTION
+## 🎯 LA SOLUTION (2 OPTIONS)
 
-### Option 1: Configuration Simple (RECOMMANDÉE)
+### Option 1: Guide Name.com Spécifique (RECOMMANDÉ)
 
-**Suivez ce guide**:
+**Suivez ce guide détaillé pour Name.com**:
+```
+CONFIGURATION_NAME_COM.md
+```
+
+**Durée**: 47 minutes
+**Étapes claires pour Name.com**
+**Tout est expliqué étape par étape**
+
+---
+
+### Option 2: Guide Générique
+
+**Si vous préférez un guide plus général**:
 ```
 GUIDE_SIMPLE_SANS_BOLT.md
 ```
