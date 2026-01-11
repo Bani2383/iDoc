@@ -6,17 +6,15 @@
 
 ---
 
-## 🚨 PROBLÈME AVEC BOLT ?
+## 🚨 SITUATION SPÉCIALE
 
-**Vous ne trouvez pas comment configurer DNS sur Bolt ?**
+**Votre domaine id0c.com est géré via NETLIFY, pas directement chez Name.com !**
 
-👉 **VOTRE DOMAINE EST CHEZ NAME.COM !**
+👉 **LISEZ CE GUIDE EN PREMIER**: `SITUATION_DOMAINE_NETLIFY.md`
 
-**SUIVEZ CE GUIDE SPÉCIFIQUE**: `CONFIGURATION_NAME_COM.md`
+Ou pour comprendre: `LIRE_EN_PREMIER.md`
 
-Ou lisez d'abord: `LIRE_EN_PREMIER.md`
-
-Bolt n'est pas un registrar. Configurez DNS directement sur Name.com !
+Le domaine existe mais n'est pas dans votre compte Name.com car il a été enregistré via Netlify.
 
 ---
 
@@ -106,7 +104,8 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 | Méthode | Durée | Difficulté | Fichier |
 |---------|-------|------------|---------|
-| **Name.com (RECOMMANDÉ)** | 47 min | Facile | `CONFIGURATION_NAME_COM.md` |
+| **Via Netlify (RECOMMANDÉ)** | 20 min | Facile | `SITUATION_DOMAINE_NETLIFY.md` |
+| **Name.com (si transfert)** | 47 min | Facile | `CONFIGURATION_NAME_COM.md` |
 | **Sans Bolt (Générique)** | 42 min | Facile | `GUIDE_SIMPLE_SANS_BOLT.md` |
 | **Script guidé** | 36 min | Facile | `./scripts/setup-vercel-dns.sh` |
 | **Guide simplifié** | 36 min | Facile | `ACTIONS_MANUELLES_3_CLICS.md` |
@@ -138,8 +137,9 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 📁 Racine projet/
 │
 ├── 🚀 START_HERE.md                      ← VOUS ÊTES ICI
-├── 🚨 LIRE_EN_PREMIER.md                 ← Si problème avec Bolt
-├── ⭐ CONFIGURATION_NAME_COM.md          ← Guide Name.com (RECOMMANDÉ)
+├── 🚨 LIRE_EN_PREMIER.md                 ← Comprendre la situation
+├── ⭐ SITUATION_DOMAINE_NETLIFY.md       ← Guide Netlify (RECOMMANDÉ)
+├── 🔹 CONFIGURATION_NAME_COM.md          ← Guide Name.com (si transfert)
 ├── ✅ GUIDE_SIMPLE_SANS_BOLT.md          ← Guide générique
 ├── 🔍 OU_EST_MON_DNS.md                  ← Identifier registrar
 ├── 📋 ACTIONS_MANUELLES_3_CLICS.md       ← Guide avec Bolt
@@ -158,21 +158,22 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 ### Recommandation selon votre situation:
 
-**Votre domaine est chez Name.com (cas actuel) ?**
+**Votre domaine est géré via Netlify (cas actuel) ?**
 ```bash
-# Guide complet spécifique Name.com
+# Guide spécifique Netlify avec 3 options
+cat SITUATION_DOMAINE_NETLIFY.md
+```
+
+**Vous voulez transférer vers Name.com d'abord ?**
+```bash
+# Guide complet Name.com (après transfert)
 cat CONFIGURATION_NAME_COM.md
 ```
 
 **Vous préférez un guide générique ?**
 ```bash
-# Guide sans référence à Bolt
+# Guide sans référence à Bolt/Netlify
 cat GUIDE_SIMPLE_SANS_BOLT.md
-```
-
-**Vous voulez un script automatique ?**
-```bash
-./scripts/setup-vercel-dns.sh
 ```
 
 ---
