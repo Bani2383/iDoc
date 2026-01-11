@@ -6,15 +6,16 @@
 
 ---
 
-## 🚨 SITUATION SPÉCIALE
+## 🚨 PROBLÈME IDENTIFIÉ
 
-**Votre domaine id0c.com est géré via NETLIFY, pas directement chez Name.com !**
+**Votre domaine id0c.com est sur un AUTRE compte Netlify !**
 
-👉 **LISEZ CE GUIDE EN PREMIER**: `SITUATION_DOMAINE_NETLIFY.md`
+👉 **LISEZ CE GUIDE EN PREMIER**: `DOMAINE_AUTRE_COMPTE_NETLIFY.md`
 
 Ou pour comprendre: `LIRE_EN_PREMIER.md`
 
-Le domaine existe mais n'est pas dans votre compte Name.com car il a été enregistré via Netlify.
+Netlify dit: "id0c.com is already managed by Netlify DNS on another team"
+Le domaine existe mais sur un compte différent de celui que vous utilisez.
 
 ---
 
@@ -104,13 +105,13 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 | Méthode | Durée | Difficulté | Fichier |
 |---------|-------|------------|---------|
-| **Via Netlify (RECOMMANDÉ)** | 20 min | Facile | `SITUATION_DOMAINE_NETLIFY.md` |
-| **Name.com (si transfert)** | 47 min | Facile | `CONFIGURATION_NAME_COM.md` |
+| **Autre compte Netlify (PRIORITÉ)** | 10-30 min | Facile | `DOMAINE_AUTRE_COMPTE_NETLIFY.md` |
+| **Support Netlify** | 24-48h | Facile | `DOMAINE_AUTRE_COMPTE_NETLIFY.md` |
+| **Transfert Name.com** | 5-7 jours | Moyen | `DOMAINE_AUTRE_COMPTE_NETLIFY.md` |
+| **Configuration Name.com** | 47 min | Facile | `CONFIGURATION_NAME_COM.md` |
 | **Sans Bolt (Générique)** | 42 min | Facile | `GUIDE_SIMPLE_SANS_BOLT.md` |
 | **Script guidé** | 36 min | Facile | `./scripts/setup-vercel-dns.sh` |
-| **Guide simplifié** | 36 min | Facile | `ACTIONS_MANUELLES_3_CLICS.md` |
 | **Référence rapide** | 20 min | Moyen | `DNS_RECORDS_REFERENCE.md` |
-| **Documentation complète** | 1h+ | Expert | `MIGRATION_DNS_COMPLETE.md` |
 
 ---
 
@@ -138,8 +139,9 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 │
 ├── 🚀 START_HERE.md                      ← VOUS ÊTES ICI
 ├── 🚨 LIRE_EN_PREMIER.md                 ← Comprendre la situation
-├── ⭐ SITUATION_DOMAINE_NETLIFY.md       ← Guide Netlify (RECOMMANDÉ)
-├── 🔹 CONFIGURATION_NAME_COM.md          ← Guide Name.com (si transfert)
+├── ⚠️ DOMAINE_AUTRE_COMPTE_NETLIFY.md   ← PROBLÈME ACTUEL (PRIORITÉ)
+├── ⭐ SITUATION_DOMAINE_NETLIFY.md       ← Guide Netlify (après résolution)
+├── 🔹 CONFIGURATION_NAME_COM.md          ← Guide Name.com (après transfert)
 ├── ✅ GUIDE_SIMPLE_SANS_BOLT.md          ← Guide générique
 ├── 🔍 OU_EST_MON_DNS.md                  ← Identifier registrar
 ├── 📋 ACTIONS_MANUELLES_3_CLICS.md       ← Guide avec Bolt
@@ -158,22 +160,24 @@ Vue d'ensemble complète avec architecture, timeline, troubleshooting.
 
 ### Recommandation selon votre situation:
 
-**Votre domaine est géré via Netlify (cas actuel) ?**
+**Votre domaine est sur un autre compte Netlify (cas actuel) ?**
 ```bash
-# Guide spécifique Netlify avec 3 options
+# Guide complet avec 3 options de résolution
+cat DOMAINE_AUTRE_COMPTE_NETLIFY.md
+```
+
+**ACTION IMMÉDIATE**:
+1. Chercher vos autres comptes Netlify dans vos emails
+2. Contacter support@netlify.com en parallèle
+3. Considérer transfert vers Name.com pour contrôle total
+
+**Après résolution, suivez**:
+```bash
+# Si vous gardez Netlify
 cat SITUATION_DOMAINE_NETLIFY.md
-```
 
-**Vous voulez transférer vers Name.com d'abord ?**
-```bash
-# Guide complet Name.com (après transfert)
+# Si vous transférez vers Name.com
 cat CONFIGURATION_NAME_COM.md
-```
-
-**Vous préférez un guide générique ?**
-```bash
-# Guide sans référence à Bolt/Netlify
-cat GUIDE_SIMPLE_SANS_BOLT.md
 ```
 
 ---

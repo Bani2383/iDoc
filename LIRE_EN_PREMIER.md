@@ -10,11 +10,13 @@ Vous ne trouvez pas comment configurer les nameservers sur Bolt.
 
 Bolt est une plateforme de développement web. Votre domaine id0c.com est enregistré ailleurs.
 
-## ⚠️ SITUATION SPÉCIALE: Domaine via Netlify
+## 🚨 PROBLÈME DÉCOUVERT: Domaine sur un autre compte Netlify
 
 Le WHOIS indique que **id0c.com est enregistré chez Name.com** MAIS **géré par Netlify Inc.**
 
-Votre compte Name.com affiche "0 domaine" car **le domaine est sur votre compte Netlify**.
+**MAIS**: Netlify dit "id0c.com is already managed by Netlify DNS on another team"
+
+Cela signifie: **Le domaine est sur un AUTRE compte Netlify** (pas celui que vous utilisez actuellement).
 
 ---
 
@@ -24,15 +26,19 @@ Votre compte Name.com affiche "0 domaine" car **le domaine est sur votre compte 
 
 **Suivez ce guide détaillé**:
 ```
-SITUATION_DOMAINE_NETLIFY.md
+DOMAINE_AUTRE_COMPTE_NETLIFY.md
 ```
 
 **Ce guide explique**:
-- Pourquoi le domaine n'est pas sur votre compte Name.com
-- 3 options pour configurer DNS (via Netlify, transfert, ou pointer)
-- Étapes complètes pour chaque option
+- Comment trouver l'autre compte Netlify
+- Comment contacter support Netlify
+- Comment transférer vers Name.com pour contrôle total
+- 3 options complètes avec étapes détaillées
 
-**Option recommandée**: Gérer DNS via Netlify (20 minutes)
+**Options recommandées**:
+1. Chercher l'autre compte (10-30 min)
+2. Contacter support Netlify (24-48h)
+3. Transférer vers Name.com (5-7 jours)
 
 ---
 
