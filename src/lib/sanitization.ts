@@ -204,7 +204,7 @@ export function hasSQLInjection(input: string): boolean {
  */
 export function hasXSS(input: string): boolean {
   const xssPatterns = [
-    /<script[^>]*>.*?<\/script>/gi,
+    /<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi,
     /javascript:/gi,
     /on\w+\s*=/gi, // Event handlers like onclick=
     /<iframe/gi,
