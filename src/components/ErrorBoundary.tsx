@@ -41,6 +41,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
    * Update state when error is caught
    */
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    // Detect chunk loading errors (after deployment)
+    const isChunkError = error.message.includes('Failed to fetch dynamically imported module') ||
+                        error.message.includes('Importing a module script failed') ||
+                        error.message.includes('Loading chunk');
+
+    // Auto-reload for chunk errors (new deployment detected)
+    if (isChunkError && !sessionStorage.getItem('chunk-error-reloaded')) {
+      sessionStorage.setItem('chunk-error-reloaded', 'true');
+      window.location.reload();
+      return {
+        hasError: false,
+        error: null,
+      };
+    }
+
     return {
       hasError: true,
       error,
@@ -102,6 +117,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
+      // Check if it's a chunk loading error
+      const isChunkError = this.state.error?.message.includes('Failed to fetch dynamically imported module') ||
+                          this.state.error?.message.includes('Importing a module script failed') ||
+                          this.state.error?.message.includes('Loading chunk');
+
       // Default error UI
       return (
         <div
@@ -115,12 +135,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Oops! Une erreur est survenue
+              {isChunkError ? 'Nouvelle version disponible' : 'Oops! Une erreur est survenue'}
             </h1>
 
             <p className="text-gray-600 mb-6">
-              {this.state.error?.message ||
-                "Quelque chose s'est mal passé. Veuillez réessayer."}
+              {isChunkError
+                ? "Une nouvelle version de l'application a été déployée. Veuillez recharger la page pour accéder à votre compte."
+                : (this.state.error?.message || "Quelque chose s'est mal passé. Veuillez réessayer.")
+              }
             </p>
 
             {import.meta.env.DEV && this.state.error && (
@@ -136,16 +158,26 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                onClick={this.resetError}
+                onClick={() => {
+                  if (isChunkError) {
+                    sessionStorage.removeItem('chunk-error-reloaded');
+                    window.location.reload();
+                  } else {
+                    this.resetError();
+                  }
+                }}
                 className="flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 aria-label="Réessayer"
               >
                 <RefreshCw className="w-4 h-4" aria-hidden="true" />
-                <span>Réessayer</span>
+                <span>{isChunkError ? 'Recharger la page' : 'Réessayer'}</span>
               </button>
 
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => {
+                  sessionStorage.removeItem('chunk-error-reloaded');
+                  window.location.href = '/';
+                }}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                 aria-label="Retour à l'accueil"
               >
