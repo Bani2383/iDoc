@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration Webhook Stripe - iDoc</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .url-box {
+      background: #f8f9fa;
+      border: 3px dashed #667eea;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .url-box label {
+      display: block;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .url-box input {
+      width: 100%;
+      padding: 15px;
+      font-size: 1em;
+      border: 2px solid #667eea;
+      border-radius: 6px;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #667eea;
+      background: white;
+    }
+
+    .url-box button {
+      margin-top: 10px;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .url-box button:hover {
+      background: #5568d3;
+    }
+
+    .url-box button:active {
+      transform: scale(0.98);
+    }
+
+    .steps {
+      margin-top: 30px;
+    }
+
+    .step {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+    }
+
+    .step-number {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      border-radius: 50%;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .step h3 {
+      display: inline;
+      color: #333;
+      font-size: 1.2em;
+    }
+
+    .step p {
+      margin-top: 10px;
+      color: #666;
+      margin-left: 40px;
+    }
+
+    .events-list {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 10px 0 10px 40px;
+    }
+
+    .events-list label {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .events-list label:hover {
+      background: #f8f9fa;
+    }
+
+    .events-list input[type="checkbox"] {
+      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .events-list code {
+      font-family: 'Courier New', monospace;
+      color: #667eea;
+      font-size: 0.9em;
+    }
+
+    .cta {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 8px;
+      margin-top: 30px;
+    }
+
+    .cta h2 {
+      margin-bottom: 15px;
+    }
+
+    .cta a {
+      display: inline-block;
+      background: white;
+      color: #667eea;
+      padding: 15px 40px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1em;
+      margin: 10px;
+      transition: transform 0.2s;
+    }
+
+    .cta a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .success-message {
+      display: none;
+      background: #d4edda;
+      border: 2px solid #c3e6cb;
+      color: #155724;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔗 Configuration Webhook Stripe</h1>
+      <p>iDoc - Configuration en 2 minutes</p>
+    </div>
+
+    <div class="content">
+      <div class="url-box">
+        <label>URL du Webhook</label>
+        <input
+          type="text"
+          id="webhookUrl"
+          value="https://jgadstuimnblhykfaxsv.supabase.co/functions/v1/stripe-webhook"
+          readonly
+        >
+        <button onclick="copyUrl()">📋 Copier l'URL</button>
+      </div>
+
+      <div id="successMessage" class="success-message">
+        ✅ URL copiée dans le presse-papier!
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <h3>Ouvrir le Dashboard Stripe</h3>
+          <p>Cliquez sur le lien ci-dessous pour accéder au dashboard:</p>
+          <p style="margin-top: 10px;">
+            <a href="https://dashboard.stripe.com/test/webhooks" target="_blank" style="color: #667eea; font-weight: bold;">
+              👉 Ouvrir Dashboard Stripe (Webhooks)
+            </a>
+          </p>
+        </div>
+
+        <div class="step">
+          <span class="step-number">2</span>
+          <h3>Ajouter un Endpoint</h3>
+          <p>Cliquez sur le bouton <strong>"+ Add endpoint"</strong></p>
+        </div>
+
+        <div class="step">
+          <span class="step-number">3</span>
+          <h3>Coller l'URL</h3>
+          <p>Dans le champ <strong>"Endpoint URL"</strong>, collez l'URL copiée ci-dessus</p>
+        </div>
+
+        <div class="step">
+          <span class="step-number">4</span>
+          <h3>Sélectionner les Événements</h3>
+          <p>Cliquez sur <strong>"Select events"</strong> et cochez ces événements:</p>
+
+          <div class="events-list">
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>checkout.session.completed</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>checkout.session.expired</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>payment_intent.succeeded</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>payment_intent.payment_failed</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>customer.subscription.created</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>customer.subscription.updated</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>customer.subscription.deleted</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>invoice.payment_succeeded</code>
+            </label>
+            <label>
+              <input type="checkbox" checked disabled>
+              <code>invoice.payment_failed</code>
+            </label>
+          </div>
+
+          <p>Puis cliquez sur <strong>"Add events"</strong></p>
+        </div>
+
+        <div class="step">
+          <span class="step-number">5</span>
+          <h3>Créer le Webhook</h3>
+          <p>Cliquez sur <strong>"Add endpoint"</strong></p>
+        </div>
+
+        <div class="step">
+          <span class="step-number">6</span>
+          <h3>Copier le Signing Secret</h3>
+          <p>Dans la section <strong>"Signing secret"</strong>, cliquez sur <strong>"Reveal"</strong></p>
+          <p>Copiez la valeur qui commence par <code>whsec_...</code></p>
+          <p style="color: #dc3545; font-weight: bold; margin-top: 10px;">
+            ⚠️ IMPORTANT: Ajoutez ce secret dans votre fichier .env:
+          </p>
+          <p style="margin-top: 10px;">
+            <code style="background: #f8f9fa; padding: 10px; display: block; border-radius: 4px;">
+              STRIPE_WEBHOOK_SECRET=whsec_VOTRE_SECRET_ICI
+            </code>
+          </p>
+        </div>
+      </div>
+
+      <div class="cta">
+        <h2>🚀 Prêt pour les Tests!</h2>
+        <p>Une fois le webhook configuré, testez vos paiements:</p>
+        <a href="https://dashboard.stripe.com/test/webhooks" target="_blank">
+          Voir mes Webhooks
+        </a>
+        <a href="https://dashboard.stripe.com/test/payments" target="_blank">
+          Voir mes Paiements
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copyUrl() {
+      const input = document.getElementById('webhookUrl');
+      input.select();
+      input.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+
+      const message = document.getElementById('successMessage');
+      message.classList.add('show');
+
+      setTimeout(() => {
+        message.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

@@ -14,7 +14,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "verify:stripe": "npx tsx scripts/verify-stripe-setup.ts",
-    "setup:stripe": "npx tsx scripts/create-stripe-products.ts"
+    "setup:stripe": "npx tsx scripts/create-stripe-products.ts",
+    "test:webhook": "npx tsx scripts/test-stripe-webhook.ts"
   },
   "dependencies": {
     "@stripe/stripe-js": "^2.4.0",
