@@ -15,6 +15,7 @@ import { AppHeader } from './components/AppHeader';
 import { ClassicView } from './components/ClassicView';
 import DynamicFOMOSystem from './components/DynamicFOMOSystem';
 import { usePageTracking } from './hooks/usePageTracking';
+import { SupabaseDiagnostic } from './components/SupabaseDiagnostic';
 
 // Lazy loaded components for better performance
 const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
@@ -220,6 +221,7 @@ function App() {
   // Main application layout for guest users
   return (
     <div className="min-h-screen bg-white">
+      <SupabaseDiagnostic />
       <LanguageSEO />
 
       <Suspense fallback={<LoadingSpinner text="Initialisation..." />}>
