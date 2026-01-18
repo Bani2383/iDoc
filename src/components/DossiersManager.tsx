@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Folder, Plus, Search, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { callDossiersApi, validateApiInput } from '../lib/apiService';
 
 interface Dossier {
   id: string;
@@ -77,21 +78,18 @@ export const DossiersManager: React.FC<{ onSelectDossier?: (id: string) => void 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      // Validate required fields
+      const validation = validateApiInput(formData, ['client_id', 'title']);
+      if (!validation.valid) {
+        alert(validation.error || 'Données invalides');
+        return;
+      }
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const response = await fetch(`${supabaseUrl}/functions/v1/dossiers-api/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify(formData),
-      });
+      const { data, error } = await callDossiersApi('create', formData);
 
-      if (!response.ok) throw new Error('Creation failed');
+      if (error || !data) {
+        throw new Error(error?.message || 'Creation failed');
+      }
 
       alert('Dossier créé!');
       setShowCreateModal(false);

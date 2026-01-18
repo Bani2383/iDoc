@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Download, Edit2, CreditCard, Lock, FileText } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { pdfGenerator } from '../lib/pdfGenerator';
@@ -235,7 +236,7 @@ export function GuidedTemplatePreview({
               </h2>
               <div
                 className="text-gray-700 whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: section.content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.content) }}
               />
             </div>
           ))}

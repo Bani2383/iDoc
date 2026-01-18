@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CreditCard, Loader2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { callCheckout, validateApiInput } from '../lib/apiService';
 import { logger } from '../lib/logger';
 
 interface CheckoutButtonProps {
@@ -34,57 +34,50 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
       setLoading(true);
       setError(null);
 
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        throw new Error('Vous devez être connecté pour effectuer un achat');
-      }
-
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      let endpoint: string;
       let body: Record<string, unknown>;
+      let checkoutType: 'model' | 'subscription';
 
       if (mode === 'model') {
         if (!templateId) {
           throw new Error('templateId est requis pour l\'achat de modèle');
         }
-        endpoint = `${supabaseUrl}/functions/v1/checkout-model`;
+        checkoutType = 'model';
         body = {
           templateId,
           customerEmail,
           successUrl: successUrl || `${window.location.origin}/success`,
           cancelUrl: cancelUrl || window.location.href,
         };
+
+        // Validate required fields
+        const validation = validateApiInput(body, ['templateId', 'customerEmail']);
+        if (!validation.valid) {
+          throw new Error(validation.error || 'Données invalides');
+        }
       } else {
-        endpoint = `${supabaseUrl}/functions/v1/checkout-subscription`;
+        checkoutType = 'subscription';
         body = {
           customerEmail,
           planId: planId || 'pro',
           successUrl: successUrl || `${window.location.origin}/dashboard?subscription=success`,
           cancelUrl: cancelUrl || `${window.location.origin}/pricing`,
         };
+
+        // Validate required fields
+        const validation = validateApiInput(body, ['customerEmail']);
+        if (!validation.valid) {
+          throw new Error(validation.error || 'Données invalides');
+        }
       }
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': anonKey,
-        },
-        body: JSON.stringify(body),
-      });
+      const { data, error: apiError } = await callCheckout(checkoutType, body);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la création de la session de paiement');
+      if (apiError || !data) {
+        throw new Error(apiError?.message || 'Erreur lors de la création de la session de paiement');
       }
 
-      if (data.url) {
-        window.location.href = data.url;
+      if ((data as { url?: string }).url) {
+        window.location.href = (data as { url: string }).url;
       } else {
         throw new Error('URL de paiement non reçue');
       }
