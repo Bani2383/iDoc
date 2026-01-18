@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Shield, User, Mail, Calendar, Edit, Trash2, X, Save } from 'lucide-react';
+import { Users, Shield, User, Mail, Calendar, Edit, Trash2, X, Save, KeyRound, Info } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
@@ -123,6 +123,23 @@ export function UserManager() {
     setEditForm(null);
   };
 
+  const resetUserPassword = async (email: string) => {
+    if (!confirm(`Envoyer un email de réinitialisation de mot de passe à ${email} ?`)) return;
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      alert(`Email de réinitialisation envoyé avec succès à ${email}`);
+    } catch (error) {
+      logger.error('Error resetting password:', error);
+      alert('Erreur lors de l\'envoi de l\'email de réinitialisation');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -142,6 +159,23 @@ export function UserManager() {
           <p className="text-gray-600 mt-1">
             {users.length} utilisateur{users.length > 1 ? 's' : ''} au total
           </p>
+        </div>
+      </div>
+
+      {/* Bannière de sécurité */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-semibold text-blue-900 mb-1">
+              Sécurité des mots de passe
+            </h3>
+            <p className="text-sm text-blue-800">
+              Les mots de passe sont cryptés et ne peuvent jamais être affichés, même par les administrateurs.
+              C'est une mesure de sécurité essentielle. Vous pouvez uniquement <strong>réinitialiser</strong> le mot de passe
+              d'un utilisateur en lui envoyant un email sécurisé.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -244,6 +278,13 @@ export function UserManager() {
                 </td>
                 <td className="px-6 py-4 text-sm text-right">
                   <div className="flex items-center justify-end space-x-2">
+                    <button
+                      onClick={() => resetUserPassword(user.email)}
+                      className={`p-2 rounded-lg transition-colors ${theme === 'minimal' ? 'text-black hover:bg-gray-100' : 'text-green-600 hover:bg-green-50'}`}
+                      title="Réinitialiser le mot de passe"
+                    >
+                      <KeyRound className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => handleEditUser(user)}
                       className={`p-2 rounded-lg transition-colors ${theme === 'minimal' ? 'text-black hover:bg-gray-100' : 'text-blue-600 hover:bg-blue-50'}`}
