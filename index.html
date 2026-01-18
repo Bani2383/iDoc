@@ -209,6 +209,65 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Chunk loading error detection - MUST be before main.tsx -->
+    <script>
+      // Detect and auto-fix chunk loading errors (deployment cache issues)
+      window.addEventListener('error', function(e) {
+        const isChunkError = e.message && (
+          e.message.includes('Failed to fetch dynamically imported module') ||
+          e.message.includes('Importing a module script failed') ||
+          e.message.includes('Loading chunk') ||
+          e.message.includes('ChunkLoadError')
+        );
+
+        if (isChunkError) {
+          // Check if we already tried reloading
+          const hasReloaded = sessionStorage.getItem('chunk-error-reload-attempt');
+
+          if (!hasReloaded) {
+            console.log('New deployment detected. Reloading page...');
+            sessionStorage.setItem('chunk-error-reload-attempt', Date.now().toString());
+            // Hard reload to bypass cache
+            window.location.reload(true);
+          } else {
+            // If reload didn't work, show helpful message
+            const reloadTime = parseInt(sessionStorage.getItem('chunk-error-reload-attempt'));
+            const now = Date.now();
+
+            // If last reload was more than 5 seconds ago, try again
+            if (now - reloadTime > 5000) {
+              sessionStorage.removeItem('chunk-error-reload-attempt');
+              window.location.reload(true);
+            } else {
+              // Show user-friendly error
+              console.error('Chunk loading failed after reload. Please clear cache (Ctrl+Shift+Del) and try again.');
+            }
+          }
+        }
+      }, true);
+
+      // Also catch unhandled promise rejections from dynamic imports
+      window.addEventListener('unhandledrejection', function(e) {
+        const isChunkError = e.reason && e.reason.message && (
+          e.reason.message.includes('Failed to fetch dynamically imported module') ||
+          e.reason.message.includes('Importing a module script failed') ||
+          e.reason.message.includes('Loading chunk')
+        );
+
+        if (isChunkError) {
+          e.preventDefault();
+          const hasReloaded = sessionStorage.getItem('chunk-error-reload-attempt');
+
+          if (!hasReloaded) {
+            console.log('Module loading error detected. Reloading...');
+            sessionStorage.setItem('chunk-error-reload-attempt', Date.now().toString());
+            window.location.reload(true);
+          }
+        }
+      });
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
