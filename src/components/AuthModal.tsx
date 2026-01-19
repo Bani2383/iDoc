@@ -1,24 +1,25 @@
 import { useState } from 'react';
-import { X, Mail, Lock, User, Zap } from 'lucide-react';
+import { X, Mail, Lock, User, Zap, Github } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface AuthModalProps {
   onClose: () => void;
-  defaultMode?: 'signin' | 'signup' | 'quick';
+  defaultMode?: 'signin' | 'signup' | 'quick' | 'reset';
 }
 
 export function AuthModal({ onClose, defaultMode = 'signin' }: AuthModalProps) {
   const { theme } = useTheme();
-  const [mode, setMode] = useState<'signin' | 'signup' | 'quick'>(defaultMode);
+  const [mode, setMode] = useState<'signin' | 'signup' | 'quick' | 'reset'>(defaultMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [quickSignupSuccess, setQuickSignupSuccess] = useState(false);
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword, signInWithProvider } = useAuth();
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
@@ -53,19 +54,37 @@ export function AuthModal({ onClose, defaultMode = 'signin' }: AuthModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
       if (mode === 'signin') {
         await signIn(email, password);
+        onClose();
+      } else if (mode === 'reset') {
+        await resetPassword(email);
+        setSuccess('Un email de réinitialisation a été envoyé à votre adresse.');
+        setTimeout(() => setMode('signin'), 3000);
       } else {
         await signUp(email, password, fullName);
+        onClose();
       }
-      onClose();
     } catch (err) {
       const error = err as Error;
       setError(error.message || 'Une erreur est survenue');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'twitter' | 'github') => {
+    try {
+      setError('');
+      setLoading(true);
+      await signInWithProvider(provider);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || 'Une erreur est survenue lors de la connexion');
       setLoading(false);
     }
   };
@@ -184,6 +203,79 @@ export function AuthModal({ onClose, defaultMode = 'signin' }: AuthModalProps) {
     );
   }
 
+  if (mode === 'reset') {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-8 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Fermer"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe oublié ?</h2>
+          <p className="text-gray-600 mb-6">Entrez votre email pour recevoir un lien de réinitialisation</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="reset-email" className="block text-sm font-semibold text-gray-900 mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  id="reset-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  placeholder="vous@exemple.com"
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                {success}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Envoi en cours...' : 'Envoyer le lien de réinitialisation'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => {
+                setMode('signin');
+                setError('');
+                setSuccess('');
+              }}
+              className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
+            >
+              Retour à la connexion
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className={theme === 'minimal' ? 'bg-white border-2 border-black max-w-md w-full p-8 relative' : 'bg-white rounded-xl max-w-md w-full p-8 relative'}>
@@ -288,6 +380,82 @@ export function AuthModal({ onClose, defaultMode = 'signin' }: AuthModalProps) {
             </button>
           )}
         </form>
+
+        {mode === 'signin' && (
+          <div className="mt-4 text-right">
+            <button
+              onClick={() => {
+                setMode('reset');
+                setError('');
+              }}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              Mot de passe oublié ?
+            </button>
+          </div>
+        )}
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Ou continuer avec</span>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('google')}
+              disabled={loading}
+              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              <span className="ml-2 text-sm font-medium text-gray-700">Google</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('facebook')}
+              disabled={loading}
+              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              <span className="ml-2 text-sm font-medium text-gray-700">Facebook</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('twitter')}
+              disabled={loading}
+              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <svg className="w-5 h-5" fill="#1DA1F2" viewBox="0 0 24 24">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+              <span className="ml-2 text-sm font-medium text-gray-700">Twitter</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSocialLogin('github')}
+              disabled={loading}
+              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <Github className="w-5 h-5" />
+              <span className="ml-2 text-sm font-medium text-gray-700">GitHub</span>
+            </button>
+          </div>
+        </div>
 
         <div className="mt-6 text-center">
           <button

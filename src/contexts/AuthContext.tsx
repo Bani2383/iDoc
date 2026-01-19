@@ -21,6 +21,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  signInWithProvider: (provider: 'google' | 'facebook' | 'twitter' | 'github') => Promise<void>;
   refreshProfile: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -140,6 +142,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+
+  const signInWithProvider = async (provider: 'google' | 'facebook' | 'twitter' | 'github') => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+  };
+
   const refreshProfile = async () => {
     if (user) {
       await fetchProfile(user.id);
@@ -149,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = profile?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signOut, refreshProfile, isAdmin }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, signIn, signUp, signOut, resetPassword, signInWithProvider, refreshProfile, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
