@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Vercel - iDoc</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+        .step {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        .step-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .variable-box {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow-x: auto;
+        }
+        .variable-label {
+            color: #90cdf4;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .variable-value {
+            color: #48bb78;
+            font-size: 14px;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .copy-btn:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        .copied {
+            background: #667eea !important;
+        }
+        .checklist {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .checklist-title {
+            color: #c53030;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .checklist-item {
+            color: #742a2a;
+            margin: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        .checklist-item:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+        }
+        .success-box {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success-title {
+            color: #22543d;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .success-text {
+            color: #2f855a;
+            line-height: 1.6;
+        }
+        .link-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: all 0.2s;
+        }
+        .link-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Configuration Vercel</h1>
+        <p class="subtitle">Copiez-collez ces variables dans Vercel pour activer Supabase</p>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Ouvrir Vercel
+            </div>
+            <a href="https://vercel.com/dashboard" target="_blank" class="link-btn">
+                📱 Ouvrir Vercel Dashboard
+            </a>
+            <p style="margin-top: 15px; color: #4a5568;">
+                Puis cliquez sur votre projet <strong>id0c</strong> → <strong>Settings</strong> → <strong>Environment Variables</strong>
+            </p>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Variable 1 : VITE_SUPABASE_URL
+            </div>
+            <div class="variable-box">
+                <div class="variable-label">Key (nom de la variable) :</div>
+                <div class="variable-value" id="key1">VITE_SUPABASE_URL</div>
+                <button class="copy-btn" onclick="copyText('key1', this)">📋 Copier le Key</button>
+            </div>
+            <div class="variable-box">
+                <div class="variable-label">Value (valeur) :</div>
+                <div class="variable-value" id="value1">https://jgadstuimnblhykfaxsv.supabase.co</div>
+                <button class="copy-btn" onclick="copyText('value1', this)">📋 Copier le Value</button>
+            </div>
+            <div class="checklist">
+                <div class="checklist-title">⚠️ Important :</div>
+                <div class="checklist-item">Cochez Production, Preview, Development</div>
+                <div class="checklist-item">Cliquez sur Save</div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Variable 2 : VITE_SUPABASE_ANON_KEY
+            </div>
+            <div class="variable-box">
+                <div class="variable-label">Key (nom de la variable) :</div>
+                <div class="variable-value" id="key2">VITE_SUPABASE_ANON_KEY</div>
+                <button class="copy-btn" onclick="copyText('key2', this)">📋 Copier le Key</button>
+            </div>
+            <div class="variable-box">
+                <div class="variable-label">Value (valeur) :</div>
+                <div class="variable-value" id="value2">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpnYWRzdHVpbW5ibGh5a2ZheHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwOTQ1MzUsImV4cCI6MjA4MzY3MDUzNX0.j0Lh_22v2gVMPa0Amkt7hyIYorFUE3un0iX-LY1S4Fs</div>
+                <button class="copy-btn" onclick="copyText('value2', this)">📋 Copier le Value</button>
+            </div>
+            <div class="checklist">
+                <div class="checklist-title">⚠️ Important :</div>
+                <div class="checklist-item">Cochez Production, Preview, Development</div>
+                <div class="checklist-item">Cliquez sur Save</div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Redéployer
+            </div>
+            <p style="color: #4a5568; margin-bottom: 15px;">
+                Une fois les 2 variables ajoutées :
+            </p>
+            <ol style="color: #4a5568; margin-left: 20px; line-height: 1.8;">
+                <li>Allez dans l'onglet <strong>Deployments</strong></li>
+                <li>Sur le dernier déploiement, cliquez sur <strong>⋯</strong> (trois points)</li>
+                <li>Cliquez sur <strong>Redeploy</strong></li>
+                <li>Attendez 1-2 minutes</li>
+            </ol>
+        </div>
+
+        <div class="success-box">
+            <div class="success-title">✅ Vérification</div>
+            <div class="success-text">
+                <strong>1.</strong> Ouvrez <a href="https://id0c.com" target="_blank">https://id0c.com</a><br>
+                <strong>2.</strong> Appuyez sur F12 pour ouvrir Chrome DevTools<br>
+                <strong>3.</strong> Allez dans l'onglet <strong>Console</strong><br>
+                <strong>4.</strong> Vous devriez voir : <code style="background: #2d3748; color: #48bb78; padding: 4px 8px; border-radius: 4px;">✅ Supabase configuré : https://jgadstuimnblhykfaxsv.supabase.co</code>
+            </div>
+        </div>
+
+        <div style="background: #edf2f7; padding: 20px; border-radius: 8px; margin-top: 30px;">
+            <strong style="color: #2d3748;">🎯 Objectif :</strong>
+            <p style="color: #4a5568; margin-top: 8px; line-height: 1.6;">
+                Ces variables permettent à votre site https://id0c.com de se connecter à votre base de données Supabase.
+                Sans elles, aucune donnée ne peut être chargée (templates, utilisateurs, etc.).
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function copyText(elementId, button) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ Copié !';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
