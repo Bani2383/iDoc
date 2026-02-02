@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, Globe } from 'lucide-react';
 
 export function SupabaseDiagnostic() {
   const [status, setStatus] = useState<{
     envVarsLoaded: boolean;
     supabaseUrl: string | undefined;
     hasAnonKey: boolean;
+    urlFormat: 'valid' | 'invalid' | 'unknown';
+    dnsResolved: boolean;
     connectionTest: 'pending' | 'success' | 'error';
     errorMessage?: string;
   }>({
     envVarsLoaded: false,
     supabaseUrl: undefined,
     hasAnonKey: false,
+    urlFormat: 'unknown',
+    dnsResolved: false,
     connectionTest: 'pending'
   });
 
@@ -21,11 +25,19 @@ export function SupabaseDiagnostic() {
       const url = import.meta.env.VITE_SUPABASE_URL;
       const hasKey = !!import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+      console.log('🔍 Diagnostic Supabase:');
+      console.log('  URL:', url);
+      console.log('  Has Key:', hasKey);
+      console.log('  Request will go to:', url);
+
+      const urlFormatValid = url?.includes('.supabase.co') ?? false;
+
       setStatus(prev => ({
         ...prev,
         envVarsLoaded: !!(url && hasKey),
         supabaseUrl: url,
-        hasAnonKey: hasKey
+        hasAnonKey: hasKey,
+        urlFormat: urlFormatValid ? 'valid' : 'invalid'
       }));
 
       if (url && hasKey) {
@@ -36,22 +48,36 @@ export function SupabaseDiagnostic() {
             .limit(1);
 
           if (error) {
+            const isDnsError = error.message.includes('Failed to fetch') ||
+                               error.message.includes('ERR_NAME_NOT_RESOLVED') ||
+                               error.message.includes('NetworkError');
+
+            console.error('❌ Erreur Supabase:', error.message);
+            console.error('   DNS Error?', isDnsError);
+
             setStatus(prev => ({
               ...prev,
+              dnsResolved: !isDnsError,
               connectionTest: 'error',
-              errorMessage: error.message
+              errorMessage: isDnsError
+                ? `DNS ne résout pas: ${url}`
+                : error.message
             }));
           } else {
+            console.log('✅ Connexion Supabase réussie');
             setStatus(prev => ({
               ...prev,
+              dnsResolved: true,
               connectionTest: 'success'
             }));
           }
-        } catch (err) {
+        } catch (err: any) {
+          console.error('❌ Exception Supabase:', err);
           setStatus(prev => ({
             ...prev,
+            dnsResolved: false,
             connectionTest: 'error',
-            errorMessage: String(err)
+            errorMessage: err.message || String(err)
           }));
         }
       } else {
@@ -94,9 +120,31 @@ export function SupabaseDiagnostic() {
           />
 
           <DiagnosticItem
+            label="Format URL Supabase"
+            status={status.urlFormat === 'valid' ? 'success' : status.urlFormat === 'invalid' ? 'error' : 'pending'}
+            message={
+              status.urlFormat === 'valid'
+                ? 'Format valide (.supabase.co)'
+                : status.urlFormat === 'invalid'
+                ? 'Format invalide - doit contenir .supabase.co'
+                : 'Vérification...'
+            }
+          />
+
+          <DiagnosticItem
             label="VITE_SUPABASE_ANON_KEY"
             status={status.hasAnonKey ? 'success' : 'error'}
             message={status.hasAnonKey ? 'Définie' : 'Non définie'}
+          />
+
+          <DiagnosticItem
+            label="Résolution DNS"
+            status={status.dnsResolved ? 'success' : 'error'}
+            message={
+              status.dnsResolved
+                ? 'Domaine accessible'
+                : 'ERR_NAME_NOT_RESOLVED - Le navigateur ne peut pas résoudre l\'URL'
+            }
           />
 
           <DiagnosticItem
@@ -114,19 +162,56 @@ export function SupabaseDiagnostic() {
 
         {status.connectionTest === 'error' && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <h3 className="font-semibold text-red-900 mb-2">
-              Solution:
+            <h3 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              Solution pour ERR_NAME_NOT_RESOLVED:
             </h3>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-red-800">
-              <li>Vérifier que le serveur de développement est démarré: <code className="bg-red-100 px-2 py-1 rounded">npm run dev</code></li>
-              <li>Vérifier que le fichier <code className="bg-red-100 px-2 py-1 rounded">.env</code> existe à la racine</li>
-              <li>Vérifier que les variables commencent par <code className="bg-red-100 px-2 py-1 rounded">VITE_</code></li>
-              <li>Redémarrer le serveur après modification du .env</li>
-              <li>Vider le cache du navigateur (Ctrl+Shift+R)</li>
-            </ol>
-            <p className="mt-3 text-sm text-red-800">
-              Consultez le fichier <code className="bg-red-100 px-2 py-1 rounded">CORRECTION_ERREUR_CONNEXION.md</code> pour plus de détails.
-            </p>
+
+            {!status.dnsResolved && (
+              <div className="mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded">
+                <p className="font-semibold text-yellow-900 mb-2">⚠️ Le navigateur ne peut pas résoudre l'URL Supabase</p>
+                <p className="text-sm text-yellow-800">
+                  Cela signifie que les variables d'environnement Vercel ne sont pas correctement configurées.
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-3 text-sm text-red-800">
+              <div>
+                <p className="font-semibold mb-1">Sur Vercel :</p>
+                <ol className="list-decimal list-inside space-y-1 ml-2">
+                  <li>Allez sur <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="underline">vercel.com</a></li>
+                  <li>Ouvrez votre projet → Settings → Environment Variables</li>
+                  <li>Ajoutez ou modifiez ces variables :</li>
+                </ol>
+              </div>
+
+              <div className="bg-white p-3 rounded border border-red-300 space-y-2 font-mono text-xs">
+                <div>
+                  <strong>VITE_SUPABASE_URL</strong><br />
+                  <span className="text-blue-700">https://ffujpjaaramwhtmzqhlx.supabase.co</span>
+                </div>
+                <div>
+                  <strong>VITE_SUPABASE_ANON_KEY</strong><br />
+                  <span className="text-blue-700">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmdWpwamFhcmFtd2h0bXpxaGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzExMTMzMDcsImV4cCI6MjA0NjY4OTMwN30.Lp-xJGVWG6yI0-Dq66eOxfqW6qyqTOJoqzw5lE_ggaE</span>
+                </div>
+              </div>
+
+              <div>
+                <p className="font-semibold mb-1">Après configuration :</p>
+                <ol className="list-decimal list-inside space-y-1 ml-2">
+                  <li>Allez dans Deployments → Redeploy</li>
+                  <li>Attendez la fin du déploiement</li>
+                  <li>Testez à nouveau sur https://id0c.com</li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+              <p className="text-sm text-blue-900">
+                <strong>Note:</strong> Les variables doivent impérativement commencer par <code className="bg-blue-100 px-1 rounded">VITE_</code> pour être accessibles côté client.
+              </p>
+            </div>
           </div>
         )}
 
