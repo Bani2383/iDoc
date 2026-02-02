@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnostic Variables Vercel</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .var {
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-left: 3px solid #00ff00;
+        }
+        .missing {
+            border-left-color: #ff0000;
+            color: #ff0000;
+        }
+        h1 { color: #00ff00; }
+    </style>
+</head>
+<body>
+    <h1>Diagnostic Variables d'Environnement</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        const results = document.getElementById('results');
+
+        const vars = {
+            'VITE_SUPABASE_URL': import.meta.env.VITE_SUPABASE_URL,
+            'VITE_SUPABASE_ANON_KEY': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'VITE_APP_URL': import.meta.env.VITE_APP_URL,
+            'VITE_STRIPE_PUBLIC_KEY': import.meta.env.VITE_STRIPE_PUBLIC_KEY,
+            'MODE': import.meta.env.MODE,
+            'DEV': import.meta.env.DEV,
+            'PROD': import.meta.env.PROD
+        };
+
+        let html = '';
+        for (const [key, value] of Object.entries(vars)) {
+            const exists = value !== undefined && value !== '';
+            const displayValue = exists ? (key.includes('KEY') ? '***masqué***' : value) : '❌ MANQUANT';
+            html += `<div class="var ${exists ? '' : 'missing'}">
+                <strong>${key}:</strong> ${displayValue}
+            </div>`;
+        }
+
+        results.innerHTML = html;
+
+        // Test de connexion
+        if (vars.VITE_SUPABASE_URL && vars.VITE_SUPABASE_ANON_KEY) {
+            results.innerHTML += '<h2 style="color: #00ff00">✅ Variables présentes - Test de connexion...</h2>';
+
+            try {
+                const response = await fetch(`${vars.VITE_SUPABASE_URL}/rest/v1/`, {
+                    headers: {
+                        'apikey': vars.VITE_SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    results.innerHTML += '<div class="var" style="border-left-color: #00ff00">✅ Connexion Supabase réussie!</div>';
+                } else {
+                    results.innerHTML += `<div class="var missing">❌ Erreur connexion: ${response.status} ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML += `<div class="var missing">❌ Erreur réseau: ${error.message}</div>`;
+            }
+        } else {
+            results.innerHTML += '<h2 style="color: #ff0000">❌ Variables manquantes - Impossible de tester la connexion</h2>';
+        }
+    </script>
+</body>
+</html>
