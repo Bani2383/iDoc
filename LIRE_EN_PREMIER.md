@@ -70,9 +70,11 @@ Environnements : Production, Preview, Development (cochez les 3)
 ## 📚 Ressources Disponibles
 
 ### Pour corriger Supabase (URGENT)
+- ✅ **SUPABASE_QUICK_FIX.md** - Guide de dépannage rapide (5 min)
 - ✅ **vercel-config.html** - Interface graphique avec boutons de copie
 - ✅ **VERCEL_3_ETAPES.md** - Guide complet en 3 étapes
-- ✅ **CORRECTION_SUPABASE_VERCEL.md** - Documentation technique détaillée
+- ✅ **SUPABASE_DIAGNOSTIC_GUIDE.md** - Documentation complète du système
+- ✅ **https://id0c.com/debug/supabase** - Page de diagnostic en ligne
 - ✅ **scripts/verify-vercel-env.sh** - Script de diagnostic
 
 ### Après correction

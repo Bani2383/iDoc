@@ -16,6 +16,8 @@ import { ClassicView } from './components/ClassicView';
 import DynamicFOMOSystem from './components/DynamicFOMOSystem';
 import { usePageTracking } from './hooks/usePageTracking';
 import { SupabaseDiagnostic } from './components/SupabaseDiagnostic';
+import { isSupabaseConfigured } from './lib/supabaseClient';
+import SupabaseConfigError from './components/SupabaseConfigError';
 
 // Lazy loaded components for better performance
 const AIDocumentGenerator = lazy(() => import('./components/AIDocumentGenerator').then(m => ({ default: m.AIDocumentGenerator })));
@@ -56,6 +58,7 @@ const GeneratorForm = lazy(() => import('./components/GeneratorForm').then(m => 
 const GuidedTemplateFlow = lazy(() => import('./components/GuidedTemplateFlow').then(m => ({ default: m.GuidedTemplateFlow })));
 const IdocWizard = lazy(() => import('./components/IdocWizard').then(m => ({ default: m.IdocWizard })));
 const SeoModelPage = lazy(() => import('./components/SeoModelPage'));
+const DebugSupabasePage = lazy(() => import('./components/DebugSupabasePage'));
 
 /**
  * Main application component
@@ -69,7 +72,7 @@ function App() {
   const [showGuestGenerator, setShowGuestGenerator] = useState(false);
   const [showFlowDemo, setShowFlowDemo] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates' | 'idoc-wizard' | 'seo-model'>('improved');
+  const [currentView, setCurrentView] = useState<'landing' | 'conversion' | 'classic' | 'signature' | 'faq' | 'improved' | 'pdf-sign' | 'seo-demo' | 'articles' | 'article-detail' | 'credits' | 'subscriptions' | 'referrals' | 'affiliate' | 'revenue' | 'flash-deals' | 'gamification' | 'control-center' | 'ab-testing' | 'email-automation' | 'reporting' | 'study-permit-landing' | 'ircc-refusal-landing' | 'business-automation-landing' | 'terms' | 'privacy' | 'generators' | 'generator-form' | 'guided-templates' | 'idoc-wizard' | 'seo-model' | 'debug-supabase'>('improved');
   const [showPDFSignatureEditor, setShowPDFSignatureEditor] = useState(false);
   const [articleSlug, setArticleSlug] = useState<string | null>(null);
   const [selectedGeneratorId, setSelectedGeneratorId] = useState<string | null>(null);
@@ -118,6 +121,8 @@ function App() {
       const slug = path.replace('/modele/', '');
       setSeoModelSlug(slug);
       setCurrentView('seo-model');
+    } else if (path === '/debug/supabase') {
+      setCurrentView('debug-supabase');
     }
   }, []);
 
@@ -155,6 +160,20 @@ function App() {
   // Loading state
   if (loading) {
     return <LoadingSpinner text="Chargement de l'application..." />;
+  }
+
+  // Debug page (accessible even if Supabase is not configured)
+  if (currentView === 'debug-supabase') {
+    return (
+      <Suspense fallback={<LoadingSpinner text="Chargement de la page de diagnostic..." />}>
+        <DebugSupabasePage />
+      </Suspense>
+    );
+  }
+
+  // Show config error if Supabase is not configured (except for debug page)
+  if (!isSupabaseConfigured()) {
+    return <SupabaseConfigError />;
   }
 
   // Authenticated user view

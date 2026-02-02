@@ -1,44 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  const errorMsg = `
-    ❌ Configuration Supabase manquante !
-
-    Variables attendues :
-    - VITE_SUPABASE_URL: ${supabaseUrl ? '✓' : '✗ MANQUANT'}
-    - VITE_SUPABASE_ANON_KEY: ${supabaseAnonKey ? '✓' : '✗ MANQUANT'}
-
-    Dans Vercel, ajoutez ces variables dans :
-    Settings → Environment Variables
-  `;
-  console.error(errorMsg);
-  throw new Error('Missing Supabase environment variables');
-}
-
-if (!supabaseUrl.includes('.supabase.co')) {
-  const errorMsg = `
-    ❌ URL Supabase invalide : ${supabaseUrl}
-
-    Format attendu : https://xxxxx.supabase.co
-
-    Vérifiez vos variables d'environnement Vercel.
-  `;
-  console.error(errorMsg);
-  throw new Error('Invalid Supabase URL format');
-}
-
-console.log('✅ Supabase configuré :', supabaseUrl);
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase } from './supabaseClient';
+export {
+  getSupabaseDiagnostics,
+  getMaskedConfig,
+  testSupabaseConnection,
+  isSupabaseConfigured,
+  getSupabaseConfigErrors,
+} from './supabaseClient';
 
 export function getSupabaseConfig() {
+  const config = getMaskedConfig();
   return {
-    url: supabaseUrl,
-    hasAnonKey: !!supabaseAnonKey,
-    anonKeyPrefix: supabaseAnonKey?.substring(0, 20) + '...'
+    url: config.url,
+    hasAnonKey: !!config.anonKey && config.anonKey !== '***',
+    anonKeyPrefix: config.anonKey,
   };
 }
 
